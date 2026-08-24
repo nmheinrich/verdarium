@@ -14,13 +14,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "border border-[var(--color-botanical)] bg-[var(--color-botanical)] text-[var(--color-surface-elevated)] hover:brightness-95 active:brightness-90 disabled:border-[var(--color-border)] disabled:bg-[var(--color-border)] disabled:text-[var(--color-text-muted)]",
+    "border border-[var(--color-botanical)] bg-[var(--color-botanical-soft)] text-[color:var(--color-text-on-botanical)] hover:brightness-95 active:brightness-90 disabled:border-[var(--color-border)] disabled:bg-[var(--color-border)] disabled:text-[color:var(--color-text-muted)]",
 
   secondary:
-    "border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)] active:bg-[var(--color-botanical-soft)] disabled:border-[var(--color-border)] disabled:bg-[var(--color-surface)] disabled:text-[var(--color-text-muted)]",
+    "border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[color:var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)] active:bg-[var(--color-botanical-soft)] disabled:border-[var(--color-border)] disabled:bg-[var(--color-surface)] disabled:text-[color:var(--color-text-muted)]",
 
   ghost:
-    "border border-transparent bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-botanical-soft)] hover:text-[var(--color-text-primary)] active:bg-[var(--color-selection)] disabled:bg-transparent disabled:text-[var(--color-text-muted)]",
+    "border border-transparent bg-transparent text-[color:var(--color-text-secondary)] hover:bg-[var(--color-botanical-soft)] hover:text-[color:var(--color-text-primary)] active:bg-[var(--color-selection)] disabled:bg-transparent disabled:text-[color:var(--color-text-muted)]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
