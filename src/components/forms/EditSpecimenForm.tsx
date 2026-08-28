@@ -2,8 +2,7 @@ import React, { useState } from "react";
 
 import type { Specimen } from "@/types";
 
-import { createId } from "@/lib";
-import { addSpecimen } from "@/storage";
+import { updateSpecimen } from "@/storage";
 
 import {
   SpecimenForm,
@@ -11,27 +10,32 @@ import {
   type SpecimenFormValues,
 } from "./SpecimenForm";
 
-interface AddSpecimenFormProps {
+interface EditSpecimenFormProps {
+  specimen: Specimen;
   onCancel: () => void;
-  onCreated: (specimens: Specimen[]) => void;
+  onUpdated: (specimens: Specimen[]) => void;
 }
 
-const initialValues: SpecimenFormValues = {
-  commonName: "",
-  family: "",
-  genus: "",
-  species: "",
-  cultivar: "",
-  room: "",
-  position: "",
-  healthStatus: "unknown",
-  lightPreference: "",
-  acquisitionDate: "",
-  acquisitionSource: "",
-  notes: "",
-  tags: "",
-  isFavorite: false,
-};
+function createInitialValues(
+  specimen: Specimen,
+): SpecimenFormValues {
+  return {
+    commonName: specimen.commonName,
+    family: specimen.classification.family ?? "",
+    genus: specimen.classification.genus,
+    species: specimen.classification.species,
+    cultivar: specimen.classification.cultivar ?? "",
+    room: specimen.location?.room ?? "",
+    position: specimen.location?.position ?? "",
+    healthStatus: specimen.healthStatus,
+    lightPreference: specimen.lightPreference ?? "",
+    acquisitionDate: specimen.acquisitionDate ?? "",
+    acquisitionSource: specimen.acquisitionSource ?? "",
+    notes: specimen.notes ?? "",
+    tags: specimen.tags.join(", "),
+    isFavorite: specimen.isFavorite,
+  };
+}
 
 function buildScientificName({
   genus,
@@ -77,12 +81,15 @@ function validateRequiredFields(
   return errors;
 }
 
-export function AddSpecimenForm({
+export function EditSpecimenForm({
+  specimen,
   onCancel,
-  onCreated,
-}: AddSpecimenFormProps) {
+  onUpdated,
+}: EditSpecimenFormProps) {
   const [values, setValues] =
-    useState<SpecimenFormValues>(initialValues);
+    useState<SpecimenFormValues>(() =>
+      createInitialValues(specimen),
+    );
 
   const [errors, setErrors] =
     useState<SpecimenFormErrors>({});
@@ -113,75 +120,86 @@ export function AddSpecimenForm({
 
     setIsSubmitting(true);
 
-    const timestamp = new Date().toISOString();
+    const updatedSpecimen: Specimen = {
+      ...specimen,
 
-    const specimen: Specimen = {
-      id: createId(),
       commonName: values.commonName.trim(),
       scientificName: buildScientificName(values),
+
       classification: {
         genus: values.genus.trim(),
         species: values.species.trim(),
       },
+
       healthStatus: values.healthStatus,
       tags: parseTags(values.tags),
       isFavorite: values.isFavorite,
-      createdAt: timestamp,
-      updatedAt: timestamp,
+
+      updatedAt: new Date().toISOString(),
     };
 
     const family = values.family.trim();
 
     if (family) {
-      specimen.classification.family = family;
+      updatedSpecimen.classification.family = family;
     }
 
     const cultivar = values.cultivar.trim();
 
     if (cultivar) {
-      specimen.classification.cultivar = cultivar;
+      updatedSpecimen.classification.cultivar = cultivar;
     }
 
     const room = values.room.trim();
     const position = values.position.trim();
 
     if (room || position) {
-      specimen.location = {};
+      updatedSpecimen.location = {};
 
       if (room) {
-        specimen.location.room = room;
+        updatedSpecimen.location.room = room;
       }
 
       if (position) {
-        specimen.location.position = position;
+        updatedSpecimen.location.position = position;
       }
+    } else {
+      delete updatedSpecimen.location;
     }
 
     if (values.lightPreference) {
-      specimen.lightPreference =
+      updatedSpecimen.lightPreference =
         values.lightPreference;
+    } else {
+      delete updatedSpecimen.lightPreference;
     }
 
     if (values.acquisitionDate) {
-      specimen.acquisitionDate =
+      updatedSpecimen.acquisitionDate =
         values.acquisitionDate;
+    } else {
+      delete updatedSpecimen.acquisitionDate;
     }
 
     const acquisitionSource =
       values.acquisitionSource.trim();
 
     if (acquisitionSource) {
-      specimen.acquisitionSource =
+      updatedSpecimen.acquisitionSource =
         acquisitionSource;
+    } else {
+      delete updatedSpecimen.acquisitionSource;
     }
 
     const notes = values.notes.trim();
 
     if (notes) {
-      specimen.notes = notes;
+      updatedSpecimen.notes = notes;
+    } else {
+      delete updatedSpecimen.notes;
     }
 
-    const result = addSpecimen(specimen);
+    const result = updateSpecimen(updatedSpecimen);
 
     if (!result.success) {
       setSubmitError(result.error.message);
@@ -189,7 +207,7 @@ export function AddSpecimenForm({
       return;
     }
 
-    onCreated(result.data);
+    onUpdated(result.data);
   };
 
   return (
@@ -197,8 +215,8 @@ export function AddSpecimenForm({
       values={values}
       errors={errors}
       submitError={submitError}
-      submitLabel="Add specimen"
-      submittingLabel="Saving specimen…"
+      submitLabel="Save changes"
+      submittingLabel="Saving changes…"
       isSubmitting={isSubmitting}
       onChange={setValues}
       onSubmit={handleSubmit}

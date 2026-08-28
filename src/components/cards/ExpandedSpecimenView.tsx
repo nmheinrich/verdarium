@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Star } from "lucide-react";
 
 import type { Specimen } from "@/types";
@@ -7,6 +8,7 @@ import { formatDisplayDate } from "@/lib";
 
 interface ExpandedSpecimenViewProps {
   specimen: Specimen;
+  actions?: ReactNode;
 }
 
 function formatHealthStatus(
@@ -37,6 +39,7 @@ function formatLocation(specimen: Specimen): string | null {
 
 export function ExpandedSpecimenView({
   specimen,
+  actions,
 }: ExpandedSpecimenViewProps) {
   const location = formatLocation(specimen);
 
@@ -81,19 +84,27 @@ export function ExpandedSpecimenView({
           </div>
 
           <div className="flex min-w-0 flex-col p-6 sm:p-8 lg:p-10">
-            <div>
-              <p className="metadata-label">Specimen record</p>
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <p className="metadata-label">Specimen record</p>
 
-              <h2
-                id={`expanded-specimen-${specimen.id}-name`}
-                className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
-              >
-                {specimen.commonName}
-              </h2>
+                <h2
+                  id={`expanded-specimen-${specimen.id}-name`}
+                  className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
+                >
+                  {specimen.commonName}
+                </h2>
 
-              <p className="scientific-name mt-2 text-xl leading-8 text-[var(--color-text-secondary)]">
-                {specimen.scientificName}
-              </p>
+                <p className="scientific-name mt-2 text-xl leading-8 text-[var(--color-text-secondary)]">
+                  {specimen.scientificName}
+                </p>
+              </div>
+
+              {actions ? (
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {actions}
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-2">

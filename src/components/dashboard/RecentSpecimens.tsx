@@ -5,10 +5,12 @@ import { formatDisplayDate } from "@/lib";
 
 interface RecentSpecimensProps {
   specimens: Specimen[];
+  onSpecimenSelect?: (specimen: Specimen) => void;
 }
 
 export function RecentSpecimens({
   specimens,
+  onSpecimenSelect,
 }: RecentSpecimensProps) {
   const recentSpecimens = [...specimens]
     .sort(
@@ -41,13 +43,10 @@ export function RecentSpecimens({
             {recentSpecimens.map((specimen) => {
               const updatedDate = formatDisplayDate(specimen.updatedAt);
 
-              return (
-                <li
-                  key={specimen.id}
-                  className="grid gap-3 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6"
-                >
+              const content = (
+                <div className="grid w-full gap-3 text-left sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] underline-offset-4 transition-[text-decoration-color] duration-[var(--transition-base)] group-hover:underline group-focus-visible:underline">
                       {specimen.commonName}
                     </p>
 
@@ -63,6 +62,27 @@ export function RecentSpecimens({
                       {updatedDate ?? "Date unavailable"}
                     </p>
                   </div>
+                </div>
+              );
+
+              return (
+                <li key={specimen.id}>
+                  {onSpecimenSelect ? (
+                    <button
+                      type="button"
+                      className="group w-full py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
+                      onClick={() =>
+                        onSpecimenSelect(specimen)
+                      }
+                      aria-label={`Open ${specimen.commonName} specimen record`}
+                    >
+                      {content}
+                    </button>
+                  ) : (
+                    <div className="py-5">
+                      {content}
+                    </div>
+                  )}
                 </li>
               );
             })}

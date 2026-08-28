@@ -9,11 +9,13 @@ import { RecentSpecimens } from "./RecentSpecimens";
 interface DashboardProps {
   specimens: Specimen[];
   loadError?: CollectionStorageError | null;
+  onSpecimenSelect?: (specimen: Specimen) => void;
 }
 
 export function Dashboard({
   specimens,
   loadError = null,
+  onSpecimenSelect,
 }: DashboardProps) {
   if (loadError) {
     return (
@@ -73,7 +75,10 @@ export function Dashboard({
     <div className="mt-8 space-y-6">
       <CollectionSummary specimens={specimens} />
 
-      <RecentSpecimens specimens={specimens} />
+      <RecentSpecimens
+        specimens={specimens}
+        onSpecimenSelect={onSpecimenSelect}
+      />
     </div>
   );
 }
