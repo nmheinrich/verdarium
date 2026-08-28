@@ -1,0 +1,1 @@
+export { BotanicalSpecimenCard } from "./BotanicalSpecimenCard";
