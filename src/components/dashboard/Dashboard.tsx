@@ -70,14 +70,10 @@ export function Dashboard({
   }
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
-      <div className="min-w-0">
-        <RecentSpecimens specimens={specimens} />
-      </div>
+    <div className="mt-8 space-y-6">
+      <CollectionSummary specimens={specimens} />
 
-      <aside aria-label="Collection summary">
-        <CollectionSummary specimens={specimens} />
-      </aside>
+      <RecentSpecimens specimens={specimens} />
     </div>
   );
 }
