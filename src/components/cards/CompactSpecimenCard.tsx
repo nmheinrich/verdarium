@@ -1,8 +1,9 @@
 import { Star } from "lucide-react";
 
-import type { Specimen } from "@/types";
-
+import { REMINDER_STATUS_LABELS } from "@/constants";
 import { Surface } from "@/components/ui";
+import { getReminderStatus } from "@/lib";
+import type { Specimen } from "@/types";
 
 interface CompactSpecimenCardProps {
   specimen: Specimen;
@@ -25,10 +26,26 @@ function formatLocation(specimen: Specimen): string | null {
     : null;
 }
 
+function getReminderTextClass(
+  status: "upcoming" | "due" | "overdue",
+): string {
+  switch (status) {
+    case "upcoming":
+      return "bg-[var(--color-reminder-upcoming)] text-[var(--color-text-secondary)]";
+
+    case "due":
+      return "bg-[var(--color-reminder-due)] text-[var(--color-text-primary)]";
+
+    case "overdue":
+      return "bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]";
+  }
+}
+
 export function CompactSpecimenCard({
   specimen,
 }: CompactSpecimenCardProps) {
   const location = formatLocation(specimen);
+  const reminderStatus = getReminderStatus(specimen.reminder);
 
   return (
     <article
@@ -81,7 +98,9 @@ export function CompactSpecimenCard({
 
           <div className="mt-5 border-t border-[var(--color-border)] pt-4">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs leading-5 text-[var(--color-text-secondary)]">
-              <span>{formatHealthStatus(specimen.healthStatus)}</span>
+              <span>
+                {formatHealthStatus(specimen.healthStatus)}
+              </span>
 
               {location ? (
                 <>
@@ -93,6 +112,25 @@ export function CompactSpecimenCard({
                   </span>
 
                   <span>{location}</span>
+                </>
+              ) : null}
+
+              {reminderStatus !== "none" ? (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className="text-[var(--color-border-strong)]"
+                  >
+                    ·
+                  </span>
+
+                  <span
+                    className={`rounded-[var(--radius-sm)] px-1.5 py-0.5 ${getReminderTextClass(
+                      reminderStatus,
+                    )}`}
+                  >
+                    {REMINDER_STATUS_LABELS[reminderStatus]}
+                  </span>
                 </>
               ) : null}
             </div>

@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { Star } from "lucide-react";
 
-import type { Specimen } from "@/types";
-
+import { REMINDER_STATUS_LABELS } from "@/constants";
 import { Badge, Surface } from "@/components/ui";
-import { formatDisplayDate } from "@/lib";
+import { formatDisplayDate, getReminderStatus } from "@/lib";
+import type { ReminderStatus, Specimen } from "@/types";
 
 interface ExpandedSpecimenViewProps {
   specimen: Specimen;
@@ -37,6 +37,12 @@ function formatLocation(specimen: Specimen): string | null {
     : null;
 }
 
+function getReminderBadgeVariant(
+  status: Exclude<ReminderStatus, "none">,
+): "upcoming" | "due" | "overdue" {
+  return status;
+}
+
 export function ExpandedSpecimenView({
   specimen,
   actions,
@@ -46,6 +52,8 @@ export function ExpandedSpecimenView({
   const acquisitionDate = specimen.acquisitionDate
     ? formatDisplayDate(specimen.acquisitionDate)
     : null;
+
+  const reminderStatus = getReminderStatus(specimen.reminder);
 
   return (
     <article
@@ -118,9 +126,11 @@ export function ExpandedSpecimenView({
                 </Badge>
               ) : null}
 
-              {specimen.reminder?.enabled ? (
-                <Badge variant="neutral">
-                  Care reminder active
+              {reminderStatus !== "none" ? (
+                <Badge
+                  variant={getReminderBadgeVariant(reminderStatus)}
+                >
+                  {REMINDER_STATUS_LABELS[reminderStatus]}
                 </Badge>
               ) : null}
             </div>
@@ -128,6 +138,7 @@ export function ExpandedSpecimenView({
             <dl className="mt-8 grid gap-x-8 gap-y-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2">
               <div>
                 <dt className="metadata-label">Genus</dt>
+
                 <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.genus}
                 </dd>
@@ -135,6 +146,7 @@ export function ExpandedSpecimenView({
 
               <div>
                 <dt className="metadata-label">Species</dt>
+
                 <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.species}
                 </dd>
@@ -143,6 +155,7 @@ export function ExpandedSpecimenView({
               {specimen.classification.cultivar ? (
                 <div>
                   <dt className="metadata-label">Cultivar</dt>
+
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                     {specimen.classification.cultivar}
                   </dd>
@@ -152,6 +165,7 @@ export function ExpandedSpecimenView({
               {location ? (
                 <div>
                   <dt className="metadata-label">Location</dt>
+
                   <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
                     {location}
                   </dd>
@@ -161,6 +175,7 @@ export function ExpandedSpecimenView({
               {specimen.lightPreference ? (
                 <div>
                   <dt className="metadata-label">Light</dt>
+
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                     {formatLightPreference(specimen.lightPreference)}
                   </dd>
@@ -170,6 +185,7 @@ export function ExpandedSpecimenView({
               {acquisitionDate ? (
                 <div>
                   <dt className="metadata-label">Acquired</dt>
+
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                     {acquisitionDate}
                   </dd>
@@ -179,6 +195,7 @@ export function ExpandedSpecimenView({
               {specimen.acquisitionSource ? (
                 <div>
                   <dt className="metadata-label">Source</dt>
+
                   <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
                     {specimen.acquisitionSource}
                   </dd>

@@ -1,8 +1,9 @@
 import { Star } from "lucide-react";
 
-import type { Specimen } from "@/types";
-
+import { REMINDER_STATUS_LABELS } from "@/constants";
 import { Badge, Surface } from "@/components/ui";
+import { getReminderStatus } from "@/lib";
+import type { ReminderStatus, Specimen } from "@/types";
 
 interface BotanicalSpecimenCardProps {
   specimen: Specimen;
@@ -25,10 +26,17 @@ function formatLocation(specimen: Specimen): string | null {
     : null;
 }
 
+function getReminderBadgeVariant(
+  status: Exclude<ReminderStatus, "none">,
+): "upcoming" | "due" | "overdue" {
+  return status;
+}
+
 export function BotanicalSpecimenCard({
   specimen,
 }: BotanicalSpecimenCardProps) {
   const location = formatLocation(specimen);
+  const reminderStatus = getReminderStatus(specimen.reminder);
 
   return (
     <article
@@ -67,7 +75,9 @@ export function BotanicalSpecimenCard({
 
         <div className="flex flex-1 flex-col p-6 sm:p-7">
           <div>
-            <p className="metadata-label">Collection specimen</p>
+            <p className="metadata-label">
+              Collection specimen
+            </p>
 
             <h2
               id={`specimen-${specimen.id}-name`}
@@ -89,6 +99,14 @@ export function BotanicalSpecimenCard({
             {specimen.classification.family ? (
               <Badge variant="neutral">
                 {specimen.classification.family}
+              </Badge>
+            ) : null}
+
+            {reminderStatus !== "none" ? (
+              <Badge
+                variant={getReminderBadgeVariant(reminderStatus)}
+              >
+                {REMINDER_STATUS_LABELS[reminderStatus]}
               </Badge>
             ) : null}
           </div>
