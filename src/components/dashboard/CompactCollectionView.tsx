@@ -4,10 +4,12 @@ import { CompactSpecimenCard } from "@/components/cards";
 
 interface CompactCollectionViewProps {
   specimens: Specimen[];
+  onSpecimenSelect?: (specimen: Specimen) => void;
 }
 
 export function CompactCollectionView({
   specimens,
+  onSpecimenSelect,
 }: CompactCollectionViewProps) {
   if (specimens.length === 0) {
     return null;
@@ -33,7 +35,10 @@ export function CompactCollectionView({
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {specimens.map((specimen) => (
           <li key={specimen.id} className="min-w-0">
-            <CompactSpecimenCard specimen={specimen} />
+            <CompactSpecimenCard
+              specimen={specimen}
+              onSelect={onSpecimenSelect}
+            />
           </li>
         ))}
       </ul>

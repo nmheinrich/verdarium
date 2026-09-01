@@ -13,3 +13,5 @@ export {
   calculateNextReminderDueAt,
   getReminderStatus,
 } from "./reminder";
+
+export { searchSpecimens } from "./search";
