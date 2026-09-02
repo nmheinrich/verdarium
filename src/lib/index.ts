@@ -15,3 +15,11 @@ export {
 } from "./reminder";
 
 export { searchSpecimens } from "./search";
+
+export {
+  countActiveSpecimenFilters,
+  DEFAULT_SPECIMEN_FILTERS,
+  filterSpecimens,
+} from "./filter";
+
+export type { SpecimenFilters } from "./filter";

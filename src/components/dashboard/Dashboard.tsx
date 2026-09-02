@@ -2,7 +2,12 @@ import { useMemo, useState } from "react";
 
 import type { CollectionStorageError } from "@/storage";
 import type { Specimen } from "@/types";
-import { searchSpecimens } from "@/lib";
+import {
+  countActiveSpecimenFilters,
+  DEFAULT_SPECIMEN_FILTERS,
+  filterSpecimens,
+  searchSpecimens,
+} from "@/lib";
 import { Surface } from "@/components/ui";
 
 import { CollectionSearch } from "./CollectionSearch";
@@ -22,13 +27,34 @@ export function Dashboard({
   onSpecimenSelect,
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState(
+    DEFAULT_SPECIMEN_FILTERS,
+  );
 
   const trimmedSearchQuery = searchQuery.trim();
 
-  const searchResults = useMemo(
-    () => searchSpecimens(specimens, searchQuery),
-    [specimens, searchQuery],
-  );
+  const activeFilterCount =
+    countActiveSpecimenFilters(filters);
+
+  const activeToolCount =
+    activeFilterCount +
+    (trimmedSearchQuery.length > 0 ? 1 : 0);
+
+  const visibleSpecimens = useMemo(() => {
+    const searchedSpecimens = searchSpecimens(
+      specimens,
+      searchQuery,
+    );
+
+    return filterSpecimens(
+      searchedSpecimens,
+      filters,
+    );
+  }, [
+    specimens,
+    searchQuery,
+    filters,
+  ]);
 
   if (loadError) {
     return (
@@ -88,7 +114,14 @@ export function Dashboard({
     );
   }
 
-  const isSearchActive = trimmedSearchQuery.length > 0;
+  const isSearchActive =
+    trimmedSearchQuery.length > 0;
+
+  const areFiltersActive =
+    activeFilterCount > 0;
+
+  const areCollectionToolsActive =
+    isSearchActive || areFiltersActive;
 
   return (
     <div className="mt-8 space-y-6">
@@ -96,34 +129,37 @@ export function Dashboard({
 
       <CollectionSearch
         value={searchQuery}
+        filters={filters}
+        activeCount={activeToolCount}
         onChange={setSearchQuery}
+        onFiltersChange={setFilters}
       />
 
-      {isSearchActive ? (
-        searchResults.length > 0 ? (
+      {areCollectionToolsActive ? (
+        visibleSpecimens.length > 0 ? (
           <CompactCollectionView
-            specimens={searchResults}
+            specimens={visibleSpecimens}
             onSpecimenSelect={onSpecimenSelect}
           />
         ) : (
           <section
-            aria-labelledby="collection-search-empty-heading"
+            aria-labelledby="collection-tools-empty-heading"
           >
             <Surface variant="subtle" className="p-6 sm:p-8">
               <p className="metadata-label">
-                Archive lookup
+                Collection index
               </p>
 
               <h2
-                id="collection-search-empty-heading"
+                id="collection-tools-empty-heading"
                 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
               >
-                No specimens match this search
+                No specimens match these criteria
               </h2>
 
               <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)]">
-                Try another common name, scientific name, classification,
-                location, tag, or acquisition source.
+                Adjust the search or collection filters to broaden the archive
+                results.
               </p>
             </Surface>
           </section>
