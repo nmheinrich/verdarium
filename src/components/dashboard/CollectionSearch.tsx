@@ -4,24 +4,31 @@ import {
   Search,
 } from "lucide-react";
 
-import type { SpecimenFilters } from "@/lib";
+import type {
+  SpecimenFilters,
+  SpecimenSortOption,
+} from "@/lib";
 
 import { CollectionFilters } from "./CollectionFilters";
 
 interface CollectionSearchProps {
   value: string;
   filters: SpecimenFilters;
+  sortOption: SpecimenSortOption;
   activeCount: number;
   onChange: (value: string) => void;
   onFiltersChange: (filters: SpecimenFilters) => void;
+  onSortChange: (sortOption: SpecimenSortOption) => void;
 }
 
 export function CollectionSearch({
   value,
   filters,
+  sortOption,
   activeCount,
   onChange,
   onFiltersChange,
+  onSortChange,
 }: CollectionSearchProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -57,7 +64,7 @@ export function CollectionSearch({
       {isExpanded ? (
         <div
           id="collection-tools-panel"
-          className="mt-5 max-w-3xl"
+          className="mt-5 max-w-5xl"
         >
           <div className="max-w-xl">
             <div className="flex items-center gap-2 pb-1.5">
@@ -91,7 +98,9 @@ export function CollectionSearch({
 
           <CollectionFilters
             filters={filters}
+            sortOption={sortOption}
             onChange={onFiltersChange}
+            onSortChange={onSortChange}
           />
         </div>
       ) : null}

@@ -5,8 +5,10 @@ import type { Specimen } from "@/types";
 import {
   countActiveSpecimenFilters,
   DEFAULT_SPECIMEN_FILTERS,
+  DEFAULT_SPECIMEN_SORT,
   filterSpecimens,
   searchSpecimens,
+  sortSpecimens,
 } from "@/lib";
 import { Surface } from "@/components/ui";
 
@@ -27,8 +29,13 @@ export function Dashboard({
   onSpecimenSelect,
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
+
   const [filters, setFilters] = useState(
     DEFAULT_SPECIMEN_FILTERS,
+  );
+
+  const [sortOption, setSortOption] = useState(
+    DEFAULT_SPECIMEN_SORT,
   );
 
   const trimmedSearchQuery = searchQuery.trim();
@@ -36,9 +43,13 @@ export function Dashboard({
   const activeFilterCount =
     countActiveSpecimenFilters(filters);
 
+  const isSortActive =
+    sortOption !== DEFAULT_SPECIMEN_SORT;
+
   const activeToolCount =
     activeFilterCount +
-    (trimmedSearchQuery.length > 0 ? 1 : 0);
+    (trimmedSearchQuery.length > 0 ? 1 : 0) +
+    (isSortActive ? 1 : 0);
 
   const visibleSpecimens = useMemo(() => {
     const searchedSpecimens = searchSpecimens(
@@ -46,14 +57,20 @@ export function Dashboard({
       searchQuery,
     );
 
-    return filterSpecimens(
+    const filteredSpecimens = filterSpecimens(
       searchedSpecimens,
       filters,
+    );
+
+    return sortSpecimens(
+      filteredSpecimens,
+      sortOption,
     );
   }, [
     specimens,
     searchQuery,
     filters,
+    sortOption,
   ]);
 
   if (loadError) {
@@ -121,7 +138,9 @@ export function Dashboard({
     activeFilterCount > 0;
 
   const areCollectionToolsActive =
-    isSearchActive || areFiltersActive;
+    isSearchActive ||
+    areFiltersActive ||
+    isSortActive;
 
   return (
     <div className="mt-8 space-y-6">
@@ -130,9 +149,11 @@ export function Dashboard({
       <CollectionSearch
         value={searchQuery}
         filters={filters}
+        sortOption={sortOption}
         activeCount={activeToolCount}
         onChange={setSearchQuery}
         onFiltersChange={setFilters}
+        onSortChange={setSortOption}
       />
 
       {areCollectionToolsActive ? (

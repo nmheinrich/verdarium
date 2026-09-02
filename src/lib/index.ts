@@ -23,3 +23,10 @@ export {
 } from "./filter";
 
 export type { SpecimenFilters } from "./filter";
+
+export {
+  DEFAULT_SPECIMEN_SORT,
+  sortSpecimens,
+} from "./sort";
+
+export type { SpecimenSortOption } from "./sort";

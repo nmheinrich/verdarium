@@ -1,5 +1,8 @@
 import { REMINDER_STATUS_LABELS } from "@/constants";
-import type { SpecimenFilters } from "@/lib";
+import type {
+  SpecimenFilters,
+  SpecimenSortOption,
+} from "@/lib";
 import type {
   ReminderStatus,
   SpecimenHealthStatus,
@@ -7,7 +10,9 @@ import type {
 
 interface CollectionFiltersProps {
   filters: SpecimenFilters;
+  sortOption: SpecimenSortOption;
   onChange: (filters: SpecimenFilters) => void;
+  onSortChange: (sortOption: SpecimenSortOption) => void;
 }
 
 const HEALTH_STATUS_OPTIONS: Array<{
@@ -41,12 +46,40 @@ const REMINDER_STATUS_OPTIONS: Array<{
   },
 ];
 
+const SORT_OPTIONS: Array<{
+  value: SpecimenSortOption;
+  label: string;
+}> = [
+  {
+    value: "updated-desc",
+    label: "Recently updated",
+  },
+  {
+    value: "created-desc",
+    label: "Recently added",
+  },
+  {
+    value: "name-asc",
+    label: "Name A–Z",
+  },
+  {
+    value: "name-desc",
+    label: "Name Z–A",
+  },
+  {
+    value: "scientific-asc",
+    label: "Scientific name A–Z",
+  },
+];
+
 export function CollectionFilters({
   filters,
+  sortOption,
   onChange,
+  onSortChange,
 }: CollectionFiltersProps) {
   return (
-    <div className="grid gap-5 border-t border-[var(--color-border)] pt-6 sm:grid-cols-3">
+    <div className="grid gap-5 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2 lg:grid-cols-4">
       <div>
         <label
           htmlFor="collection-health-filter"
@@ -135,6 +168,35 @@ export function CollectionFilters({
           <option value="favorites">
             Favorites only
           </option>
+        </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="collection-sort"
+          className="metadata-label"
+        >
+          Sort
+        </label>
+
+        <select
+          id="collection-sort"
+          value={sortOption}
+          onChange={(event) =>
+            onSortChange(
+              event.target.value as SpecimenSortOption,
+            )
+          }
+          className="mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-botanical)]"
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
     </div>
