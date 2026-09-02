@@ -13,6 +13,7 @@ import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
   EditSpecimenForm,
+  ThemeSelector,
 } from "@/components/forms";
 import {
   AppNav,
@@ -24,12 +25,19 @@ import {
   IconButton,
   Surface,
 } from "@/components/ui";
+import {
+  initializeTheme,
+  setTheme,
+} from "@/lib";
 import type { CollectionStorageError } from "@/storage";
 import {
   deleteSpecimen,
   loadCollection,
 } from "@/storage";
-import type { Specimen } from "@/types";
+import type {
+  Specimen,
+  ThemeId,
+} from "@/types";
 
 const navigationItems = [
   { label: "Collection", value: "collection" },
@@ -41,7 +49,8 @@ type AppView =
   | "collection"
   | "add-specimen"
   | "specimen"
-  | "edit-specimen";
+  | "edit-specimen"
+  | "settings";
 
 interface CollectionState {
   specimens: Specimen[];
@@ -68,6 +77,9 @@ export default function App() {
   const [view, setView] =
     useState<AppView>("collection");
 
+  const [theme, setActiveTheme] =
+    useState<ThemeId>(() => initializeTheme());
+
   const [collectionState, setCollectionState] =
     useState<CollectionState>(() =>
       loadCollectionState(),
@@ -93,6 +105,11 @@ export default function App() {
           (specimen) =>
             specimen.id === selectedSpecimenId,
         ) ?? null;
+
+  const activeNavigationItem =
+    view === "settings"
+      ? "settings"
+      : "collection";
 
   const handleSpecimenCreated = (
     specimens: Specimen[],
@@ -193,6 +210,29 @@ export default function App() {
     setView("collection");
   };
 
+  const handleThemeChange = (
+    nextTheme: ThemeId,
+  ) => {
+    setActiveTheme(nextTheme);
+    setTheme(nextTheme);
+  };
+
+  const handleNavigation = (
+    value: string,
+  ) => {
+    if (value === "collection") {
+      handleReturnToCollection();
+      return;
+    }
+
+    if (value === "settings") {
+      setSelectedSpecimenId(null);
+      setIsDeleteConfirming(false);
+      setDeleteError(null);
+      setView("settings");
+    }
+  };
+
   if (
     (view === "specimen" ||
       view === "edit-specimen") &&
@@ -204,6 +244,7 @@ export default function App() {
           <AppNav
             items={navigationItems}
             activeItem="collection"
+            onNavigate={handleNavigation}
           />
         }
       >
@@ -230,7 +271,8 @@ export default function App() {
       navigation={
         <AppNav
           items={navigationItems}
-          activeItem="collection"
+          activeItem={activeNavigationItem}
+          onNavigate={handleNavigation}
         />
       }
       actions={
@@ -411,6 +453,42 @@ export default function App() {
               onCancel={handleCancelEditSpecimen}
               onUpdated={handleSpecimenUpdated}
             />
+          </div>
+        </>
+      ) : null}
+
+      {view === "settings" ? (
+        <>
+          <PageHeader
+            eyebrow="Archive Preferences"
+            title="Settings"
+            description="Adjust how Verdarium presents your botanical collection."
+          />
+
+          <div className="mt-8 max-w-3xl">
+            <Surface className="p-6 sm:p-8">
+              <div className="max-w-2xl">
+                <p className="metadata-label">
+                  Presentation
+                </p>
+
+                <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+                  Archive appearance
+                </h2>
+
+                <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                  Choose the visual atmosphere used throughout your botanical
+                  archive.
+                </p>
+              </div>
+
+              <div className="mt-7 border-t border-[var(--color-border)] pt-6">
+                <ThemeSelector
+                  value={theme}
+                  onChange={handleThemeChange}
+                />
+              </div>
+            </Surface>
           </div>
         </>
       ) : null}

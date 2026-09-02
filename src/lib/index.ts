@@ -30,3 +30,12 @@ export {
 } from "./sort";
 
 export type { SpecimenSortOption } from "./sort";
+
+export {
+  applyTheme,
+  getStoredTheme,
+  initializeTheme,
+  isThemeId,
+  saveTheme,
+  setTheme,
+} from "./theme";

@@ -51,7 +51,88 @@
   --transition-fast: 120ms;
   --transition-base: 200ms;
   --transition-slow: 320ms;
+
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root[data-theme="herbarium"] {
+  /* Core surfaces */
+  --color-background: #eef1e7;
+  --color-surface: #f6f7f0;
+  --color-surface-elevated: #fbfcf7;
+
+  /* Text */
+  --color-text-primary: #1e281f;
+  --color-text-secondary: #59665a;
+  --color-text-muted: #7f897f;
+  --color-text-on-botanical: #f7f8f1;
+
+  /* Borders */
+  --color-border: #d2d8ca;
+  --color-border-strong: #adb8a8;
+
+  /* Botanical accents */
+  --color-botanical: #486249;
+  --color-botanical-muted: #7e957c;
+  --color-botanical-soft: #d9e3d5;
+
+  /* Reminder states */
+  --color-reminder-upcoming: #e0e6d7;
+  --color-reminder-due: #e5d6a8;
+  --color-reminder-overdue: #d5b4a4;
+
+  /* Interactive states */
+  --color-focus: #5f775e;
+  --color-selection: #d4dfcf;
+
+  /* Shadows */
+  --shadow-subtle:
+    0 1px 2px rgb(30 40 31 / 0.035),
+    0 6px 18px rgb(30 40 31 / 0.045);
+
+  --shadow-elevated:
+    0 2px 4px rgb(30 40 31 / 0.045),
+    0 12px 32px rgb(30 40 31 / 0.07);
+}
+
+:root[data-theme="night-archive"] {
+  /* Core surfaces */
+  --color-background: #1d211d;
+  --color-surface: #252a25;
+  --color-surface-elevated: #2c312c;
+
+  /* Text */
+  --color-text-primary: #ece8dc;
+  --color-text-secondary: #b7b8ad;
+  --color-text-muted: #8d9188;
+  --color-text-on-botanical: #f5f1e6;
+
+  /* Borders */
+  --color-border: #3a403a;
+  --color-border-strong: #555d55;
+
+  /* Botanical accents */
+  --color-botanical: #98aa8f;
+  --color-botanical-muted: #74816f;
+  --color-botanical-soft: #394338;
+
+  /* Reminder states */
+  --color-reminder-upcoming: #41483b;
+  --color-reminder-due: #665a39;
+  --color-reminder-overdue: #684b43;
+
+  /* Interactive states */
+  --color-focus: #a7b99d;
+  --color-selection: #3f493d;
+
+  /* Shadows */
+  --shadow-subtle:
+    0 1px 2px rgb(0 0 0 / 0.18),
+    0 6px 18px rgb(0 0 0 / 0.16);
+
+  --shadow-elevated:
+    0 2px 4px rgb(0 0 0 / 0.2),
+    0 12px 32px rgb(0 0 0 / 0.22);
 }
 
 @media (min-width: 48rem) {

@@ -6,10 +6,12 @@ export {
   DEFAULT_SORT_DIRECTION,
   DEFAULT_THEME,
   STORAGE_SCHEMA_VERSION,
-} from './app';
+} from "./app";
 
 export {
   REMINDER_FREQUENCY_LABELS,
   REMINDER_FREQUENCY_UNITS,
   REMINDER_STATUS_LABELS,
-} from './reminders';
+} from "./reminders";
+
+export { THEMES } from "./themes";
