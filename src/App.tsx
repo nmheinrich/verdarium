@@ -13,6 +13,7 @@ import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
   EditSpecimenForm,
+  ExportCollectionForm,
   ImportCollectionForm,
   ThemeSelector,
 } from "@/components/forms";
@@ -505,9 +506,15 @@ export default function App() {
             </Surface>
 
             <Surface className="p-6 sm:p-8">
-              <ImportCollectionForm
-                onImported={handleCollectionImported}
+              <ExportCollectionForm
+                specimens={collectionState.specimens}
               />
+
+              <div className="mt-8 border-t border-[var(--color-border)] pt-8">
+                <ImportCollectionForm
+                  onImported={handleCollectionImported}
+                />
+              </div>
             </Surface>
           </div>
         </>

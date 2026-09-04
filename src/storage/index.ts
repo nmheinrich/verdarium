@@ -15,6 +15,14 @@ export type {
 } from "./collection";
 
 export {
+  createCollectionExport,
+} from "./export";
+
+export type {
+  ExportCollectionResult,
+} from "./export";
+
+export {
   parseImportedCollection,
 } from "./import";
 
