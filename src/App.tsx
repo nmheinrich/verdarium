@@ -294,18 +294,6 @@ export default function App() {
           onNavigate={handleNavigation}
         />
       }
-      actions={
-        view === "collection" &&
-        collectionState.specimens.length > 0 ? (
-          <Button
-            size="compact"
-            leadingIcon={<Plus size={16} />}
-            onClick={handleAddSpecimen}
-          >
-            Add specimen
-          </Button>
-        ) : null
-      }
     >
       {view === "collection" ? (
         <>
@@ -313,6 +301,25 @@ export default function App() {
             eyebrow="Personal Herbarium"
             title="Collection"
             description="A quiet archive for documenting, studying, and caring for your botanical specimens."
+            actions={
+              collectionState.specimens.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleAddSpecimen}
+                  className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
+                >
+                  <Plus
+                    size={18}
+                    aria-hidden="true"
+                    className="text-[var(--color-text-muted)]"
+                  />
+
+                  <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
+                    Add specimen
+                  </span>
+                </button>
+              ) : null
+            }
           />
 
           <Dashboard
