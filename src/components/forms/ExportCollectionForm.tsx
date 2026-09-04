@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui";
@@ -13,9 +14,11 @@ function createExportFileName(): string {
   const today = new Date();
 
   const year = today.getFullYear();
+
   const month = String(
     today.getMonth() + 1,
   ).padStart(2, "0");
+
   const day = String(
     today.getDate(),
   ).padStart(2, "0");
@@ -81,28 +84,28 @@ export function ExportCollectionForm({
       aria-labelledby="export-collection-heading"
     >
       <div className="max-w-2xl">
-        <p className="metadata-label">
-          Collection data
-        </p>
-
-        <h2
+        <h3
           id="export-collection-heading"
-          className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+          className="font-serif text-xl leading-tight text-[var(--color-text-primary)]"
         >
-          Export collection
-        </h2>
+          Export archive
+        </h3>
 
-        <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+        <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
           Download a portable JSON backup of
-          your current botanical archive.
+          your current botanical archive for
+          safekeeping or transfer.
         </p>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <Button
           type="button"
           leadingIcon={
-            <Download size={16} />
+            <Download
+              size={16}
+              aria-hidden="true"
+            />
           }
           onClick={handleExport}
         >

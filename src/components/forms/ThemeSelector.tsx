@@ -15,7 +15,7 @@ export function ThemeSelector({
   return (
     <fieldset>
       <legend className="metadata-label">
-        Appearance
+        Archive theme
       </legend>
 
       <div className="mt-4 grid gap-3">
@@ -37,7 +37,7 @@ export function ThemeSelector({
               />
 
               <div
-                className={`flex items-start justify-between gap-4 rounded-[var(--radius-md)] border p-4 transition-colors duration-[var(--transition-base)] ${
+                className={`flex items-start justify-between gap-4 rounded-[var(--radius-md)] border p-4 transition-colors duration-[var(--transition-base)] group-focus-within:ring-2 group-focus-within:ring-[var(--color-focus)] group-focus-within:ring-offset-2 ${
                   isSelected
                     ? "border-[var(--color-botanical-muted)] bg-[var(--color-botanical-soft)]"
                     : "border-[var(--color-border)] bg-[var(--color-surface)] group-hover:border-[var(--color-border-strong)]"

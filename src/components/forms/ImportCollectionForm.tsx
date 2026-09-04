@@ -55,6 +55,7 @@ export function ImportCollectionForm({
       setErrorMessage(
         "Verdarium could not read the selected file.",
       );
+
       return;
     }
 
@@ -115,25 +116,22 @@ export function ImportCollectionForm({
       aria-labelledby="import-collection-heading"
     >
       <div className="max-w-2xl">
-        <p className="metadata-label">
-          Collection data
-        </p>
-
-        <h2
+        <h3
           id="import-collection-heading"
-          className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+          className="font-serif text-xl leading-tight text-[var(--color-text-primary)]"
         >
-          Import collection
-        </h2>
+          Import archive
+        </h3>
 
-        <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-          Select a Verdarium JSON file to replace the
-          current botanical archive. The file is
-          validated before anything is written.
+        <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+          Select a Verdarium JSON file to
+          replace the current botanical archive.
+          The file is validated before anything
+          is written.
         </p>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <label
           htmlFor="collection-import-file"
           className="metadata-label"
@@ -177,9 +175,9 @@ export function ImportCollectionForm({
             Import ready
           </p>
 
-          <h3 className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+          <h4 className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
             Replace the current collection?
-          </h3>
+          </h4>
 
           <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
             <span className="font-medium text-[var(--color-text-primary)]">

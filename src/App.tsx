@@ -121,6 +121,9 @@ export default function App() {
       ? "settings"
       : "collection";
 
+  const specimenCount =
+    collectionState.specimens.length;
+
   const handleSpecimenCreated = (
     specimens: Specimen[],
   ) => {
@@ -592,44 +595,130 @@ export default function App() {
           <PageHeader
             eyebrow="Archive Preferences"
             title="Settings"
-            description="Adjust how Verdarium presents and manages your botanical collection."
+            description="Adjust the appearance of Verdarium and manage the botanical archive stored in this browser."
           />
 
           <div className="mt-8 max-w-3xl space-y-6">
             <Surface className="p-6 sm:p-8">
-              <div className="max-w-2xl">
-                <p className="metadata-label">
-                  Presentation
-                </p>
+              <section
+                aria-labelledby="settings-appearance-heading"
+              >
+                <div className="max-w-2xl">
+                  <p className="metadata-label">
+                    Presentation
+                  </p>
 
-                <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
-                  Archive appearance
-                </h2>
+                  <h2
+                    id="settings-appearance-heading"
+                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                  >
+                    Appearance
+                  </h2>
 
-                <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                  Choose the visual atmosphere used throughout your botanical
-                  archive.
-                </p>
-              </div>
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                    Choose the visual atmosphere used
+                    throughout your botanical archive.
+                  </p>
+                </div>
 
-              <div className="mt-7 border-t border-[var(--color-border)] pt-6">
-                <ThemeSelector
-                  value={theme}
-                  onChange={handleThemeChange}
-                />
-              </div>
+                <div className="mt-7 border-t border-[var(--color-border)] pt-6">
+                  <ThemeSelector
+                    value={theme}
+                    onChange={handleThemeChange}
+                  />
+                </div>
+              </section>
             </Surface>
 
             <Surface className="p-6 sm:p-8">
-              <ExportCollectionForm
-                specimens={collectionState.specimens}
-              />
+              <section
+                aria-labelledby="settings-collection-heading"
+              >
+                <div className="max-w-2xl">
+                  <p className="metadata-label">
+                    Archive stewardship
+                  </p>
 
-              <div className="mt-8 border-t border-[var(--color-border)] pt-8">
-                <ImportCollectionForm
-                  onImported={handleCollectionImported}
-                />
-              </div>
+                  <h2
+                    id="settings-collection-heading"
+                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                  >
+                    Collection management
+                  </h2>
+
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                    Create a portable backup of your
+                    collection or restore Verdarium from
+                    a previously exported archive.
+                  </p>
+                </div>
+
+                <div className="mt-7 border-t border-[var(--color-border)] pt-6">
+                  <ExportCollectionForm
+                    specimens={collectionState.specimens}
+                  />
+                </div>
+
+                <div className="mt-8 border-t border-[var(--color-border)] pt-8">
+                  <ImportCollectionForm
+                    onImported={handleCollectionImported}
+                  />
+                </div>
+              </section>
+            </Surface>
+
+            <Surface className="p-6 sm:p-8">
+              <section
+                aria-labelledby="settings-archive-heading"
+              >
+                <div className="max-w-2xl">
+                  <p className="metadata-label">
+                    Local archive
+                  </p>
+
+                  <h2
+                    id="settings-archive-heading"
+                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                  >
+                    Archive information
+                  </h2>
+
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                    Verdarium keeps your botanical
+                    collection locally in this browser.
+                    Export the archive periodically if you
+                    want a portable backup.
+                  </p>
+                </div>
+
+                <dl className="mt-7 grid gap-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2">
+                  <div>
+                    <dt className="metadata-label">
+                      Specimens
+                    </dt>
+
+                    <dd className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+                      {specimenCount}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="metadata-label">
+                      Storage
+                    </dt>
+
+                    <dd className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+                      This browser
+                    </dd>
+                  </div>
+                </dl>
+
+                <p className="mt-6 border-t border-[var(--color-border)] pt-6 text-xs leading-5 text-[var(--color-text-muted)]">
+                  Collection data is not automatically
+                  synchronized between browsers or
+                  devices.
+                </p>
+              </section>
             </Surface>
           </div>
         </>
