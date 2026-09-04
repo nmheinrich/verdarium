@@ -1,4 +1,10 @@
 import { useState } from "react";
+
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 import {
   ArrowLeft,
   Check,
@@ -76,6 +82,8 @@ function loadCollectionState(): CollectionState {
 }
 
 export default function App() {
+  const shouldReduceMotion = useReducedMotion();
+
   const [view, setView] =
     useState<AppView>("collection");
 
@@ -156,6 +164,15 @@ export default function App() {
     setView("collection");
   };
 
+  const handleSpecimenExitComplete = () => {
+    if (
+      view === "collection" ||
+      view === "settings"
+    ) {
+      setSelectedSpecimenId(null);
+    }
+  };
+
   const handleSelectSpecimen = (
     specimen: Specimen,
   ) => {
@@ -166,7 +183,6 @@ export default function App() {
   };
 
   const handleReturnToCollection = () => {
-    setSelectedSpecimenId(null);
     setIsDeleteConfirming(false);
     setDeleteError(null);
     setView("collection");
@@ -245,7 +261,6 @@ export default function App() {
     }
 
     if (value === "settings") {
-      setSelectedSpecimenId(null);
       setIsDeleteConfirming(false);
       setDeleteError(null);
       setView("settings");
@@ -295,41 +310,228 @@ export default function App() {
         />
       }
     >
-      {view === "collection" ? (
-        <>
-          <PageHeader
-            eyebrow="Personal Herbarium"
-            title="Collection"
-            description="A quiet archive for documenting, studying, and caring for your botanical specimens."
-            actions={
-              collectionState.specimens.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={handleAddSpecimen}
-                  className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
-                >
-                  <Plus
-                    size={18}
-                    aria-hidden="true"
-                    className="text-[var(--color-text-muted)]"
-                  />
-
-                  <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
-                    Add specimen
-                  </span>
-                </button>
-              ) : null
+      <AnimatePresence
+        initial={false}
+        mode="wait"
+        onExitComplete={handleSpecimenExitComplete}
+      >
+        {view === "collection" ? (
+          <motion.div
+            key="collection"
+            initial={
+              shouldReduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: -6,
+                  }
             }
-          />
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            exit={
+              shouldReduceMotion
+                ? {
+                    opacity: 0,
+                  }
+                : {
+                    opacity: 0,
+                    y: -8,
+                  }
+            }
+            transition={{
+              duration: shouldReduceMotion
+                ? 0.1
+                : 0.22,
+              ease: shouldReduceMotion
+                ? "easeOut"
+                : [0.22, 1, 0.36, 1],
+            }}
+          >
+            <PageHeader
+              eyebrow="Personal Herbarium"
+              title="Collection"
+              description="A quiet archive for documenting, studying, and caring for your botanical specimens."
+              actions={
+                collectionState.specimens.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleAddSpecimen}
+                    className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
+                  >
+                    <Plus
+                      size={18}
+                      aria-hidden="true"
+                      className="text-[var(--color-text-muted)]"
+                    />
 
-          <Dashboard
-            specimens={collectionState.specimens}
-            loadError={collectionState.error}
-            onSpecimenSelect={handleSelectSpecimen}
-            onAddSpecimen={handleAddSpecimen}
-          />
-        </>
-      ) : null}
+                    <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
+                      Add specimen
+                    </span>
+                  </button>
+                ) : null
+              }
+            />
+
+            <Dashboard
+              specimens={collectionState.specimens}
+              loadError={collectionState.error}
+              onSpecimenSelect={handleSelectSpecimen}
+              onAddSpecimen={handleAddSpecimen}
+            />
+          </motion.div>
+        ) : null}
+
+        {view === "specimen" && selectedSpecimen ? (
+          <motion.div
+            key={`specimen-${selectedSpecimen.id}`}
+            initial={
+              shouldReduceMotion
+                ? false
+                : {
+                    opacity: 0,
+                  }
+            }
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            transition={{
+              duration: shouldReduceMotion
+                ? 0.1
+                : 0.24,
+              ease: "easeOut",
+            }}
+          >
+            <PageHeader
+              eyebrow="Specimen Record"
+              title={selectedSpecimen.commonName}
+              description={selectedSpecimen.scientificName}
+              actions={
+                <Button
+                  variant="secondary"
+                  leadingIcon={<ArrowLeft size={16} />}
+                  onClick={handleReturnToCollection}
+                >
+                  Back to collection
+                </Button>
+              }
+            />
+
+            <div className="mt-8">
+              <AnimatePresence initial={false}>
+                {isDeleteConfirming ? (
+                  <motion.div
+                    key="delete-confirmation"
+                    initial={
+                      shouldReduceMotion
+                        ? false
+                        : {
+                            opacity: 0,
+                            y: -4,
+                          }
+                    }
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: shouldReduceMotion
+                        ? 0
+                        : -4,
+                    }}
+                    transition={{
+                      duration: shouldReduceMotion
+                        ? 0.1
+                        : 0.18,
+                      ease: "easeOut",
+                    }}
+                  >
+                    <Surface
+                      variant="subtle"
+                      className="mb-5 px-4 py-4 sm:px-5"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="metadata-label">
+                            Permanent removal
+                          </p>
+
+                          <h2 className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+                            Remove this specimen?
+                          </h2>
+
+                          <p className="mt-1.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
+                            This botanical record will be permanently deleted.
+                          </p>
+
+                          {deleteError ? (
+                            <p
+                              role="alert"
+                              className="mt-2 text-sm leading-5 text-[var(--color-text-secondary)]"
+                            >
+                              {deleteError}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <IconButton
+                            variant="default"
+                            size="compact"
+                            aria-label="Cancel specimen deletion"
+                            icon={<X size={16} />}
+                            onClick={handleCancelDelete}
+                          />
+
+                          <IconButton
+                            variant="default"
+                            size="compact"
+                            aria-label="Confirm specimen deletion"
+                            icon={<Check size={16} />}
+                            className="border-[var(--color-reminder-overdue)] bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)] hover:brightness-95 active:brightness-90"
+                            onClick={handleConfirmDelete}
+                          />
+                        </div>
+                      </div>
+                    </Surface>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              <ExpandedSpecimenView
+                specimen={selectedSpecimen}
+                actions={
+                  <>
+                    <Button
+                      size="compact"
+                      variant="secondary"
+                      leadingIcon={<Pencil size={15} />}
+                      onClick={handleEditSpecimen}
+                    >
+                      Edit specimen
+                    </Button>
+
+                    <Button
+                      size="compact"
+                      variant="secondary"
+                      leadingIcon={<Trash2 size={15} />}
+                      className="border-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]"
+                      onClick={handleRequestDelete}
+                    >
+                      Delete specimen
+                    </Button>
+                  </>
+                }
+              />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {view === "add-specimen" ? (
         <>
@@ -352,104 +554,6 @@ export default function App() {
             <AddSpecimenForm
               onCancel={handleCancelAddSpecimen}
               onCreated={handleSpecimenCreated}
-            />
-          </div>
-        </>
-      ) : null}
-
-      {view === "specimen" && selectedSpecimen ? (
-        <>
-          <PageHeader
-            eyebrow="Specimen Record"
-            title={selectedSpecimen.commonName}
-            description={selectedSpecimen.scientificName}
-            actions={
-              <Button
-                variant="secondary"
-                leadingIcon={<ArrowLeft size={16} />}
-                onClick={handleReturnToCollection}
-              >
-                Back to collection
-              </Button>
-            }
-          />
-
-          <div className="mt-8">
-            {isDeleteConfirming ? (
-              <Surface
-                variant="subtle"
-                className="mb-5 px-4 py-4 sm:px-5"
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="metadata-label">
-                      Permanent removal
-                    </p>
-
-                    <h2 className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
-                      Remove this specimen?
-                    </h2>
-
-                    <p className="mt-1.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
-                      This botanical record will be permanently deleted.
-                    </p>
-
-                    {deleteError ? (
-                      <p
-                        role="alert"
-                        className="mt-2 text-sm leading-5 text-[var(--color-text-secondary)]"
-                      >
-                        {deleteError}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <IconButton
-                      variant="default"
-                      size="compact"
-                      aria-label="Cancel specimen deletion"
-                      icon={<X size={16} />}
-                      onClick={handleCancelDelete}
-                    />
-
-                    <IconButton
-                      variant="default"
-                      size="compact"
-                      aria-label="Confirm specimen deletion"
-                      icon={<Check size={16} />}
-                      className="border-[var(--color-reminder-overdue)] bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)] hover:brightness-95 active:brightness-90"
-                      onClick={handleConfirmDelete}
-                    />
-                  </div>
-                </div>
-              </Surface>
-            ) : null}
-
-            <ExpandedSpecimenView
-              specimen={selectedSpecimen}
-              actions={
-                <>
-                  <Button
-                    size="compact"
-                    variant="secondary"
-                    leadingIcon={<Pencil size={15} />}
-                    onClick={handleEditSpecimen}
-                  >
-                    Edit specimen
-                  </Button>
-
-                  <Button
-                    size="compact"
-                    variant="secondary"
-                    leadingIcon={<Trash2 size={15} />}
-                    className="border-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]"
-                    onClick={handleRequestDelete}
-                  >
-                    Delete specimen
-                  </Button>
-                </>
-              }
             />
           </div>
         </>

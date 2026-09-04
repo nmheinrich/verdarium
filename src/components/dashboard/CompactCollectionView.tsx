@@ -1,3 +1,5 @@
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+
 import type { Specimen } from "@/types";
 
 import { CompactSpecimenCard } from "@/components/cards";
@@ -11,6 +13,8 @@ export function CompactCollectionView({
   specimens,
   onSpecimenSelect,
 }: CompactCollectionViewProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   if (specimens.length === 0) {
     return null;
   }
@@ -32,16 +36,51 @@ export function CompactCollectionView({
         </p>
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {specimens.map((specimen) => (
-          <li key={specimen.id} className="min-w-0">
-            <CompactSpecimenCard
-              specimen={specimen}
-              onSelect={onSpecimenSelect}
-            />
-          </li>
-        ))}
-      </ul>
+      <motion.ul
+        layout={!shouldReduceMotion}
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+      >
+        <AnimatePresence initial={false} mode="popLayout">
+          {specimens.map((specimen) => (
+            <motion.li
+              key={specimen.id}
+              layout={!shouldReduceMotion}
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 6,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={
+                shouldReduceMotion
+                  ? {
+                      opacity: 0,
+                    }
+                  : {
+                      opacity: 0,
+                      y: -4,
+                    }
+              }
+              transition={{
+                duration: shouldReduceMotion ? 0.1 : 0.2,
+                ease: "easeOut",
+              }}
+              className="min-w-0"
+            >
+              <CompactSpecimenCard
+                specimen={specimen}
+                onSelect={onSpecimenSelect}
+              />
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </motion.ul>
     </section>
   );
 }

@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { Star } from "lucide-react";
 
 import { BotanicalIllustration } from "@/components/illustrations/BotanicalIllustration";
 import { Badge, Surface } from "@/components/ui";
 import { REMINDER_STATUS_LABELS } from "@/constants";
 import { formatDisplayDate, getReminderStatus } from "@/lib";
-
 import type { ReminderStatus, Specimen } from "@/types";
 
 interface ExpandedSpecimenViewProps {
@@ -50,6 +50,8 @@ export function ExpandedSpecimenView({
   specimen,
   actions,
 }: ExpandedSpecimenViewProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   const location = formatLocation(specimen);
 
   const acquisitionDate = specimen.acquisitionDate
@@ -59,8 +61,39 @@ export function ExpandedSpecimenView({
   const reminderStatus = getReminderStatus(specimen.reminder);
 
   return (
-    <article
+    <motion.article
       aria-labelledby={`expanded-specimen-${specimen.id}-name`}
+      initial={
+        shouldReduceMotion
+          ? false
+          : {
+              opacity: 0,
+              y: 14,
+              scale: 0.985,
+            }
+      }
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+      }}
+      exit={
+        shouldReduceMotion
+          ? {
+              opacity: 0,
+            }
+          : {
+              opacity: 0,
+              y: 10,
+              scale: 0.985,
+            }
+      }
+      transition={{
+        duration: shouldReduceMotion ? 0.1 : 0.3,
+        ease: shouldReduceMotion
+          ? "easeOut"
+          : [0.22, 1, 0.36, 1],
+      }}
       className="min-w-0"
     >
       <Surface className="overflow-hidden">
@@ -262,6 +295,6 @@ export function ExpandedSpecimenView({
           </div>
         </div>
       </Surface>
-    </article>
+    </motion.article>
   );
 }
