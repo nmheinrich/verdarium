@@ -15,18 +15,21 @@ import { Surface } from "@/components/ui";
 import { CollectionSearch } from "./CollectionSearch";
 import { CollectionSummary } from "./CollectionSummary";
 import { CompactCollectionView } from "./CompactCollectionView";
+import { EmptyCollection } from "./EmptyCollection";
 import { RecentSpecimens } from "./RecentSpecimens";
 
 interface DashboardProps {
   specimens: Specimen[];
   loadError?: CollectionStorageError | null;
   onSpecimenSelect?: (specimen: Specimen) => void;
+  onAddSpecimen?: () => void;
 }
 
 export function Dashboard({
   specimens,
   loadError = null,
   onSpecimenSelect,
+  onAddSpecimen,
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -106,28 +109,9 @@ export function Dashboard({
 
   if (specimens.length === 0) {
     return (
-      <section
-        aria-labelledby="empty-collection-heading"
-        className="mt-8"
-      >
-        <Surface className="p-6 sm:p-8">
-          <p className="metadata-label">
-            Collection register
-          </p>
-
-          <h2
-            id="empty-collection-heading"
-            className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-          >
-            Your botanical archive is empty
-          </h2>
-
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)] sm:text-base sm:leading-7">
-            Specimens will appear here as they are added to your personal
-            herbarium.
-          </p>
-        </Surface>
-      </section>
+      <EmptyCollection
+        onAddSpecimen={onAddSpecimen}
+      />
     );
   }
 

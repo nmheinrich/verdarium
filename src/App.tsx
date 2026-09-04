@@ -148,6 +148,10 @@ export default function App() {
     setDeleteError(null);
   };
 
+  const handleAddSpecimen = () => {
+    setView("add-specimen");
+  };
+
   const handleCancelAddSpecimen = () => {
     setView("collection");
   };
@@ -291,13 +295,12 @@ export default function App() {
         />
       }
       actions={
-        view === "collection" ? (
+        view === "collection" &&
+        collectionState.specimens.length > 0 ? (
           <Button
             size="compact"
             leadingIcon={<Plus size={16} />}
-            onClick={() =>
-              setView("add-specimen")
-            }
+            onClick={handleAddSpecimen}
           >
             Add specimen
           </Button>
@@ -316,6 +319,7 @@ export default function App() {
             specimens={collectionState.specimens}
             loadError={collectionState.error}
             onSpecimenSelect={handleSelectSpecimen}
+            onAddSpecimen={handleAddSpecimen}
           />
         </>
       ) : null}
