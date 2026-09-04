@@ -13,6 +13,7 @@ import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
   EditSpecimenForm,
+  ImportCollectionForm,
   ThemeSelector,
 } from "@/components/forms";
 import {
@@ -131,6 +132,19 @@ export default function App() {
     });
 
     setView("specimen");
+  };
+
+  const handleCollectionImported = (
+    specimens: Specimen[],
+  ) => {
+    setCollectionState({
+      specimens,
+      error: null,
+    });
+
+    setSelectedSpecimenId(null);
+    setIsDeleteConfirming(false);
+    setDeleteError(null);
   };
 
   const handleCancelAddSpecimen = () => {
@@ -462,10 +476,10 @@ export default function App() {
           <PageHeader
             eyebrow="Archive Preferences"
             title="Settings"
-            description="Adjust how Verdarium presents your botanical collection."
+            description="Adjust how Verdarium presents and manages your botanical collection."
           />
 
-          <div className="mt-8 max-w-3xl">
+          <div className="mt-8 max-w-3xl space-y-6">
             <Surface className="p-6 sm:p-8">
               <div className="max-w-2xl">
                 <p className="metadata-label">
@@ -488,6 +502,12 @@ export default function App() {
                   onChange={handleThemeChange}
                 />
               </div>
+            </Surface>
+
+            <Surface className="p-6 sm:p-8">
+              <ImportCollectionForm
+                onImported={handleCollectionImported}
+              />
             </Surface>
           </div>
         </>

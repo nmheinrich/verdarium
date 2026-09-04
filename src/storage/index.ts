@@ -2,6 +2,7 @@ export {
   addSpecimen,
   deleteSpecimen,
   loadCollection,
+  parseCollectionData,
   saveCollection,
   updateSpecimen,
 } from "./collection";
@@ -12,6 +13,14 @@ export type {
   CollectionStorageErrorCode,
   LoadCollectionResult,
 } from "./collection";
+
+export {
+  parseImportedCollection,
+} from "./import";
+
+export type {
+  ImportCollectionParseResult,
+} from "./import";
 
 export {
   readStorageItem,

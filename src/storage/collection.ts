@@ -2,6 +2,7 @@ import {
   COLLECTION_STORAGE_KEY,
   STORAGE_SCHEMA_VERSION,
 } from "@/constants";
+
 import type { Specimen } from "@/types";
 import { validateSpecimen } from "@/validation";
 
@@ -9,6 +10,7 @@ import {
   readStorageItem,
   writeStorageItem,
 } from "./localStorage";
+
 import {
   createEmptyCollectionStorage,
   type CollectionStorageSchema,
@@ -51,11 +53,19 @@ export type CollectionMutationResult =
       error: CollectionStorageError;
     };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function isRecord(
+  value: unknown,
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
 }
 
-function parseStoredCollection(value: string): LoadCollectionResult {
+export function parseCollectionData(
+  value: string,
+): LoadCollectionResult {
   let parsed: unknown;
 
   try {
@@ -66,7 +76,8 @@ function parseStoredCollection(value: string): LoadCollectionResult {
       data: null,
       error: {
         code: "invalid-json",
-        message: "Stored collection data is not valid JSON.",
+        message:
+          "Stored collection data is not valid JSON.",
       },
     };
   }
@@ -77,12 +88,16 @@ function parseStoredCollection(value: string): LoadCollectionResult {
       data: null,
       error: {
         code: "invalid-schema",
-        message: "Stored collection data has an invalid structure.",
+        message:
+          "Stored collection data has an invalid structure.",
       },
     };
   }
 
-  const { version, specimens } = parsed;
+  const {
+    version,
+    specimens,
+  } = parsed;
 
   if (typeof version !== "number") {
     return {
@@ -90,7 +105,8 @@ function parseStoredCollection(value: string): LoadCollectionResult {
       data: null,
       error: {
         code: "invalid-schema",
-        message: "Stored collection data is missing a valid schema version.",
+        message:
+          "Stored collection data is missing a valid schema version.",
       },
     };
   }
@@ -112,7 +128,8 @@ function parseStoredCollection(value: string): LoadCollectionResult {
       data: null,
       error: {
         code: "invalid-schema",
-        message: "Stored collection specimens must be an array.",
+        message:
+          "Stored collection specimens must be an array.",
       },
     };
   }
@@ -121,7 +138,8 @@ function parseStoredCollection(value: string): LoadCollectionResult {
   const ids = new Set<string>();
 
   for (const specimenValue of specimens) {
-    const result = validateSpecimen(specimenValue);
+    const result =
+      validateSpecimen(specimenValue);
 
     if (!result.success) {
       return {
@@ -129,7 +147,8 @@ function parseStoredCollection(value: string): LoadCollectionResult {
         data: null,
         error: {
           code: "invalid-specimen",
-          message: "Stored collection contains an invalid specimen.",
+          message:
+            "Stored collection contains an invalid specimen.",
         },
       };
     }
@@ -205,7 +224,8 @@ function persistCollection(
       data: null,
       error: {
         code: "write-failed",
-        message: "Unable to serialize collection data.",
+        message:
+          "Unable to serialize collection data.",
       },
     };
   }
@@ -221,7 +241,8 @@ function persistCollection(
       data: null,
       error: {
         code:
-          writeResult.error.code === "unavailable"
+          writeResult.error.code ===
+          "unavailable"
             ? "storage-unavailable"
             : "write-failed",
         message: writeResult.error.message,
@@ -235,8 +256,11 @@ function persistCollection(
   };
 }
 
-export function loadCollection(): LoadCollectionResult {
-  const readResult = readStorageItem(COLLECTION_STORAGE_KEY);
+export function loadCollection():
+  LoadCollectionResult {
+  const readResult = readStorageItem(
+    COLLECTION_STORAGE_KEY,
+  );
 
   if (!readResult.success) {
     return {
@@ -250,7 +274,8 @@ export function loadCollection(): LoadCollectionResult {
   }
 
   if (readResult.value === null) {
-    const emptyCollection = createEmptyCollectionStorage();
+    const emptyCollection =
+      createEmptyCollectionStorage();
 
     return {
       success: true,
@@ -258,7 +283,9 @@ export function loadCollection(): LoadCollectionResult {
     };
   }
 
-  return parseStoredCollection(readResult.value);
+  return parseCollectionData(
+    readResult.value,
+  );
 }
 
 export function saveCollection(
@@ -270,7 +297,8 @@ export function saveCollection(
 export function addSpecimen(
   specimen: Specimen,
 ): CollectionMutationResult {
-  const currentCollection = loadCollection();
+  const currentCollection =
+    loadCollection();
 
   if (!currentCollection.success) {
     return currentCollection;
@@ -278,7 +306,8 @@ export function addSpecimen(
 
   if (
     currentCollection.data.some(
-      (existingSpecimen) => existingSpecimen.id === specimen.id,
+      (existingSpecimen) =>
+        existingSpecimen.id === specimen.id,
     )
   ) {
     return {
@@ -300,15 +329,18 @@ export function addSpecimen(
 export function updateSpecimen(
   specimen: Specimen,
 ): CollectionMutationResult {
-  const currentCollection = loadCollection();
+  const currentCollection =
+    loadCollection();
 
   if (!currentCollection.success) {
     return currentCollection;
   }
 
-  const specimenIndex = currentCollection.data.findIndex(
-    (existingSpecimen) => existingSpecimen.id === specimen.id,
-  );
+  const specimenIndex =
+    currentCollection.data.findIndex(
+      (existingSpecimen) =>
+        existingSpecimen.id === specimen.id,
+    );
 
   if (specimenIndex === -1) {
     return {
@@ -321,25 +353,33 @@ export function updateSpecimen(
     };
   }
 
-  const updatedCollection = [...currentCollection.data];
+  const updatedCollection = [
+    ...currentCollection.data,
+  ];
 
-  updatedCollection[specimenIndex] = specimen;
+  updatedCollection[specimenIndex] =
+    specimen;
 
-  return persistCollection(updatedCollection);
+  return persistCollection(
+    updatedCollection,
+  );
 }
 
 export function deleteSpecimen(
   specimenId: string,
 ): CollectionMutationResult {
-  const currentCollection = loadCollection();
+  const currentCollection =
+    loadCollection();
 
   if (!currentCollection.success) {
     return currentCollection;
   }
 
-  const specimenExists = currentCollection.data.some(
-    (specimen) => specimen.id === specimenId,
-  );
+  const specimenExists =
+    currentCollection.data.some(
+      (specimen) =>
+        specimen.id === specimenId,
+    );
 
   if (!specimenExists) {
     return {
@@ -352,9 +392,13 @@ export function deleteSpecimen(
     };
   }
 
-  const updatedCollection = currentCollection.data.filter(
-    (specimen) => specimen.id !== specimenId,
-  );
+  const updatedCollection =
+    currentCollection.data.filter(
+      (specimen) =>
+        specimen.id !== specimenId,
+    );
 
-  return persistCollection(updatedCollection);
+  return persistCollection(
+    updatedCollection,
+  );
 }
