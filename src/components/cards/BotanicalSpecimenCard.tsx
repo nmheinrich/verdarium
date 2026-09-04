@@ -1,7 +1,8 @@
 import { Star } from "lucide-react";
 
-import { REMINDER_STATUS_LABELS } from "@/constants";
+import { BotanicalIllustration } from "@/components/illustrations/BotanicalIllustration";
 import { Badge, Surface } from "@/components/ui";
+import { REMINDER_STATUS_LABELS } from "@/constants";
 import { getReminderStatus } from "@/lib";
 import type { ReminderStatus, Specimen } from "@/types";
 
@@ -44,19 +45,11 @@ export function BotanicalSpecimenCard({
       className="h-full"
     >
       <Surface className="flex h-full flex-col overflow-hidden">
-        <div className="archive-surface specimen-border relative flex min-h-72 items-center justify-center border-x-0 border-t-0 p-8 sm:min-h-80">
-          <div className="flex max-w-xs flex-col items-center text-center">
-            <p className="metadata-label">Botanical plate</p>
-
-            <div
-              aria-hidden="true"
-              className="mt-6 h-32 w-px bg-[var(--color-border-strong)] sm:h-40"
-            />
-
-            <p className="mt-6 max-w-48 text-xs leading-5 text-[var(--color-text-muted)]">
-              Illustration reserved for this specimen
-            </p>
-          </div>
+        <div className="relative min-h-72 sm:min-h-80">
+          <BotanicalIllustration
+            illustrationKey={specimen.illustrationKey}
+            className="absolute inset-0 h-full w-full border-x-0 border-t-0"
+          />
 
           {specimen.isFavorite ? (
             <div className="absolute right-5 top-5 flex items-center gap-1.5 text-[var(--color-botanical)]">

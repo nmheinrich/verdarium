@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
+
 import { Star } from "lucide-react";
 
-import { REMINDER_STATUS_LABELS } from "@/constants";
+import { BotanicalIllustration } from "@/components/illustrations/BotanicalIllustration";
 import { Badge, Surface } from "@/components/ui";
+import { REMINDER_STATUS_LABELS } from "@/constants";
 import { formatDisplayDate, getReminderStatus } from "@/lib";
+
 import type { ReminderStatus, Specimen } from "@/types";
 
 interface ExpandedSpecimenViewProps {
@@ -63,18 +66,11 @@ export function ExpandedSpecimenView({
       <Surface className="overflow-hidden">
         <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
           <div className="relative flex min-h-80 items-center justify-center border-b border-[var(--color-border)] bg-[var(--color-surface)] p-8 lg:min-h-[34rem] lg:border-b-0 lg:border-r">
-            <div className="flex max-w-sm flex-col items-center text-center">
-              <p className="metadata-label">Botanical plate</p>
-
-              <div
-                aria-hidden="true"
-                className="mt-8 h-44 w-px bg-[var(--color-border-strong)] sm:h-52"
-              />
-
-              <p className="mt-8 max-w-56 text-xs leading-5 text-[var(--color-text-muted)]">
-                Illustration reserved for this specimen
-              </p>
-            </div>
+            <BotanicalIllustration
+              illustrationKey={specimen.illustrationKey}
+              presentation="plate"
+              className="w-full max-w-sm"
+            />
 
             {specimen.isFavorite ? (
               <div className="absolute right-6 top-6 text-[var(--color-botanical)]">
@@ -94,7 +90,9 @@ export function ExpandedSpecimenView({
           <div className="flex min-w-0 flex-col p-6 sm:p-8 lg:p-10">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <p className="metadata-label">Specimen record</p>
+                <p className="metadata-label">
+                  Specimen record
+                </p>
 
                 <h2
                   id={`expanded-specimen-${specimen.id}-name`}
@@ -137,7 +135,9 @@ export function ExpandedSpecimenView({
 
             <dl className="mt-8 grid gap-x-8 gap-y-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2">
               <div>
-                <dt className="metadata-label">Genus</dt>
+                <dt className="metadata-label">
+                  Genus
+                </dt>
 
                 <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.genus}
@@ -145,7 +145,9 @@ export function ExpandedSpecimenView({
               </div>
 
               <div>
-                <dt className="metadata-label">Species</dt>
+                <dt className="metadata-label">
+                  Species
+                </dt>
 
                 <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.species}
@@ -154,7 +156,9 @@ export function ExpandedSpecimenView({
 
               {specimen.classification.cultivar ? (
                 <div>
-                  <dt className="metadata-label">Cultivar</dt>
+                  <dt className="metadata-label">
+                    Cultivar
+                  </dt>
 
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                     {specimen.classification.cultivar}
@@ -164,7 +168,9 @@ export function ExpandedSpecimenView({
 
               {location ? (
                 <div>
-                  <dt className="metadata-label">Location</dt>
+                  <dt className="metadata-label">
+                    Location
+                  </dt>
 
                   <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
                     {location}
@@ -174,17 +180,23 @@ export function ExpandedSpecimenView({
 
               {specimen.lightPreference ? (
                 <div>
-                  <dt className="metadata-label">Light</dt>
+                  <dt className="metadata-label">
+                    Light
+                  </dt>
 
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
-                    {formatLightPreference(specimen.lightPreference)}
+                    {formatLightPreference(
+                      specimen.lightPreference,
+                    )}
                   </dd>
                 </div>
               ) : null}
 
               {acquisitionDate ? (
                 <div>
-                  <dt className="metadata-label">Acquired</dt>
+                  <dt className="metadata-label">
+                    Acquired
+                  </dt>
 
                   <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                     {acquisitionDate}
@@ -194,7 +206,9 @@ export function ExpandedSpecimenView({
 
               {specimen.acquisitionSource ? (
                 <div>
-                  <dt className="metadata-label">Source</dt>
+                  <dt className="metadata-label">
+                    Source
+                  </dt>
 
                   <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
                     {specimen.acquisitionSource}
@@ -217,7 +231,10 @@ export function ExpandedSpecimenView({
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   {specimen.tags.map((tag) => (
-                    <Badge key={tag} variant="neutral">
+                    <Badge
+                      key={tag}
+                      variant="neutral"
+                    >
                       {tag}
                     </Badge>
                   ))}

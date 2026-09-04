@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 
+import { BotanicalIllustration } from "@/components/illustrations/BotanicalIllustration";
 import { REMINDER_STATUS_LABELS } from "@/constants";
 import { Surface } from "@/components/ui";
 import { getReminderStatus } from "@/lib";
@@ -33,10 +34,8 @@ function getReminderTextClass(
   switch (status) {
     case "upcoming":
       return "bg-[var(--color-reminder-upcoming)] text-[var(--color-text-secondary)]";
-
     case "due":
       return "bg-[var(--color-reminder-due)] text-[var(--color-text-primary)]";
-
     case "overdue":
       return "bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]";
   }
@@ -51,15 +50,11 @@ export function CompactSpecimenCard({
 
   const content = (
     <Surface className="flex h-full flex-col overflow-hidden">
-      <div className="relative flex min-h-32 items-center justify-center border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-5">
-        <div className="flex flex-col items-center text-center">
-          <p className="metadata-label">Botanical plate</p>
-
-          <div
-            aria-hidden="true"
-            className="mt-4 h-12 w-px bg-[var(--color-border-strong)]"
-          />
-        </div>
+      <div className="relative min-h-32">
+        <BotanicalIllustration
+          illustrationKey={specimen.illustrationKey}
+          className="absolute inset-0 h-full w-full border-x-0 border-t-0 p-3"
+        />
 
         {specimen.isFavorite ? (
           <div className="absolute right-4 top-4 text-[var(--color-botanical)]">

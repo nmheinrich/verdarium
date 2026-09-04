@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 
+import { BotanicalIllustration } from "@/components/illustrations/BotanicalIllustration";
 import { Surface } from "@/components/ui";
 
 interface EmptyCollectionProps {
@@ -56,14 +57,14 @@ export function EmptyCollection({
           </div>
 
           <div className="flex min-h-52 items-center justify-center border-t border-[var(--color-border)] bg-[var(--color-surface)] p-8 lg:border-l lg:border-t-0">
-            <div className="flex flex-col items-center text-center">
+            <div className="flex w-full flex-col items-center text-center">
               <p className="metadata-label">
                 First specimen plate
               </p>
 
-              <div
-                aria-hidden="true"
-                className="mt-6 h-20 w-px bg-[var(--color-border-strong)]"
+              <BotanicalIllustration
+                presentation="card"
+                className="mt-6 w-full max-w-36"
               />
 
               <p className="mt-5 max-w-40 text-xs leading-5 text-[var(--color-text-muted)]">
