@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import type { Specimen } from "@/types";
-
 import { createId } from "@/lib";
 import { addSpecimen } from "@/storage";
 
@@ -77,6 +76,10 @@ function validateRequiredFields(
   return errors;
 }
 
+function getAddSpecimenErrorMessage(): string {
+  return "Verdarium could not save this specimen. Your entered information has been preserved so you can try again.";
+}
+
 export function AddSpecimenForm({
   onCancel,
   onCreated,
@@ -143,6 +146,7 @@ export function AddSpecimenForm({
     }
 
     const room = values.room.trim();
+
     const position = values.position.trim();
 
     if (room || position) {
@@ -184,7 +188,10 @@ export function AddSpecimenForm({
     const result = addSpecimen(specimen);
 
     if (!result.success) {
-      setSubmitError(result.error.message);
+      setSubmitError(
+        getAddSpecimenErrorMessage(),
+      );
+
       setIsSubmitting(false);
       return;
     }

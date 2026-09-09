@@ -26,6 +26,10 @@ function createExportFileName(): string {
   return `verdarium-collection-${year}-${month}-${day}.json`;
 }
 
+function getExportErrorMessage(): string {
+  return "Verdarium could not prepare this archive for export. Your collection has not been changed, so you can try again.";
+}
+
 export function ExportCollectionForm({
   specimens,
 }: ExportCollectionFormProps) {
@@ -43,7 +47,9 @@ export function ExportCollectionForm({
       createCollectionExport(specimens);
 
     if (!result.success) {
-      setErrorMessage(result.error.message);
+      setErrorMessage(
+        getExportErrorMessage(),
+      );
       return;
     }
 

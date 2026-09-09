@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 
-import type { Specimen } from "@/types";
-
 import { updateSpecimen } from "@/storage";
+import type { Specimen } from "@/types";
 
 import {
   SpecimenForm,
@@ -81,6 +80,10 @@ function validateRequiredFields(
   return errors;
 }
 
+function getEditSpecimenErrorMessage(): string {
+  return "Verdarium could not save these changes. Your edits have been preserved so you can try again.";
+}
+
 export function EditSpecimenForm({
   specimen,
   onCancel,
@@ -122,19 +125,15 @@ export function EditSpecimenForm({
 
     const updatedSpecimen: Specimen = {
       ...specimen,
-
       commonName: values.commonName.trim(),
       scientificName: buildScientificName(values),
-
       classification: {
         genus: values.genus.trim(),
         species: values.species.trim(),
       },
-
       healthStatus: values.healthStatus,
       tags: parseTags(values.tags),
       isFavorite: values.isFavorite,
-
       updatedAt: new Date().toISOString(),
     };
 
@@ -199,10 +198,14 @@ export function EditSpecimenForm({
       delete updatedSpecimen.notes;
     }
 
-    const result = updateSpecimen(updatedSpecimen);
+    const result =
+      updateSpecimen(updatedSpecimen);
 
     if (!result.success) {
-      setSubmitError(result.error.message);
+      setSubmitError(
+        getEditSpecimenErrorMessage(),
+      );
+
       setIsSubmitting(false);
       return;
     }

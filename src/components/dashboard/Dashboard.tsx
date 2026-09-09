@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 
-import type { CollectionStorageError } from "@/storage";
-import type { Specimen } from "@/types";
+import { ErrorState, Surface } from "@/components/ui";
 import {
   countActiveSpecimenFilters,
   DEFAULT_SPECIMEN_FILTERS,
@@ -10,7 +9,8 @@ import {
   searchSpecimens,
   sortSpecimens,
 } from "@/lib";
-import { Surface } from "@/components/ui";
+import type { CollectionStorageError } from "@/storage";
+import type { Specimen } from "@/types";
 
 import { CollectionSearch } from "./CollectionSearch";
 import { CollectionSummary } from "./CollectionSummary";
@@ -23,6 +23,39 @@ interface DashboardProps {
   loadError?: CollectionStorageError | null;
   onSpecimenSelect?: (specimen: Specimen) => void;
   onAddSpecimen?: () => void;
+}
+
+function getCollectionLoadErrorDescription(
+  error: CollectionStorageError,
+): string {
+  switch (error.code) {
+    case "storage-unavailable":
+      return "Verdarium cannot access browser storage right now. Your existing archive has not been changed.";
+
+    case "invalid-json":
+      return "The saved botanical archive could not be read safely. Verdarium has left the stored data unchanged.";
+
+    case "invalid-schema":
+      return "The saved archive does not match the collection format Verdarium expects. The stored data has not been changed.";
+
+    case "unsupported-version":
+      return "This botanical archive was created with a version of Verdarium that this build cannot open safely.";
+
+    case "invalid-specimen":
+      return "One or more specimen records in the saved archive could not be validated. Verdarium has left the stored data unchanged.";
+
+    case "duplicate-id":
+      return "The saved archive contains conflicting specimen records and could not be opened safely. The stored data has not been changed.";
+
+    case "specimen-not-found":
+      return "Verdarium could not locate a botanical record expected in the saved archive.";
+
+    case "write-failed":
+      return "Verdarium encountered a storage problem while opening the botanical archive. Your existing data has not been intentionally changed.";
+
+    default:
+      return "Verdarium was unable to safely open the botanical archive. Your existing stored collection has been left unchanged.";
+  }
 }
 
 export function Dashboard({
@@ -82,27 +115,13 @@ export function Dashboard({
         aria-labelledby="collection-load-error-heading"
         className="mt-8"
       >
-        <Surface variant="subtle" className="p-6 sm:p-8">
-          <p className="metadata-label">
-            Collection unavailable
-          </p>
-
-          <h2
-            id="collection-load-error-heading"
-            className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-          >
-            The botanical archive could not be loaded
-          </h2>
-
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)] sm:text-base sm:leading-7">
-            Your stored collection remains unchanged. Verdarium was unable to
-            safely read the existing archive data.
-          </p>
-
-          <p className="mt-5 text-sm leading-6 text-[var(--color-text-muted)]">
-            {loadError.message}
-          </p>
-        </Surface>
+        <ErrorState
+          eyebrow="Archive unavailable"
+          title="The botanical archive could not be loaded"
+          description={getCollectionLoadErrorDescription(
+            loadError,
+          )}
+        />
       </section>
     );
   }
@@ -150,7 +169,10 @@ export function Dashboard({
           <section
             aria-labelledby="collection-tools-empty-heading"
           >
-            <Surface variant="subtle" className="p-6 sm:p-8">
+            <Surface
+              variant="subtle"
+              className="p-6 sm:p-8"
+            >
               <p className="metadata-label">
                 Collection index
               </p>
@@ -163,7 +185,8 @@ export function Dashboard({
               </h2>
 
               <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)]">
-                Adjust the search or collection filters to broaden the archive
+                Adjust the search or collection
+                filters to broaden the archive
                 results.
               </p>
             </Surface>

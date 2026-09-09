@@ -1,0 +1,44 @@
+import type { ReactNode } from "react";
+
+import { Surface } from "@/components/ui/Surface";
+
+interface ErrorStateProps {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  actions?: ReactNode;
+}
+
+export function ErrorState({
+  eyebrow = "Archive unavailable",
+  title,
+  description,
+  actions,
+}: ErrorStateProps) {
+  return (
+    <Surface
+      variant="subtle"
+      className="px-6 py-8 sm:px-8 sm:py-10"
+    >
+      <div className="max-w-2xl">
+        <p className="metadata-label">
+          {eyebrow}
+        </p>
+
+        <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)] sm:text-3xl">
+          {title}
+        </h2>
+
+        <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+          {description}
+        </p>
+
+        {actions ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {actions}
+          </div>
+        ) : null}
+      </div>
+    </Surface>
+  );
+}

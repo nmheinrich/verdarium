@@ -19,6 +19,14 @@ interface PendingImport {
   specimens: Specimen[];
 }
 
+function getInvalidArchiveMessage(): string {
+  return "Verdarium could not validate the selected file as a compatible botanical archive. Your current collection has not been changed.";
+}
+
+function getImportSaveErrorMessage(): string {
+  return "The archive was validated, but Verdarium could not save it to this browser. Your current collection remains unchanged.";
+}
+
 export function ImportCollectionForm({
   onImported,
 }: ImportCollectionFormProps) {
@@ -53,7 +61,7 @@ export function ImportCollectionForm({
       fileContents = await file.text();
     } catch {
       setErrorMessage(
-        "Verdarium could not read the selected file.",
+        "Verdarium could not read the selected file. Your current collection has not been changed.",
       );
 
       return;
@@ -63,7 +71,10 @@ export function ImportCollectionForm({
       parseImportedCollection(fileContents);
 
     if (!result.success) {
-      setErrorMessage(result.error.message);
+      setErrorMessage(
+        getInvalidArchiveMessage(),
+      );
+
       return;
     }
 
@@ -92,7 +103,10 @@ export function ImportCollectionForm({
     );
 
     if (!result.success) {
-      setErrorMessage(result.error.message);
+      setErrorMessage(
+        getImportSaveErrorMessage(),
+      );
+
       setIsImporting(false);
       return;
     }

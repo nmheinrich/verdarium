@@ -30,6 +30,7 @@ import {
 } from "@/components/layout";
 import {
   Button,
+  ErrorState,
   IconButton,
   Surface,
 } from "@/components/ui";
@@ -234,7 +235,9 @@ export default function App() {
     );
 
     if (!result.success) {
-      setDeleteError(result.error.message);
+      setDeleteError(
+        "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
+      );
       return;
     }
 
@@ -288,17 +291,30 @@ export default function App() {
         <PageHeader
           eyebrow="Personal Herbarium"
           title="Collection"
-          description="The selected botanical record is no longer available."
-          actions={
-            <Button
-              variant="secondary"
-              leadingIcon={<ArrowLeft size={16} />}
-              onClick={handleReturnToCollection}
-            >
-              Back to collection
-            </Button>
-          }
+          description="A quiet archive for documenting, studying, and caring for your botanical specimens."
         />
+
+        <div className="mt-8">
+          <ErrorState
+            eyebrow="Record unavailable"
+            title="This botanical record is no longer available"
+            description="Verdarium could not locate the selected specimen in the current collection. It may have been removed or replaced by a recently imported archive."
+            actions={
+              <Button
+                variant="secondary"
+                leadingIcon={
+                  <ArrowLeft
+                    size={16}
+                    aria-hidden="true"
+                  />
+                }
+                onClick={handleReturnToCollection}
+              >
+                Back to collection
+              </Button>
+            }
+          />
+        </div>
       </AppShell>
     );
   }
@@ -416,7 +432,12 @@ export default function App() {
               actions={
                 <Button
                   variant="secondary"
-                  leadingIcon={<ArrowLeft size={16} />}
+                  leadingIcon={
+                    <ArrowLeft
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  }
                   onClick={handleReturnToCollection}
                 >
                   Back to collection
@@ -513,7 +534,12 @@ export default function App() {
                     <Button
                       size="compact"
                       variant="secondary"
-                      leadingIcon={<Pencil size={15} />}
+                      leadingIcon={
+                        <Pencil
+                          size={15}
+                          aria-hidden="true"
+                        />
+                      }
                       onClick={handleEditSpecimen}
                     >
                       Edit specimen
@@ -522,7 +548,12 @@ export default function App() {
                     <Button
                       size="compact"
                       variant="secondary"
-                      leadingIcon={<Trash2 size={15} />}
+                      leadingIcon={
+                        <Trash2
+                          size={15}
+                          aria-hidden="true"
+                        />
+                      }
                       className="border-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]"
                       onClick={handleRequestDelete}
                     >
@@ -545,7 +576,12 @@ export default function App() {
             actions={
               <Button
                 variant="secondary"
-                leadingIcon={<ArrowLeft size={16} />}
+                leadingIcon={
+                  <ArrowLeft
+                    size={16}
+                    aria-hidden="true"
+                  />
+                }
                 onClick={handleCancelAddSpecimen}
               >
                 Back to collection
@@ -572,7 +608,12 @@ export default function App() {
             actions={
               <Button
                 variant="secondary"
-                leadingIcon={<ArrowLeft size={16} />}
+                leadingIcon={
+                  <ArrowLeft
+                    size={16}
+                    aria-hidden="true"
+                  />
+                }
                 onClick={handleCancelEditSpecimen}
               >
                 Back to specimen
