@@ -1,8 +1,10 @@
 import { REMINDER_STATUS_LABELS } from "@/constants";
+
 import type {
   SpecimenFilters,
   SpecimenSortOption,
 } from "@/lib";
+
 import type {
   ReminderStatus,
   SpecimenHealthStatus,
@@ -72,6 +74,9 @@ const SORT_OPTIONS: Array<{
   },
 ];
 
+const selectClassName =
+  "mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] focus-visible:border-[var(--color-botanical)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]";
+
 export function CollectionFilters({
   filters,
   sortOption,
@@ -99,7 +104,7 @@ export function CollectionFilters({
                   .value as SpecimenFilters["healthStatus"],
             })
           }
-          className="mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-botanical)]"
+          className={selectClassName}
         >
           {HEALTH_STATUS_OPTIONS.map((option) => (
             <option
@@ -131,7 +136,7 @@ export function CollectionFilters({
                   .value as SpecimenFilters["reminderStatus"],
             })
           }
-          className="mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-botanical)]"
+          className={selectClassName}
         >
           {REMINDER_STATUS_OPTIONS.map((option) => (
             <option
@@ -154,7 +159,11 @@ export function CollectionFilters({
 
         <select
           id="collection-favorites-filter"
-          value={filters.favoritesOnly ? "favorites" : "all"}
+          value={
+            filters.favoritesOnly
+              ? "favorites"
+              : "all"
+          }
           onChange={(event) =>
             onChange({
               ...filters,
@@ -162,9 +171,12 @@ export function CollectionFilters({
                 event.target.value === "favorites",
             })
           }
-          className="mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-botanical)]"
+          className={selectClassName}
         >
-          <option value="all">All</option>
+          <option value="all">
+            All
+          </option>
+
           <option value="favorites">
             Favorites only
           </option>
@@ -187,7 +199,7 @@ export function CollectionFilters({
               event.target.value as SpecimenSortOption,
             )
           }
-          className="mt-2 w-full border-0 border-b border-[var(--color-border-strong)] bg-transparent px-0 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-botanical)]"
+          className={selectClassName}
         >
           {SORT_OPTIONS.map((option) => (
             <option

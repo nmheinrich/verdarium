@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   ChevronRight,
   Search,
@@ -34,32 +35,35 @@ export function CollectionSearch({
 
   return (
     <section aria-labelledby="collection-tools-heading">
-      <button
-        type="button"
-        className="group flex items-center gap-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
-        aria-expanded={isExpanded}
-        aria-controls="collection-tools-panel"
-        onClick={() =>
-          setIsExpanded((currentValue) => !currentValue)
-        }
-      >
-        <ChevronRight
-          aria-hidden="true"
-          size={14}
-          strokeWidth={1.75}
-          className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-[var(--transition-base)] ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-
-        <span
-          id="collection-tools-heading"
-          className="metadata-label transition-colors duration-[var(--transition-base)] group-hover:text-[var(--color-text-primary)]"
+      <h2 id="collection-tools-heading">
+        <button
+          type="button"
+          className="group flex items-center gap-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
+          aria-expanded={isExpanded}
+          aria-controls="collection-tools-panel"
+          onClick={() =>
+            setIsExpanded(
+              (currentValue) => !currentValue,
+            )
+          }
         >
-          Filter and Search
-          {activeCount > 0 ? ` · ${activeCount} active` : ""}
-        </span>
-      </button>
+          <ChevronRight
+            aria-hidden="true"
+            size={14}
+            strokeWidth={1.75}
+            className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-[var(--transition-base)] ${
+              isExpanded ? "rotate-90" : ""
+            }`}
+          />
+
+          <span className="metadata-label transition-colors duration-[var(--transition-base)] group-hover:text-[var(--color-text-primary)]">
+            Filter and Search
+            {activeCount > 0
+              ? ` · ${activeCount} active`
+              : ""}
+          </span>
+        </button>
+      </h2>
 
       {isExpanded ? (
         <div
@@ -67,7 +71,7 @@ export function CollectionSearch({
           className="mt-5 max-w-5xl"
         >
           <div className="max-w-xl">
-            <div className="flex items-center gap-2 pb-1.5">
+            <div className="flex items-center gap-2 rounded-[var(--radius-sm)] pb-1.5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--color-focus)]">
               <Search
                 aria-hidden="true"
                 size={12}

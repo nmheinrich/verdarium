@@ -1,4 +1,8 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   AnimatePresence,
@@ -109,6 +113,9 @@ export default function App() {
     setDeleteError,
   ] = useState<string | null>(null);
 
+  const returnFocusSpecimenIdRef =
+    useRef<string | null>(null);
+
   const selectedSpecimen =
     selectedSpecimenId === null
       ? null
@@ -124,6 +131,24 @@ export default function App() {
 
   const specimenCount =
     collectionState.specimens.length;
+
+  useEffect(() => {
+    if (!isDeleteConfirming) {
+      return;
+    }
+
+    const animationFrame = requestAnimationFrame(() => {
+      document
+        .getElementById(
+          "delete-specimen-confirmation-heading",
+        )
+        ?.focus();
+    });
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [isDeleteConfirming]);
 
   const handleSpecimenCreated = (
     specimens: Specimen[],
@@ -158,9 +183,11 @@ export default function App() {
     setSelectedSpecimenId(null);
     setIsDeleteConfirming(false);
     setDeleteError(null);
+    returnFocusSpecimenIdRef.current = null;
   };
 
   const handleAddSpecimen = () => {
+    returnFocusSpecimenIdRef.current = null;
     setView("add-specimen");
   };
 
@@ -183,10 +210,17 @@ export default function App() {
     setSelectedSpecimenId(specimen.id);
     setIsDeleteConfirming(false);
     setDeleteError(null);
+    returnFocusSpecimenIdRef.current =
+      specimen.id;
     setView("specimen");
   };
 
   const handleReturnToCollection = () => {
+    if (selectedSpecimen) {
+      returnFocusSpecimenIdRef.current =
+        selectedSpecimen.id;
+    }
+
     setIsDeleteConfirming(false);
     setDeleteError(null);
     setView("collection");
@@ -220,6 +254,12 @@ export default function App() {
   const handleCancelDelete = () => {
     setDeleteError(null);
     setIsDeleteConfirming(false);
+
+    requestAnimationFrame(() => {
+      document
+        .getElementById("delete-specimen-button")
+        ?.focus();
+    });
   };
 
   const handleConfirmDelete = () => {
@@ -246,6 +286,7 @@ export default function App() {
       error: null,
     });
 
+    returnFocusSpecimenIdRef.current = null;
     setSelectedSpecimenId(null);
     setIsDeleteConfirming(false);
     setView("collection");
@@ -267,9 +308,47 @@ export default function App() {
     }
 
     if (value === "settings") {
+      returnFocusSpecimenIdRef.current = null;
       setIsDeleteConfirming(false);
       setDeleteError(null);
       setView("settings");
+    }
+  };
+
+  const handleSpecimenViewAnimationComplete = () => {
+    if (
+      view !== "specimen" ||
+      !selectedSpecimen
+    ) {
+      return;
+    }
+
+    document
+      .getElementById(
+        `expanded-specimen-${selectedSpecimen.id}-name`,
+      )
+      ?.focus();
+  };
+
+  const handleCollectionViewAnimationComplete = () => {
+    if (view !== "collection") {
+      return;
+    }
+
+    const specimenId =
+      returnFocusSpecimenIdRef.current;
+
+    if (!specimenId) {
+      return;
+    }
+
+    const specimenButton = document.getElementById(
+      `compact-specimen-${specimenId}-open`,
+    );
+
+    if (specimenButton) {
+      specimenButton.focus();
+      returnFocusSpecimenIdRef.current = null;
     }
   };
 
@@ -367,6 +446,9 @@ export default function App() {
                 ? "easeOut"
                 : [0.22, 1, 0.36, 1],
             }}
+            onAnimationComplete={
+              handleCollectionViewAnimationComplete
+            }
           >
             <PageHeader
               eyebrow="Personal Herbarium"
@@ -424,6 +506,9 @@ export default function App() {
                 : 0.24,
               ease: "easeOut",
             }}
+            onAnimationComplete={
+              handleSpecimenViewAnimationComplete
+            }
           >
             <PageHeader
               eyebrow="Specimen Record"
@@ -485,7 +570,11 @@ export default function App() {
                             Permanent removal
                           </p>
 
-                          <h2 className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+                          <h2
+                            id="delete-specimen-confirmation-heading"
+                            tabIndex={-1}
+                            className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+                          >
                             Remove this specimen?
                           </h2>
 
@@ -546,6 +635,7 @@ export default function App() {
                     </Button>
 
                     <Button
+                      id="delete-specimen-button"
                       size="compact"
                       variant="secondary"
                       leadingIcon={

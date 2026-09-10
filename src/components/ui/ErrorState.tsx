@@ -4,6 +4,7 @@ import { Surface } from "@/components/ui/Surface";
 
 interface ErrorStateProps {
   eyebrow?: string;
+  titleId?: string;
   title: string;
   description: string;
   actions?: ReactNode;
@@ -11,6 +12,7 @@ interface ErrorStateProps {
 
 export function ErrorState({
   eyebrow = "Archive unavailable",
+  titleId,
   title,
   description,
   actions,
@@ -25,7 +27,10 @@ export function ErrorState({
           {eyebrow}
         </p>
 
-        <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)] sm:text-3xl">
+        <h2
+          id={titleId}
+          className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)] sm:text-3xl"
+        >
           {title}
         </h2>
 

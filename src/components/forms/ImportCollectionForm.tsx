@@ -1,13 +1,19 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   Button,
   Surface,
 } from "@/components/ui";
+
 import {
   parseImportedCollection,
   saveCollection,
 } from "@/storage";
+
 import type { Specimen } from "@/types";
 
 interface ImportCollectionFormProps {
@@ -42,6 +48,20 @@ export function ImportCollectionForm({
   const [isImporting, setIsImporting] =
     useState(false);
 
+  const fileInputRef =
+    useRef<HTMLInputElement>(null);
+
+  const confirmationHeadingRef =
+    useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!pendingImport) {
+      return;
+    }
+
+    confirmationHeadingRef.current?.focus();
+  }, [pendingImport]);
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -63,7 +83,6 @@ export function ImportCollectionForm({
       setErrorMessage(
         "Verdarium could not read the selected file. Your current collection has not been changed.",
       );
-
       return;
     }
 
@@ -74,7 +93,6 @@ export function ImportCollectionForm({
       setErrorMessage(
         getInvalidArchiveMessage(),
       );
-
       return;
     }
 
@@ -87,6 +105,10 @@ export function ImportCollectionForm({
   const handleCancelImport = () => {
     setPendingImport(null);
     setErrorMessage(null);
+
+    requestAnimationFrame(() => {
+      fileInputRef.current?.focus();
+    });
   };
 
   const handleConfirmImport = () => {
@@ -106,7 +128,6 @@ export function ImportCollectionForm({
       setErrorMessage(
         getImportSaveErrorMessage(),
       );
-
       setIsImporting(false);
       return;
     }
@@ -137,11 +158,13 @@ export function ImportCollectionForm({
           Import archive
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
-          Select a Verdarium JSON file to
-          replace the current botanical archive.
-          The file is validated before anything
-          is written.
+        <p
+          id="import-collection-description"
+          className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]"
+        >
+          Select a Verdarium JSON file to replace
+          the current botanical archive. The file is
+          validated before anything is written.
         </p>
       </div>
 
@@ -154,11 +177,13 @@ export function ImportCollectionForm({
         </label>
 
         <input
+          ref={fileInputRef}
           id="collection-import-file"
           type="file"
           accept="application/json,.json"
+          aria-describedby="import-collection-description"
           onChange={handleFileChange}
-          className="mt-3 block w-full text-sm text-[var(--color-text-secondary)] file:mr-4 file:rounded-[var(--radius-sm)] file:border file:border-[var(--color-border-strong)] file:bg-[var(--color-surface)] file:px-3 file:py-2 file:text-xs file:font-medium file:text-[var(--color-text-primary)] hover:file:border-[var(--color-botanical-muted)]"
+          className="mt-3 block w-full rounded-[var(--radius-sm)] text-sm text-[var(--color-text-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] file:mr-4 file:rounded-[var(--radius-sm)] file:border file:border-[var(--color-border-strong)] file:bg-[var(--color-surface)] file:px-3 file:py-2 file:text-xs file:font-medium file:text-[var(--color-text-primary)] hover:file:border-[var(--color-botanical-muted)]"
         />
       </div>
 
@@ -184,12 +209,18 @@ export function ImportCollectionForm({
         <Surface
           variant="subtle"
           className="mt-6 p-5"
+          aria-labelledby="import-confirmation-heading"
         >
           <p className="metadata-label">
             Import ready
           </p>
 
-          <h4 className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+          <h4
+            ref={confirmationHeadingRef}
+            id="import-confirmation-heading"
+            tabIndex={-1}
+            className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+          >
             Replace the current collection?
           </h4>
 

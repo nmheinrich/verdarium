@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { ErrorState, Surface } from "@/components/ui";
+
 import {
   countActiveSpecimenFilters,
   DEFAULT_SPECIMEN_FILTERS,
@@ -9,6 +10,7 @@ import {
   searchSpecimens,
   sortSpecimens,
 } from "@/lib";
+
 import type { CollectionStorageError } from "@/storage";
 import type { Specimen } from "@/types";
 
@@ -117,6 +119,7 @@ export function Dashboard({
       >
         <ErrorState
           eyebrow="Archive unavailable"
+          titleId="collection-load-error-heading"
           title="The botanical archive could not be loaded"
           description={getCollectionLoadErrorDescription(
             loadError,

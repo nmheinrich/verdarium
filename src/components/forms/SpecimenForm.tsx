@@ -70,7 +70,9 @@ export function SpecimenForm({
     <form onSubmit={onSubmit} noValidate>
       <Surface className="p-6 sm:p-8">
         <div className="max-w-2xl">
-          <p className="metadata-label">Specimen intake</p>
+          <p className="metadata-label">
+            Specimen intake
+          </p>
 
           <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
             Botanical identity
@@ -83,11 +85,14 @@ export function SpecimenForm({
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="common-name">Common name</Label>
+            <Label htmlFor="common-name">
+              Common name
+            </Label>
 
             <Input
               id="common-name"
               value={values.commonName}
+              required
               invalid={Boolean(errors.commonName)}
               aria-describedby={
                 errors.commonName
@@ -113,7 +118,9 @@ export function SpecimenForm({
           </div>
 
           <div>
-            <Label htmlFor="family">Family</Label>
+            <Label htmlFor="family">
+              Family
+            </Label>
 
             <Input
               id="family"
@@ -128,7 +135,9 @@ export function SpecimenForm({
           </div>
 
           <div>
-            <Label htmlFor="cultivar">Cultivar</Label>
+            <Label htmlFor="cultivar">
+              Cultivar
+            </Label>
 
             <Input
               id="cultivar"
@@ -143,11 +152,14 @@ export function SpecimenForm({
           </div>
 
           <div>
-            <Label htmlFor="genus">Genus</Label>
+            <Label htmlFor="genus">
+              Genus
+            </Label>
 
             <Input
               id="genus"
               value={values.genus}
+              required
               invalid={Boolean(errors.genus)}
               aria-describedby={
                 errors.genus
@@ -173,11 +185,14 @@ export function SpecimenForm({
           </div>
 
           <div>
-            <Label htmlFor="species">Species</Label>
+            <Label htmlFor="species">
+              Species
+            </Label>
 
             <Input
               id="species"
               value={values.species}
+              required
               invalid={Boolean(errors.species)}
               aria-describedby={
                 errors.species
@@ -217,7 +232,9 @@ export function SpecimenForm({
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div>
-            <Label htmlFor="room">Room</Label>
+            <Label htmlFor="room">
+              Room
+            </Label>
 
             <Input
               id="room"
@@ -232,7 +249,9 @@ export function SpecimenForm({
           </div>
 
           <div>
-            <Label htmlFor="position">Position</Label>
+            <Label htmlFor="position">
+              Position
+            </Label>
 
             <Input
               id="position"
@@ -262,10 +281,22 @@ export function SpecimenForm({
               }
               className="min-h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)] focus-visible:border-[var(--color-focus)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
-              <option value="unknown">Unknown</option>
-              <option value="thriving">Thriving</option>
-              <option value="stable">Stable</option>
-              <option value="watch">Watch</option>
+              <option value="unknown">
+                Unknown
+              </option>
+
+              <option value="thriving">
+                Thriving
+              </option>
+
+              <option value="stable">
+                Stable
+              </option>
+
+              <option value="watch">
+                Watch
+              </option>
+
               <option value="recovering">
                 Recovering
               </option>
@@ -292,12 +323,23 @@ export function SpecimenForm({
               <option value="">
                 Not recorded
               </option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
+
+              <option value="low">
+                Low
+              </option>
+
+              <option value="medium">
+                Medium
+              </option>
+
               <option value="bright-indirect">
                 Bright indirect
               </option>
-              <option value="direct">Direct</option>
+
+              <option value="direct">
+                Direct
+              </option>
+
               <option value="unknown">
                 Unknown
               </option>
@@ -354,12 +396,15 @@ export function SpecimenForm({
           </div>
 
           <div className="sm:col-span-2">
-            <Label htmlFor="tags">Tags</Label>
+            <Label htmlFor="tags">
+              Tags
+            </Label>
 
             <Input
               id="tags"
               value={values.tags}
               placeholder="aroid, tropical, indoor"
+              aria-describedby="tags-help"
               onChange={(event) =>
                 updateField(
                   "tags",
@@ -368,13 +413,18 @@ export function SpecimenForm({
               }
             />
 
-            <p className="mt-2 text-xs leading-5 text-[var(--color-text-muted)]">
+            <p
+              id="tags-help"
+              className="mt-2 text-xs leading-5 text-[var(--color-text-muted)]"
+            >
               Separate tags with commas.
             </p>
           </div>
 
           <div className="sm:col-span-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">
+              Notes
+            </Label>
 
             <textarea
               id="notes"
@@ -391,7 +441,7 @@ export function SpecimenForm({
           </div>
 
           <div className="sm:col-span-2">
-            <label className="flex items-center gap-3 text-sm text-[var(--color-text-secondary)]">
+            <label className="inline-flex items-center gap-3 text-sm text-[var(--color-text-secondary)]">
               <input
                 type="checkbox"
                 checked={values.isFavorite}
@@ -401,9 +451,12 @@ export function SpecimenForm({
                     event.target.checked,
                   )
                 }
+                className="size-4 rounded border-[var(--color-border-strong)] accent-[var(--color-botanical)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
               />
 
-              Mark as favorite
+              <span>
+                Mark as favorite
+              </span>
             </label>
           </div>
         </div>

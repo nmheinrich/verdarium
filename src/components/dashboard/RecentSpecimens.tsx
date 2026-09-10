@@ -24,7 +24,9 @@ export function RecentSpecimens({
     <section aria-labelledby="recent-specimens-heading">
       <Surface className="p-6 sm:p-8">
         <div className="max-w-2xl">
-          <p className="metadata-label">Archive index</p>
+          <p className="metadata-label">
+            Archive index
+          </p>
 
           <h2
             id="recent-specimens-heading"
@@ -41,7 +43,8 @@ export function RecentSpecimens({
         {recentSpecimens.length > 0 ? (
           <ul className="mt-8 divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
             {recentSpecimens.map((specimen) => {
-              const updatedDate = formatDisplayDate(specimen.updatedAt);
+              const updatedDate =
+                formatDisplayDate(specimen.updatedAt);
 
               const content = (
                 <div className="grid w-full gap-3 text-left sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
@@ -56,7 +59,9 @@ export function RecentSpecimens({
                   </div>
 
                   <div className="sm:text-right">
-                    <p className="metadata-label">Last revised</p>
+                    <p className="metadata-label">
+                      Last revised
+                    </p>
 
                     <p className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
                       {updatedDate ?? "Date unavailable"}
@@ -69,6 +74,7 @@ export function RecentSpecimens({
                 <li key={specimen.id}>
                   {onSpecimenSelect ? (
                     <button
+                      id={`compact-specimen-${specimen.id}-open`}
                       type="button"
                       className="group w-full py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
                       onClick={() =>

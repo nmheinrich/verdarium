@@ -51,7 +51,6 @@ export function ExpandedSpecimenView({
   actions,
 }: ExpandedSpecimenViewProps) {
   const shouldReduceMotion = useReducedMotion();
-
   const location = formatLocation(specimen);
 
   const acquisitionDate = specimen.acquisitionDate
@@ -60,9 +59,12 @@ export function ExpandedSpecimenView({
 
   const reminderStatus = getReminderStatus(specimen.reminder);
 
+  const headingId =
+    `expanded-specimen-${specimen.id}-name`;
+
   return (
     <motion.article
-      aria-labelledby={`expanded-specimen-${specimen.id}-name`}
+      aria-labelledby={headingId}
       initial={
         shouldReduceMotion
           ? false
@@ -128,7 +130,8 @@ export function ExpandedSpecimenView({
                 </p>
 
                 <h2
-                  id={`expanded-specimen-${specimen.id}-name`}
+                  id={headingId}
+                  tabIndex={-1}
                   className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
                 >
                   {specimen.commonName}
@@ -159,7 +162,9 @@ export function ExpandedSpecimenView({
 
               {reminderStatus !== "none" ? (
                 <Badge
-                  variant={getReminderBadgeVariant(reminderStatus)}
+                  variant={getReminderBadgeVariant(
+                    reminderStatus,
+                  )}
                 >
                   {REMINDER_STATUS_LABELS[reminderStatus]}
                 </Badge>
