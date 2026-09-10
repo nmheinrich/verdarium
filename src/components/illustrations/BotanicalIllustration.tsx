@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { Leaf } from "lucide-react";
 
 import { getBotanicalIllustration } from "../../constants/illustrations";
@@ -15,11 +16,15 @@ export function BotanicalIllustration({
   presentation = "card",
   className,
 }: BotanicalIllustrationProps) {
-  const illustration = getBotanicalIllustration(illustrationKey);
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const illustration =
+    getBotanicalIllustration(illustrationKey);
+
+  const [failedSrc, setFailedSrc] =
+    useState<string | null>(null);
 
   const canRenderIllustration =
-    illustration !== undefined && failedSrc !== illustration.src;
+    illustration !== undefined &&
+    failedSrc !== illustration.src;
 
   return (
     <div
@@ -36,15 +41,25 @@ export function BotanicalIllustration({
         <img
           src={illustration.src}
           alt=""
+          loading={
+            presentation === "card"
+              ? "lazy"
+              : "eager"
+          }
+          decoding="async"
           className="h-full w-full object-contain"
           draggable={false}
-          onError={() => setFailedSrc(illustration.src)}
+          onError={() =>
+            setFailedSrc(illustration.src)
+          }
         />
       ) : (
         <Leaf
           className={cn(
             "text-muted",
-            presentation === "card" ? "h-8 w-8" : "h-12 w-12",
+            presentation === "card"
+              ? "h-8 w-8"
+              : "h-12 w-12",
           )}
           strokeWidth={1.25}
           aria-hidden="true"

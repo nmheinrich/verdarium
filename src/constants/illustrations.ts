@@ -1,8 +1,8 @@
-import fernWatercolor from "../assets/illustrations/fern-watercolor.png";
-import monsteraWatercolor from "../assets/illustrations/monstera-watercolor.png";
-import palmateWatercolor from "../assets/illustrations/palmate-watercolor.png";
-import succulentWatercolor from "../assets/illustrations/succulent-watercolor.png";
-import vineWatercolor from "../assets/illustrations/vine-watercolor.png";
+import fernWatercolor from "../assets/illustrations/fern-watercolor.webp";
+import monsteraWatercolor from "../assets/illustrations/monstera-watercolor.webp";
+import palmateWatercolor from "../assets/illustrations/palmate-watercolor.webp";
+import succulentWatercolor from "../assets/illustrations/succulent-watercolor.webp";
+import vineWatercolor from "../assets/illustrations/vine-watercolor.webp";
 
 export interface BotanicalIllustrationDefinition {
   key: string;
