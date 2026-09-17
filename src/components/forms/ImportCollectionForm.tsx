@@ -62,6 +62,12 @@ export function ImportCollectionForm({
     confirmationHeadingRef.current?.focus();
   }, [pendingImport]);
 
+  const clearFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -83,6 +89,7 @@ export function ImportCollectionForm({
       setErrorMessage(
         "Verdarium could not read the selected file. Your current collection has not been changed.",
       );
+      clearFileInput();
       return;
     }
 
@@ -93,6 +100,7 @@ export function ImportCollectionForm({
       setErrorMessage(
         getInvalidArchiveMessage(),
       );
+      clearFileInput();
       return;
     }
 
@@ -105,6 +113,7 @@ export function ImportCollectionForm({
   const handleCancelImport = () => {
     setPendingImport(null);
     setErrorMessage(null);
+    clearFileInput();
 
     requestAnimationFrame(() => {
       fileInputRef.current?.focus();
@@ -144,6 +153,7 @@ export function ImportCollectionForm({
 
     setPendingImport(null);
     setIsImporting(false);
+    clearFileInput();
   };
 
   return (

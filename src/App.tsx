@@ -54,7 +54,6 @@ import type {
 
 const navigationItems = [
   { label: "Collection", value: "collection" },
-  { label: "Reminders", value: "reminders" },
   { label: "Settings", value: "settings" },
 ];
 

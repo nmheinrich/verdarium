@@ -48,7 +48,6 @@ export function CompactSpecimenCard({
   onSelect,
 }: CompactSpecimenCardProps) {
   const location = formatLocation(specimen);
-
   const reminderStatus =
     getReminderStatus(specimen.reminder);
 
@@ -58,9 +57,9 @@ export function CompactSpecimenCard({
   return (
     <article
       aria-labelledby={headingId}
-      className="relative h-full"
+      className="group relative h-full"
     >
-      <Surface className="flex h-full flex-col overflow-hidden">
+      <Surface className="flex h-full flex-col overflow-hidden transition-[border-color] duration-[var(--transition-base)] ease-[var(--ease-standard)] group-hover:border-[var(--color-border-strong)]">
         <div className="relative min-h-32">
           <BotanicalIllustration
             illustrationKey={specimen.illustrationKey}
@@ -154,7 +153,7 @@ export function CompactSpecimenCard({
           type="button"
           aria-label={`Open ${specimen.commonName} specimen record`}
           onClick={() => onSelect(specimen)}
-          className="absolute inset-0 rounded-[var(--radius-md)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
+          className="absolute inset-0 cursor-pointer rounded-[var(--radius-md)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]"
         />
       ) : null}
     </article>

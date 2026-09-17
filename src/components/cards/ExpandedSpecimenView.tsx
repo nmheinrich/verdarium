@@ -57,7 +57,8 @@ export function ExpandedSpecimenView({
     ? formatDisplayDate(specimen.acquisitionDate)
     : null;
 
-  const reminderStatus = getReminderStatus(specimen.reminder);
+  const reminderStatus =
+    getReminderStatus(specimen.reminder);
 
   const headingId =
     `expanded-specimen-${specimen.id}-name`;
@@ -132,12 +133,12 @@ export function ExpandedSpecimenView({
                 <h2
                   id={headingId}
                   tabIndex={-1}
-                  className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
+                  className="mt-3 break-words font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
                 >
                   {specimen.commonName}
                 </h2>
 
-                <p className="scientific-name mt-2 text-xl leading-8 text-[var(--color-text-secondary)]">
+                <p className="scientific-name mt-2 break-words text-xl leading-8 text-[var(--color-text-secondary)]">
                   {specimen.scientificName}
                 </p>
               </div>
@@ -177,7 +178,7 @@ export function ExpandedSpecimenView({
                   Genus
                 </dt>
 
-                <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
+                <dd className="scientific-name mt-1.5 break-words text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.genus}
                 </dd>
               </div>
@@ -187,7 +188,7 @@ export function ExpandedSpecimenView({
                   Species
                 </dt>
 
-                <dd className="scientific-name mt-1.5 text-sm text-[var(--color-text-secondary)]">
+                <dd className="scientific-name mt-1.5 break-words text-sm text-[var(--color-text-secondary)]">
                   {specimen.classification.species}
                 </dd>
               </div>
@@ -198,7 +199,7 @@ export function ExpandedSpecimenView({
                     Cultivar
                   </dt>
 
-                  <dd className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
+                  <dd className="mt-1.5 break-words text-sm text-[var(--color-text-secondary)]">
                     {specimen.classification.cultivar}
                   </dd>
                 </div>
@@ -210,7 +211,7 @@ export function ExpandedSpecimenView({
                     Location
                   </dt>
 
-                  <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
+                  <dd className="mt-1.5 break-words text-sm leading-6 text-[var(--color-text-secondary)]">
                     {location}
                   </dd>
                 </div>
@@ -248,7 +249,7 @@ export function ExpandedSpecimenView({
                     Source
                   </dt>
 
-                  <dd className="mt-1.5 text-sm leading-6 text-[var(--color-text-secondary)]">
+                  <dd className="mt-1.5 break-words text-sm leading-6 text-[var(--color-text-secondary)]">
                     {specimen.acquisitionSource}
                   </dd>
                 </div>
@@ -292,7 +293,7 @@ export function ExpandedSpecimenView({
                   Archive notes
                 </h3>
 
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--color-text-secondary)]">
+                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--color-text-secondary)]">
                   {specimen.notes}
                 </p>
               </section>

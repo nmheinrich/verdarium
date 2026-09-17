@@ -57,9 +57,9 @@ export function CollectionSearch({
           />
 
           <span className="metadata-label transition-colors duration-[var(--transition-base)] group-hover:text-[var(--color-text-primary)]">
-            Filter and Search
+            Collection tools
             {activeCount > 0
-              ? ` · ${activeCount} active`
+              ? ` · ${activeCount} applied`
               : ""}
           </span>
         </button>

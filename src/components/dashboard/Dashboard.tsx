@@ -162,45 +162,45 @@ export function Dashboard({
         onSortChange={setSortOption}
       />
 
-      {areCollectionToolsActive ? (
-        visibleSpecimens.length > 0 ? (
-          <CompactCollectionView
-            specimens={visibleSpecimens}
-            onSpecimenSelect={onSpecimenSelect}
-          />
-        ) : (
-          <section
-            aria-labelledby="collection-tools-empty-heading"
-          >
-            <Surface
-              variant="subtle"
-              className="p-6 sm:p-8"
-            >
-              <p className="metadata-label">
-                Collection index
-              </p>
-
-              <h2
-                id="collection-tools-empty-heading"
-                className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-              >
-                No specimens match these criteria
-              </h2>
-
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)]">
-                Adjust the search or collection
-                filters to broaden the archive
-                results.
-              </p>
-            </Surface>
-          </section>
-        )
+      {visibleSpecimens.length > 0 ? (
+        <CompactCollectionView
+          specimens={visibleSpecimens}
+          onSpecimenSelect={onSpecimenSelect}
+        />
       ) : (
+        <section
+          aria-labelledby="collection-tools-empty-heading"
+        >
+          <Surface
+            variant="subtle"
+            className="p-6 sm:p-8"
+          >
+            <p className="metadata-label">
+              Collection index
+            </p>
+
+            <h2
+              id="collection-tools-empty-heading"
+              className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+            >
+              No specimens match these criteria
+            </h2>
+
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)]">
+              Adjust the search or collection
+              filters to broaden the archive
+              results.
+            </p>
+          </Surface>
+        </section>
+      )}
+
+      {!areCollectionToolsActive ? (
         <RecentSpecimens
           specimens={specimens}
           onSpecimenSelect={onSpecimenSelect}
         />
-      )}
+      ) : null}
     </div>
   );
 }

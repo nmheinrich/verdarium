@@ -79,7 +79,8 @@ export function SpecimenForm({
           </h2>
 
           <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-            Record the core botanical details for this specimen.
+            Record the core botanical details for this specimen. Common name,
+            genus, and species are required.
           </p>
         </div>
 
