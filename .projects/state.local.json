@@ -2,12 +2,49 @@
   "version": 1,
   "project": {
     "catalog": "prod",
-    "merchantId": "acct_1P8BdMFFbqPEwSgD",
+    "initializedAt": "2026-09-20T19:45:09.533Z",
     "merchantDisplayName": "Heinrich Nowak",
+    "merchantId": "acct_1P8BdMFFbqPEwSgD",
     "projectId": "project_61VREd3GKeUUomkFs16QHZajIuSQLIO7jmgfesHW44G0",
-    "projectName": "verdarium",
-    "initializedAt": "2026-09-20T19:45:09.533Z"
+    "projectName": "verdarium"
   },
-  "providers": {},
-  "resources": {}
+  "providers": {
+    "supabase": {
+      "accountRequestId": "facctrq_61VRF3DWsWwi0qEb116QHZajIuSQLIO7jmgfesHW4WhM",
+      "configuration": {},
+      "linkedAt": "2026-09-20T20:12:39.812Z",
+      "providerId": "prvdr_61UIXYHdsyF69pZbG52n2",
+      "providerName": "Supabase",
+      "redirectUrl": null,
+      "requestedAt": "2026-09-20T20:12:21.992Z",
+      "status": "complete"
+    }
+  },
+  "resources": {
+    "supabase-plan": {
+      "configuration": {},
+      "createdAt": "2026-09-20T20:12:45.727Z",
+      "lastRevealedAt": "2026-09-20T20:12:46.018Z",
+      "lastStatus": "complete",
+      "name": "supabase-plan",
+      "providerId": "prvdr_61UIXYHdsyF69pZbG52n2",
+      "providerName": "Supabase",
+      "resourceId": "fres_61VRF3g7rJDudRdLV16QHZajIuSQLIO7jmgfesHW4NiS",
+      "serviceId": "free"
+    },
+    "supabase-project": {
+      "configuration": {
+        "name": "verdarium",
+        "region": "americas"
+      },
+      "createdAt": "2026-09-20T20:13:08.434Z",
+      "lastRevealedAt": "2026-09-20T20:13:08.852Z",
+      "lastStatus": "complete",
+      "name": "supabase-project",
+      "providerId": "prvdr_61UIXYHdsyF69pZbG52n2",
+      "providerName": "Supabase",
+      "resourceId": "fres_61VRF3nPBoV6XQhxy16QHZajIuSQLIO7jmgfesHW42oS",
+      "serviceId": "project"
+    }
+  }
 }
