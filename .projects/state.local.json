@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "project": {
+    "catalog": "prod",
+    "merchantId": "acct_1P8BdMFFbqPEwSgD",
+    "merchantDisplayName": "Heinrich Nowak",
+    "projectId": "project_61VREd3GKeUUomkFs16QHZajIuSQLIO7jmgfesHW44G0",
+    "projectName": "verdarium",
+    "initializedAt": "2026-09-20T19:45:09.533Z"
+  },
+  "providers": {},
+  "resources": {}
+}
