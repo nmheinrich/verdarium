@@ -42,11 +42,14 @@ import {
   initializeTheme,
   setTheme,
 } from "@/lib";
+import { supabase } from "@/lib/supabase";
 import type { CollectionStorageError } from "@/storage";
 import {
-  deleteSpecimen,
   loadCollection,
 } from "@/storage";
+import { localCollectionStore } from "@/storage/localCollectionStore";
+import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
+import { synchronizeCollectionWhenSafe } from "@/storage/supabase/migrationActions";
 import type {
   Specimen,
   ThemeId,
@@ -112,6 +115,16 @@ export default function App() {
     setDeleteError,
   ] = useState<string | null>(null);
 
+  const [
+    cloudError,
+    setCloudError,
+  ] = useState<string | null>(null);
+
+  const [
+    isCloudActive,
+    setIsCloudActive,
+  ] = useState(false);
+
   const returnFocusSpecimenIdRef =
     useRef<string | null>(null);
 
@@ -132,6 +145,70 @@ export default function App() {
     collectionState.specimens.length;
 
   useEffect(() => {
+    let isCancelled = false;
+
+    async function initializeCloudCollection() {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (isCancelled) {
+        return;
+      }
+
+      if (error) {
+        setCloudError(
+          "Verdarium could not check cloud availability. Your local botanical archive remains available.",
+        );
+        return;
+      }
+
+      if (!session) {
+        setIsCloudActive(false);
+        return;
+      }
+
+      const syncResult =
+        await synchronizeCollectionWhenSafe();
+
+      if (isCancelled) {
+        return;
+      }
+
+      if (!syncResult.success) {
+        setIsCloudActive(false);
+
+        if (syncResult.error.code === "sync-conflict") {
+          setCloudError(
+            "The local and cloud collections contain different records. Verdarium has left both archives unchanged until you choose how to resolve them.",
+          );
+          return;
+        }
+
+        setCloudError(
+          "Verdarium could not synchronize the cloud collection. Your local botanical archive remains unchanged.",
+        );
+        return;
+      }
+
+      setCollectionState({
+        specimens: syncResult.data,
+        error: null,
+      });
+
+      setCloudError(null);
+      setIsCloudActive(true);
+    }
+
+    void initializeCloudCollection();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isDeleteConfirming) {
       return;
     }
@@ -149,33 +226,76 @@ export default function App() {
     };
   }, [isDeleteConfirming]);
 
-  const handleSpecimenCreated = (
+  const mirrorCollectionToCloud = async (
+    specimens: Specimen[],
+  ): Promise<Specimen[]> => {
+    if (!isCloudActive) {
+      return specimens;
+    }
+
+    const storeResult =
+      await getCloudCollectionStore();
+
+    if (!storeResult.success) {
+      setCloudError(
+        "Verdarium saved this change locally but could not reach the cloud collection. The cloud archive has not been overwritten.",
+      );
+
+      return specimens;
+    }
+
+    const replaceResult =
+      await storeResult.store.replaceCollection(specimens);
+
+    if (!replaceResult.success) {
+      setCloudError(
+        "Verdarium saved this change locally but could not synchronize it to the cloud. The cloud archive has not been overwritten.",
+      );
+
+      return specimens;
+    }
+
+    setCloudError(null);
+
+    return replaceResult.data;
+  };
+
+  const handleSpecimenCreated = async (
     specimens: Specimen[],
   ) => {
+    const synchronizedSpecimens =
+      await mirrorCollectionToCloud(specimens);
+
     setCollectionState({
-      specimens,
+      specimens: synchronizedSpecimens,
       error: null,
     });
 
     setView("collection");
   };
 
-  const handleSpecimenUpdated = (
+  const handleSpecimenUpdated = async (
     specimens: Specimen[],
   ) => {
+    const synchronizedSpecimens =
+      await mirrorCollectionToCloud(specimens);
+
     setCollectionState({
-      specimens,
+      specimens: synchronizedSpecimens,
       error: null,
     });
 
     setView("specimen");
   };
 
-  const handleCollectionImported = (
+  const handleCollectionImported = async (
     specimens: Specimen[],
   ) => {
+    const synchronizedSpecimens =
+      await mirrorCollectionToCloud(specimens);
+
     setCollectionState({
-      specimens,
+      specimens: synchronizedSpecimens,
       error: null,
     });
 
@@ -261,7 +381,7 @@ export default function App() {
     });
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!selectedSpecimen) {
       handleReturnToCollection();
       return;
@@ -269,21 +389,64 @@ export default function App() {
 
     setDeleteError(null);
 
-    const result = deleteSpecimen(
-      selectedSpecimen.id,
-    );
+    if (isCloudActive) {
+      const storeResult =
+        await getCloudCollectionStore();
 
-    if (!result.success) {
-      setDeleteError(
-        "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
-      );
-      return;
+      if (!storeResult.success) {
+        setDeleteError(
+          "Verdarium could not reach the cloud collection. The botanical record remains unchanged.",
+        );
+        return;
+      }
+
+      const result =
+        await storeResult.store.deleteSpecimen(
+          selectedSpecimen.id,
+        );
+
+      if (!result.success) {
+        setDeleteError(
+          "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
+        );
+        return;
+      }
+
+      const localResult =
+        await localCollectionStore.replaceCollection(
+          result.data,
+        );
+
+      if (!localResult.success) {
+        setCloudError(
+          "The specimen was removed from the cloud archive, but Verdarium could not refresh the local browser copy.",
+        );
+      } else {
+        setCloudError(null);
+      }
+
+      setCollectionState({
+        specimens: result.data,
+        error: null,
+      });
+    } else {
+      const result =
+        await localCollectionStore.deleteSpecimen(
+          selectedSpecimen.id,
+        );
+
+      if (!result.success) {
+        setDeleteError(
+          "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
+        );
+        return;
+      }
+
+      setCollectionState({
+        specimens: result.data,
+        error: null,
+      });
     }
-
-    setCollectionState({
-      specimens: result.data,
-      error: null,
-    });
 
     returnFocusSpecimenIdRef.current = null;
     setSelectedSpecimenId(null);
@@ -473,6 +636,20 @@ export default function App() {
                 ) : null
               }
             />
+
+            {cloudError ? (
+              <Surface
+                variant="subtle"
+                className="mt-6 px-4 py-4 sm:px-5"
+              >
+                <p
+                  role="alert"
+                  className="text-sm leading-6 text-[var(--color-text-secondary)]"
+                >
+                  {cloudError}
+                </p>
+              </Surface>
+            ) : null}
 
             <Dashboard
               specimens={collectionState.specimens}
@@ -725,7 +902,7 @@ export default function App() {
           <PageHeader
             eyebrow="Archive Preferences"
             title="Settings"
-            description="Adjust the appearance of Verdarium and manage the botanical archive stored in this browser."
+            description="Adjust the appearance of Verdarium and manage your botanical archive."
           />
 
           <div className="mt-8 max-w-3xl space-y-6">
@@ -803,7 +980,7 @@ export default function App() {
               >
                 <div className="max-w-2xl">
                   <p className="metadata-label">
-                    Local archive
+                    Archive storage
                   </p>
 
                   <h2
@@ -814,10 +991,9 @@ export default function App() {
                   </h2>
 
                   <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                    Verdarium keeps your botanical
-                    collection locally in this browser.
-                    Export the archive periodically if you
-                    want a portable backup.
+                    {isCloudActive
+                      ? "Verdarium is connected to your private cloud collection while retaining a local browser copy."
+                      : "Verdarium currently keeps your botanical collection locally in this browser. Export the archive periodically if you want a portable backup."}
                   </p>
                 </div>
 
@@ -838,16 +1014,27 @@ export default function App() {
                     </dt>
 
                     <dd className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
-                      This browser
+                      {isCloudActive
+                        ? "Private cloud + this browser"
+                        : "This browser"}
                     </dd>
                   </div>
                 </dl>
 
                 <p className="mt-6 border-t border-[var(--color-border)] pt-6 text-xs leading-5 text-[var(--color-text-muted)]">
-                  Collection data is not automatically
-                  synchronized between browsers or
-                  devices.
+                  {isCloudActive
+                    ? "Cloud synchronization is active for this signed-in session. Multi-device conflict resolution will be expanded in a later Verdarium feature."
+                    : "Collection data is not automatically synchronized between browsers or devices."}
                 </p>
+
+                {cloudError ? (
+                  <p
+                    role="alert"
+                    className="mt-4 text-sm leading-6 text-[var(--color-text-secondary)]"
+                  >
+                    {cloudError}
+                  </p>
+                ) : null}
               </section>
             </Surface>
           </div>
