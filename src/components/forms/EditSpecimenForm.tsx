@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { updateSpecimen } from "@/storage";
 import type { Specimen } from "@/types";
 
 import {
@@ -9,10 +8,21 @@ import {
   type SpecimenFormValues,
 } from "./SpecimenForm";
 
+export type EditSpecimenResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 interface EditSpecimenFormProps {
   specimen: Specimen;
   onCancel: () => void;
-  onUpdated: (specimens: Specimen[]) => void;
+  onUpdate: (
+    specimen: Specimen,
+  ) => Promise<EditSpecimenResult>;
 }
 
 function createInitialValues(
@@ -20,16 +30,22 @@ function createInitialValues(
 ): SpecimenFormValues {
   return {
     commonName: specimen.commonName,
-    family: specimen.classification.family ?? "",
+    family:
+      specimen.classification.family ?? "",
     genus: specimen.classification.genus,
     species: specimen.classification.species,
-    cultivar: specimen.classification.cultivar ?? "",
+    cultivar:
+      specimen.classification.cultivar ?? "",
     room: specimen.location?.room ?? "",
-    position: specimen.location?.position ?? "",
+    position:
+      specimen.location?.position ?? "",
     healthStatus: specimen.healthStatus,
-    lightPreference: specimen.lightPreference ?? "",
-    acquisitionDate: specimen.acquisitionDate ?? "",
-    acquisitionSource: specimen.acquisitionSource ?? "",
+    lightPreference:
+      specimen.lightPreference ?? "",
+    acquisitionDate:
+      specimen.acquisitionDate ?? "",
+    acquisitionSource:
+      specimen.acquisitionSource ?? "",
     notes: specimen.notes ?? "",
     tags: specimen.tags.join(", "),
     isFavorite: specimen.isFavorite,
@@ -44,7 +60,8 @@ function buildScientificName({
   SpecimenFormValues,
   "genus" | "species" | "cultivar"
 >): string {
-  const baseName = `${genus.trim()} ${species.trim()}`.trim();
+  const baseName =
+    `${genus.trim()} ${species.trim()}`.trim();
 
   const normalizedCultivar = cultivar.trim();
 
@@ -81,13 +98,13 @@ function validateRequiredFields(
 }
 
 function getEditSpecimenErrorMessage(): string {
-  return "Verdarium could not save these changes. Your edits have been preserved so you can try again.";
+  return "Verdarium could not save these changes to the private archive. Your edits have been preserved so you can try again.";
 }
 
 export function EditSpecimenForm({
   specimen,
   onCancel,
-  onUpdated,
+  onUpdate,
 }: EditSpecimenFormProps) {
   const [values, setValues] =
     useState<SpecimenFormValues>(() =>
@@ -103,7 +120,7 @@ export function EditSpecimenForm({
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: Parameters<
       NonNullable<
         React.ComponentProps<"form">["onSubmit"]
@@ -111,6 +128,10 @@ export function EditSpecimenForm({
     >[0],
   ) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const nextErrors = validateRequiredFields(values);
 
@@ -140,13 +161,15 @@ export function EditSpecimenForm({
     const family = values.family.trim();
 
     if (family) {
-      updatedSpecimen.classification.family = family;
+      updatedSpecimen.classification.family =
+        family;
     }
 
     const cultivar = values.cultivar.trim();
 
     if (cultivar) {
-      updatedSpecimen.classification.cultivar = cultivar;
+      updatedSpecimen.classification.cultivar =
+        cultivar;
     }
 
     const room = values.room.trim();
@@ -160,7 +183,8 @@ export function EditSpecimenForm({
       }
 
       if (position) {
-        updatedSpecimen.location.position = position;
+        updatedSpecimen.location.position =
+          position;
       }
     } else {
       delete updatedSpecimen.location;
@@ -198,19 +222,24 @@ export function EditSpecimenForm({
       delete updatedSpecimen.notes;
     }
 
-    const result =
-      updateSpecimen(updatedSpecimen);
+    try {
+      const result =
+        await onUpdate(updatedSpecimen);
 
-    if (!result.success) {
+      if (!result.success) {
+        setSubmitError(
+          result.message ||
+            getEditSpecimenErrorMessage(),
+        );
+        setIsSubmitting(false);
+        return;
+      }
+    } catch {
       setSubmitError(
         getEditSpecimenErrorMessage(),
       );
-
       setIsSubmitting(false);
-      return;
     }
-
-    onUpdated(result.data);
   };
 
   return (

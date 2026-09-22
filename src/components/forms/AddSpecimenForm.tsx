@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 
-import type { Specimen } from "@/types";
 import { createId } from "@/lib";
-import { addSpecimen } from "@/storage";
+import type { Specimen } from "@/types";
 
 import {
   SpecimenForm,
@@ -10,9 +9,20 @@ import {
   type SpecimenFormValues,
 } from "./SpecimenForm";
 
+export type AddSpecimenResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 interface AddSpecimenFormProps {
   onCancel: () => void;
-  onCreated: (specimens: Specimen[]) => void;
+  onCreate: (
+    specimen: Specimen,
+  ) => Promise<AddSpecimenResult>;
 }
 
 const initialValues: SpecimenFormValues = {
@@ -40,7 +50,8 @@ function buildScientificName({
   SpecimenFormValues,
   "genus" | "species" | "cultivar"
 >): string {
-  const baseName = `${genus.trim()} ${species.trim()}`.trim();
+  const baseName =
+    `${genus.trim()} ${species.trim()}`.trim();
 
   const normalizedCultivar = cultivar.trim();
 
@@ -77,12 +88,12 @@ function validateRequiredFields(
 }
 
 function getAddSpecimenErrorMessage(): string {
-  return "Verdarium could not save this specimen. Your entered information has been preserved so you can try again.";
+  return "Verdarium could not save this specimen to the private archive. Your entered information has been preserved so you can try again.";
 }
 
 export function AddSpecimenForm({
   onCancel,
-  onCreated,
+  onCreate,
 }: AddSpecimenFormProps) {
   const [values, setValues] =
     useState<SpecimenFormValues>(initialValues);
@@ -96,7 +107,7 @@ export function AddSpecimenForm({
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: Parameters<
       NonNullable<
         React.ComponentProps<"form">["onSubmit"]
@@ -104,6 +115,10 @@ export function AddSpecimenForm({
     >[0],
   ) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const nextErrors = validateRequiredFields(values);
 
@@ -142,11 +157,11 @@ export function AddSpecimenForm({
     const cultivar = values.cultivar.trim();
 
     if (cultivar) {
-      specimen.classification.cultivar = cultivar;
+      specimen.classification.cultivar =
+        cultivar;
     }
 
     const room = values.room.trim();
-
     const position = values.position.trim();
 
     if (room || position) {
@@ -185,18 +200,23 @@ export function AddSpecimenForm({
       specimen.notes = notes;
     }
 
-    const result = addSpecimen(specimen);
+    try {
+      const result = await onCreate(specimen);
 
-    if (!result.success) {
+      if (!result.success) {
+        setSubmitError(
+          result.message ||
+            getAddSpecimenErrorMessage(),
+        );
+        setIsSubmitting(false);
+        return;
+      }
+    } catch {
       setSubmitError(
         getAddSpecimenErrorMessage(),
       );
-
       setIsSubmitting(false);
-      return;
     }
-
-    onCreated(result.data);
   };
 
   return (

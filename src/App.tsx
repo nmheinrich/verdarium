@@ -18,13 +18,24 @@ import {
   X,
 } from "lucide-react";
 
+import {
+  initializeAuthenticatedCollection,
+  resolveCollectionConflict,
+  type CollectionConflictChoice,
+} from "@/auth/collectionSessionCoordinator";
+import { useAuth } from "@/auth/useAuth";
+import {
+  AccountMenu,
+  type ArchiveConnectionStatus,
+} from "@/components/auth/AccountMenu";
+import { ArchiveEntry } from "@/components/auth/ArchiveEntry";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { CollectionConflictDialog } from "@/components/auth/CollectionConflictDialog";
 import { ExpandedSpecimenView } from "@/components/cards";
 import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
   EditSpecimenForm,
-  ExportCollectionForm,
-  ImportCollectionForm,
   ThemeSelector,
 } from "@/components/forms";
 import {
@@ -42,14 +53,7 @@ import {
   initializeTheme,
   setTheme,
 } from "@/lib";
-import { supabase } from "@/lib/supabase";
-import type { CollectionStorageError } from "@/storage";
-import {
-  loadCollection,
-} from "@/storage";
-import { localCollectionStore } from "@/storage/localCollectionStore";
 import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
-import { synchronizeCollectionWhenSafe } from "@/storage/supabase/migrationActions";
 import type {
   Specimen,
   ThemeId,
@@ -67,29 +71,22 @@ type AppView =
   | "edit-specimen"
   | "settings";
 
-interface CollectionState {
-  specimens: Specimen[];
-  error: CollectionStorageError | null;
-}
-
-function loadCollectionState(): CollectionState {
-  const result = loadCollection();
-
-  if (result.success) {
-    return {
-      specimens: result.data,
-      error: null,
+type SpecimenMutationOutcome =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
     };
-  }
-
-  return {
-    specimens: [],
-    error: result.error,
-  };
-}
 
 export default function App() {
   const shouldReduceMotion = useReducedMotion();
+
+  const {
+    state: authState,
+    signOut,
+  } = useAuth();
 
   const [view, setView] =
     useState<AppView>("collection");
@@ -97,10 +94,9 @@ export default function App() {
   const [theme, setActiveTheme] =
     useState<ThemeId>(() => initializeTheme());
 
-  const [collectionState, setCollectionState] =
-    useState<CollectionState>(() =>
-      loadCollectionState(),
-    );
+  const [specimens, setSpecimens] = useState<
+    Specimen[]
+  >([]);
 
   const [selectedSpecimenId, setSelectedSpecimenId] =
     useState<string | null>(null);
@@ -116,22 +112,66 @@ export default function App() {
   ] = useState<string | null>(null);
 
   const [
+    archiveStatus,
+    setArchiveStatus,
+  ] =
+    useState<ArchiveConnectionStatus>("connecting");
+
+  const [
+    archiveWarning,
+    setArchiveWarning,
+  ] = useState<string | null>(null);
+
+  const [
     cloudError,
     setCloudError,
   ] = useState<string | null>(null);
 
   const [
-    isCloudActive,
-    setIsCloudActive,
+    isAuthDialogOpen,
+    setIsAuthDialogOpen,
   ] = useState(false);
+
+  const [
+    isConflictDialogOpen,
+    setIsConflictDialogOpen,
+  ] = useState(false);
+
+  const [
+    isResolvingConflict,
+    setIsResolvingConflict,
+  ] = useState(false);
+
+  const [
+    conflictError,
+    setConflictError,
+  ] = useState<string | null>(null);
+
+  const [
+    isSigningOut,
+    setIsSigningOut,
+  ] = useState(false);
+
+  const [
+    connectionAttempt,
+    setConnectionAttempt,
+  ] = useState(0);
 
   const returnFocusSpecimenIdRef =
     useRef<string | null>(null);
 
+  const activeUserIdRef =
+    useRef<string | null>(null);
+
+  const authenticatedUserId =
+    authState.status === "signedIn"
+      ? authState.user.id
+      : null;
+
   const selectedSpecimen =
     selectedSpecimenId === null
       ? null
-      : collectionState.specimens.find(
+      : specimens.find(
           (specimen) =>
             specimen.id === selectedSpecimenId,
         ) ?? null;
@@ -141,72 +181,85 @@ export default function App() {
       ? "settings"
       : "collection";
 
-  const specimenCount =
-    collectionState.specimens.length;
+  const isCollectionReady =
+    archiveStatus === "cloud";
 
   useEffect(() => {
     let isCancelled = false;
 
-    async function initializeCloudCollection() {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+    async function initializeCollection() {
+      await Promise.resolve();
 
       if (isCancelled) {
         return;
       }
 
-      if (error) {
-        setCloudError(
-          "Verdarium could not check cloud availability. Your local botanical archive remains available.",
-        );
+      if (
+        authState.status !== "signedIn" ||
+        !authenticatedUserId
+      ) {
+        activeUserIdRef.current = null;
+        setSpecimens([]);
+        setSelectedSpecimenId(null);
+        setArchiveStatus("connecting");
+        setArchiveWarning(null);
+        setCloudError(null);
+        setIsConflictDialogOpen(false);
+        setConflictError(null);
+        setView("collection");
         return;
       }
 
-      if (!session) {
-        setIsCloudActive(false);
-        return;
-      }
+      activeUserIdRef.current =
+        authenticatedUserId;
 
-      const syncResult =
-        await synchronizeCollectionWhenSafe();
-
-      if (isCancelled) {
-        return;
-      }
-
-      if (!syncResult.success) {
-        setIsCloudActive(false);
-
-        if (syncResult.error.code === "sync-conflict") {
-          setCloudError(
-            "The local and cloud collections contain different records. Verdarium has left both archives unchanged until you choose how to resolve them.",
-          );
-          return;
-        }
-
-        setCloudError(
-          "Verdarium could not synchronize the cloud collection. Your local botanical archive remains unchanged.",
-        );
-        return;
-      }
-
-      setCollectionState({
-        specimens: syncResult.data,
-        error: null,
-      });
-
+      setSpecimens([]);
+      setSelectedSpecimenId(null);
+      setArchiveStatus("connecting");
+      setArchiveWarning(null);
       setCloudError(null);
-      setIsCloudActive(true);
+      setConflictError(null);
+
+      const outcome =
+        await initializeAuthenticatedCollection();
+
+      if (
+        isCancelled ||
+        activeUserIdRef.current !==
+          authenticatedUserId
+      ) {
+        return;
+      }
+
+      if (outcome.status === "conflict") {
+        setArchiveStatus("conflict");
+        setCloudError(outcome.message);
+        setIsConflictDialogOpen(true);
+        return;
+      }
+
+      if (outcome.status === "error") {
+        setArchiveStatus("error");
+        setCloudError(outcome.message);
+        return;
+      }
+
+      setSpecimens(outcome.specimens);
+      setArchiveStatus("cloud");
+      setArchiveWarning(outcome.warning);
+      setCloudError(null);
     }
 
-    void initializeCloudCollection();
+    void initializeCollection();
 
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [
+    authState.status,
+    authenticatedUserId,
+    connectionAttempt,
+  ]);
 
   useEffect(() => {
     if (!isDeleteConfirming) {
@@ -226,86 +279,99 @@ export default function App() {
     };
   }, [isDeleteConfirming]);
 
-  const mirrorCollectionToCloud = async (
-    specimens: Specimen[],
-  ): Promise<Specimen[]> => {
-    if (!isCloudActive) {
-      return specimens;
+  const handleCreateSpecimen = async (
+    specimen: Specimen,
+  ): Promise<SpecimenMutationOutcome> => {
+    if (!isCollectionReady) {
+      return {
+        success: false,
+        message:
+          "The private archive is not ready. Please wait or try opening it again.",
+      };
     }
 
     const storeResult =
       await getCloudCollectionStore();
 
     if (!storeResult.success) {
-      setCloudError(
-        "Verdarium saved this change locally but could not reach the cloud collection. The cloud archive has not been overwritten.",
-      );
-
-      return specimens;
+      return {
+        success: false,
+        message:
+          "Verdarium could not reach the private archive. Your entered information has been preserved.",
+      };
     }
 
-    const replaceResult =
-      await storeResult.store.replaceCollection(specimens);
+    const result =
+      await storeResult.store.addSpecimen(specimen);
 
-    if (!replaceResult.success) {
-      setCloudError(
-        "Verdarium saved this change locally but could not synchronize it to the cloud. The cloud archive has not been overwritten.",
-      );
-
-      return specimens;
+    if (!result.success) {
+      return {
+        success: false,
+        message:
+          "Verdarium could not save this specimen to the private archive. Your entered information has been preserved.",
+      };
     }
 
-    setCloudError(null);
-
-    return replaceResult.data;
-  };
-
-  const handleSpecimenCreated = async (
-    specimens: Specimen[],
-  ) => {
-    const synchronizedSpecimens =
-      await mirrorCollectionToCloud(specimens);
-
-    setCollectionState({
-      specimens: synchronizedSpecimens,
-      error: null,
-    });
-
-    setView("collection");
-  };
-
-  const handleSpecimenUpdated = async (
-    specimens: Specimen[],
-  ) => {
-    const synchronizedSpecimens =
-      await mirrorCollectionToCloud(specimens);
-
-    setCollectionState({
-      specimens: synchronizedSpecimens,
-      error: null,
-    });
-
-    setView("specimen");
-  };
-
-  const handleCollectionImported = async (
-    specimens: Specimen[],
-  ) => {
-    const synchronizedSpecimens =
-      await mirrorCollectionToCloud(specimens);
-
-    setCollectionState({
-      specimens: synchronizedSpecimens,
-      error: null,
-    });
-
+    setSpecimens(result.data);
     setSelectedSpecimenId(null);
-    setIsDeleteConfirming(false);
-    setDeleteError(null);
-    returnFocusSpecimenIdRef.current = null;
+    setCloudError(null);
+    setView("collection");
+
+    return {
+      success: true,
+    };
+  };
+
+  const handleUpdateSpecimen = async (
+    specimen: Specimen,
+  ): Promise<SpecimenMutationOutcome> => {
+    if (!isCollectionReady) {
+      return {
+        success: false,
+        message:
+          "The private archive is not ready. Please wait or try opening it again.",
+      };
+    }
+
+    const storeResult =
+      await getCloudCollectionStore();
+
+    if (!storeResult.success) {
+      return {
+        success: false,
+        message:
+          "Verdarium could not reach the private archive. Your edits have been preserved.",
+      };
+    }
+
+    const result =
+      await storeResult.store.updateSpecimen(
+        specimen,
+      );
+
+    if (!result.success) {
+      return {
+        success: false,
+        message:
+          "Verdarium could not save these changes to the private archive. Your edits have been preserved.",
+      };
+    }
+
+    setSpecimens(result.data);
+    setSelectedSpecimenId(specimen.id);
+    setCloudError(null);
+    setView("specimen");
+
+    return {
+      success: true,
+    };
   };
 
   const handleAddSpecimen = () => {
+    if (!isCollectionReady) {
+      return;
+    }
+
     returnFocusSpecimenIdRef.current = null;
     setView("add-specimen");
   };
@@ -387,70 +453,42 @@ export default function App() {
       return;
     }
 
-    setDeleteError(null);
-
-    if (isCloudActive) {
-      const storeResult =
-        await getCloudCollectionStore();
-
-      if (!storeResult.success) {
-        setDeleteError(
-          "Verdarium could not reach the cloud collection. The botanical record remains unchanged.",
-        );
-        return;
-      }
-
-      const result =
-        await storeResult.store.deleteSpecimen(
-          selectedSpecimen.id,
-        );
-
-      if (!result.success) {
-        setDeleteError(
-          "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
-        );
-        return;
-      }
-
-      const localResult =
-        await localCollectionStore.replaceCollection(
-          result.data,
-        );
-
-      if (!localResult.success) {
-        setCloudError(
-          "The specimen was removed from the cloud archive, but Verdarium could not refresh the local browser copy.",
-        );
-      } else {
-        setCloudError(null);
-      }
-
-      setCollectionState({
-        specimens: result.data,
-        error: null,
-      });
-    } else {
-      const result =
-        await localCollectionStore.deleteSpecimen(
-          selectedSpecimen.id,
-        );
-
-      if (!result.success) {
-        setDeleteError(
-          "Verdarium could not remove this specimen. The botanical record remains in your collection, so you can try again.",
-        );
-        return;
-      }
-
-      setCollectionState({
-        specimens: result.data,
-        error: null,
-      });
+    if (!isCollectionReady) {
+      setDeleteError(
+        "The private archive is not ready. This specimen remains unchanged.",
+      );
+      return;
     }
 
-    returnFocusSpecimenIdRef.current = null;
+    setDeleteError(null);
+
+    const storeResult =
+      await getCloudCollectionStore();
+
+    if (!storeResult.success) {
+      setDeleteError(
+        "Verdarium could not reach the private archive. This specimen remains unchanged.",
+      );
+      return;
+    }
+
+    const result =
+      await storeResult.store.deleteSpecimen(
+        selectedSpecimen.id,
+      );
+
+    if (!result.success) {
+      setDeleteError(
+        "Verdarium could not remove this specimen. The botanical record remains in your collection.",
+      );
+      return;
+    }
+
+    setSpecimens(result.data);
     setSelectedSpecimenId(null);
     setIsDeleteConfirming(false);
+    setCloudError(null);
+    returnFocusSpecimenIdRef.current = null;
     setView("collection");
   };
 
@@ -514,6 +552,99 @@ export default function App() {
     }
   };
 
+  const handleResolveConflict = async (
+    choice: CollectionConflictChoice,
+  ) => {
+    if (
+      isResolvingConflict ||
+      !authenticatedUserId
+    ) {
+      return;
+    }
+
+    const resolvingUserId = authenticatedUserId;
+
+    setIsResolvingConflict(true);
+    setConflictError(null);
+
+    const outcome =
+      await resolveCollectionConflict(choice);
+
+    if (
+      activeUserIdRef.current !== resolvingUserId
+    ) {
+      setIsResolvingConflict(false);
+      return;
+    }
+
+    if (outcome.status !== "ready") {
+      setConflictError(outcome.message);
+      setIsResolvingConflict(false);
+      return;
+    }
+
+    setSpecimens(outcome.specimens);
+    setSelectedSpecimenId(null);
+    setArchiveStatus("cloud");
+    setArchiveWarning(outcome.warning);
+    setCloudError(null);
+    setConflictError(null);
+    setIsResolvingConflict(false);
+    setIsConflictDialogOpen(false);
+    setView("collection");
+  };
+
+  const handleSignOut = async () => {
+    if (
+      isSigningOut ||
+      authState.status !== "signedIn"
+    ) {
+      return;
+    }
+
+    setIsSigningOut(true);
+    setCloudError(null);
+
+    const result = await signOut();
+
+    if (!result.success) {
+      setCloudError(result.error.message);
+      setIsSigningOut(false);
+      return;
+    }
+
+    activeUserIdRef.current = null;
+    setSpecimens([]);
+    setSelectedSpecimenId(null);
+    setArchiveWarning(null);
+    setCloudError(null);
+    setIsConflictDialogOpen(false);
+    setConflictError(null);
+    setIsSigningOut(false);
+    setView("collection");
+  };
+
+  if (authState.status !== "signedIn") {
+    return (
+      <>
+        <AppShell navigation={null}>
+          <ArchiveEntry
+            onOpenAuth={() => {
+              setIsAuthDialogOpen(true);
+            }}
+          />
+        </AppShell>
+
+        <AuthDialog
+          isOpen={isAuthDialogOpen}
+          onClose={() => {
+            setIsAuthDialogOpen(false);
+          }}
+        />
+      </>
+    );
+  }
+
   if (
     (view === "specimen" ||
       view === "edit-specimen") &&
@@ -539,7 +670,7 @@ export default function App() {
           <ErrorState
             eyebrow="Record unavailable"
             title="This botanical record is no longer available"
-            description="Verdarium could not locate the selected specimen in the current collection. It may have been removed or replaced by a recently imported archive."
+            description="Verdarium could not locate the selected specimen in the private collection."
             actions={
               <Button
                 variant="secondary"
@@ -561,135 +692,395 @@ export default function App() {
   }
 
   return (
-    <AppShell
-      navigation={
-        <AppNav
-          items={navigationItems}
-          activeItem={activeNavigationItem}
-          onNavigate={handleNavigation}
-        />
-      }
-    >
-      <AnimatePresence
-        initial={false}
-        mode="wait"
-        onExitComplete={handleSpecimenExitComplete}
+    <>
+      <AppShell
+        navigation={
+          <AppNav
+            items={navigationItems}
+            activeItem={activeNavigationItem}
+            onNavigate={handleNavigation}
+          />
+        }
       >
-        {view === "collection" ? (
-          <motion.div
-            key="collection"
-            initial={
-              shouldReduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: -6,
-                  }
-            }
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            exit={
-              shouldReduceMotion
-                ? {
-                    opacity: 0,
-                  }
-                : {
-                    opacity: 0,
-                    y: -8,
-                  }
-            }
-            transition={{
-              duration: shouldReduceMotion
-                ? 0.1
-                : 0.22,
-              ease: shouldReduceMotion
-                ? "easeOut"
-                : [0.22, 1, 0.36, 1],
-            }}
-            onAnimationComplete={
-              handleCollectionViewAnimationComplete
-            }
-          >
-            <PageHeader
-              eyebrow="Personal Herbarium"
-              title="Collection"
-              description="A quiet archive for documenting, studying, and caring for your botanical specimens."
-              actions={
-                collectionState.specimens.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={handleAddSpecimen}
-                    className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
-                  >
-                    <Plus
-                      size={18}
-                      aria-hidden="true"
-                      className="text-[var(--color-text-muted)]"
-                    />
-
-                    <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
-                      Add specimen
-                    </span>
-                  </button>
-                ) : null
+        <AnimatePresence
+          initial={false}
+          mode="wait"
+          onExitComplete={
+            handleSpecimenExitComplete
+          }
+        >
+          {view === "collection" ? (
+            <motion.div
+              key="collection"
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: -6,
+                    }
               }
-            />
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={
+                shouldReduceMotion
+                  ? {
+                      opacity: 0,
+                    }
+                  : {
+                      opacity: 0,
+                      y: -8,
+                    }
+              }
+              transition={{
+                duration: shouldReduceMotion
+                  ? 0.1
+                  : 0.22,
+                ease: shouldReduceMotion
+                  ? "easeOut"
+                  : [0.22, 1, 0.36, 1],
+              }}
+              onAnimationComplete={
+                handleCollectionViewAnimationComplete
+              }
+            >
+              <PageHeader
+                eyebrow="Personal Herbarium"
+                title="Collection"
+                description="A quiet archive for documenting, studying, and caring for your botanical specimens."
+                actions={
+                  isCollectionReady &&
+                  specimens.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={
+                        handleAddSpecimen
+                      }
+                      className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
+                    >
+                      <Plus
+                        size={18}
+                        aria-hidden="true"
+                        className="text-[var(--color-text-muted)]"
+                      />
 
-            {cloudError ? (
-              <Surface
-                variant="subtle"
-                className="mt-6 px-4 py-4 sm:px-5"
-              >
-                <p
-                  role="alert"
-                  className="text-sm leading-6 text-[var(--color-text-secondary)]"
+                      <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
+                        Add specimen
+                      </span>
+                    </button>
+                  ) : null
+                }
+              />
+
+              {archiveWarning ? (
+                <Surface
+                  variant="subtle"
+                  className="mt-6 px-4 py-4 sm:px-5"
                 >
-                  {cloudError}
-                </p>
-              </Surface>
-            ) : null}
+                  <p
+                    role="status"
+                    className="text-sm leading-6 text-[var(--color-text-secondary)]"
+                  >
+                    {archiveWarning}
+                  </p>
+                </Surface>
+              ) : null}
 
-            <Dashboard
-              specimens={collectionState.specimens}
-              loadError={collectionState.error}
-              onSpecimenSelect={handleSelectSpecimen}
-              onAddSpecimen={handleAddSpecimen}
-            />
-          </motion.div>
-        ) : null}
+              {archiveStatus === "connecting" ? (
+                <Surface
+                  variant="subtle"
+                  className="mt-8 p-8"
+                >
+                  <p
+                    role="status"
+                    className="metadata-label"
+                  >
+                    Opening private archive
+                  </p>
 
-        {view === "specimen" && selectedSpecimen ? (
-          <motion.div
-            key={`specimen-${selectedSpecimen.id}`}
-            initial={
-              shouldReduceMotion
-                ? false
-                : {
-                    opacity: 0,
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                    Verdarium is retrieving your botanical
+                    collection.
+                  </p>
+                </Surface>
+              ) : null}
+
+              {archiveStatus === "error" ? (
+                <div className="mt-8">
+                  <ErrorState
+                    eyebrow="Private archive unavailable"
+                    title="Verdarium could not open the collection"
+                    description={
+                      cloudError ??
+                      "The private cloud archive is temporarily unavailable. No records have been changed."
+                    }
+                    actions={
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => {
+                          setConnectionAttempt(
+                            (attempt) =>
+                              attempt + 1,
+                          );
+                        }}
+                      >
+                        Try again
+                      </Button>
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {archiveStatus === "conflict" ? (
+                <div className="mt-8">
+                  <ErrorState
+                    eyebrow="Legacy migration"
+                    title="Choose the collection to preserve"
+                    description={
+                      cloudError ??
+                      "A legacy browser collection differs from the private cloud archive."
+                    }
+                    actions={
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setConflictError(null);
+                          setIsConflictDialogOpen(
+                            true,
+                          );
+                        }}
+                      >
+                        Review collections
+                      </Button>
+                    }
+                  />
+                </div>
+              ) : null}
+
+              {isCollectionReady ? (
+                <Dashboard
+                  specimens={specimens}
+                  loadError={null}
+                  onSpecimenSelect={
+                    handleSelectSpecimen
                   }
-            }
-            animate={{
-              opacity: 1,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            transition={{
-              duration: shouldReduceMotion
-                ? 0.1
-                : 0.24,
-              ease: "easeOut",
-            }}
-            onAnimationComplete={
-              handleSpecimenViewAnimationComplete
-            }
-          >
+                  onAddSpecimen={
+                    handleAddSpecimen
+                  }
+                />
+              ) : null}
+            </motion.div>
+          ) : null}
+
+          {view === "specimen" &&
+          selectedSpecimen ? (
+            <motion.div
+              key={`specimen-${selectedSpecimen.id}`}
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                    }
+              }
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              transition={{
+                duration: shouldReduceMotion
+                  ? 0.1
+                  : 0.24,
+                ease: "easeOut",
+              }}
+              onAnimationComplete={
+                handleSpecimenViewAnimationComplete
+              }
+            >
+              <PageHeader
+                eyebrow="Specimen Record"
+                title={
+                  selectedSpecimen.commonName
+                }
+                description={
+                  selectedSpecimen.scientificName
+                }
+                actions={
+                  <Button
+                    variant="secondary"
+                    leadingIcon={
+                      <ArrowLeft
+                        size={16}
+                        aria-hidden="true"
+                      />
+                    }
+                    onClick={
+                      handleReturnToCollection
+                    }
+                  >
+                    Back to collection
+                  </Button>
+                }
+              />
+
+              <div className="mt-8">
+                <AnimatePresence initial={false}>
+                  {isDeleteConfirming ? (
+                    <motion.div
+                      key="delete-confirmation"
+                      initial={
+                        shouldReduceMotion
+                          ? false
+                          : {
+                              opacity: 0,
+                              y: -4,
+                            }
+                      }
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: shouldReduceMotion
+                          ? 0
+                          : -4,
+                      }}
+                      transition={{
+                        duration:
+                          shouldReduceMotion
+                            ? 0.1
+                            : 0.18,
+                        ease: "easeOut",
+                      }}
+                    >
+                      <Surface
+                        variant="subtle"
+                        className="mb-5 px-4 py-4 sm:px-5"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="metadata-label">
+                              Permanent removal
+                            </p>
+
+                            <h2
+                              id="delete-specimen-confirmation-heading"
+                              tabIndex={-1}
+                              className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+                            >
+                              Remove this
+                              specimen?
+                            </h2>
+
+                            <p className="mt-1.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
+                              This botanical
+                              record will be
+                              permanently deleted
+                              from the private
+                              archive.
+                            </p>
+
+                            {deleteError ? (
+                              <p
+                                role="alert"
+                                className="mt-2 text-sm leading-5 text-[var(--color-text-secondary)]"
+                              >
+                                {deleteError}
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-2">
+                            <IconButton
+                              variant="default"
+                              size="compact"
+                              aria-label="Cancel specimen deletion"
+                              icon={
+                                <X size={16} />
+                              }
+                              onClick={
+                                handleCancelDelete
+                              }
+                            />
+
+                            <IconButton
+                              variant="default"
+                              size="compact"
+                              aria-label="Confirm specimen deletion"
+                              icon={
+                                <Check
+                                  size={16}
+                                />
+                              }
+                              className="border-[var(--color-reminder-overdue)] bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)] hover:brightness-95 active:brightness-90"
+                              onClick={
+                                handleConfirmDelete
+                              }
+                            />
+                          </div>
+                        </div>
+                      </Surface>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                <ExpandedSpecimenView
+                  specimen={selectedSpecimen}
+                  actions={
+                    <>
+                      <Button
+                        size="compact"
+                        variant="secondary"
+                        leadingIcon={
+                          <Pencil
+                            size={15}
+                            aria-hidden="true"
+                          />
+                        }
+                        onClick={
+                          handleEditSpecimen
+                        }
+                      >
+                        Edit specimen
+                      </Button>
+
+                      <Button
+                        id="delete-specimen-button"
+                        size="compact"
+                        variant="secondary"
+                        leadingIcon={
+                          <Trash2
+                            size={15}
+                            aria-hidden="true"
+                          />
+                        }
+                        className="border-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]"
+                        onClick={
+                          handleRequestDelete
+                        }
+                      >
+                        Delete specimen
+                      </Button>
+                    </>
+                  }
+                />
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        {view === "add-specimen" ? (
+          <>
             <PageHeader
-              eyebrow="Specimen Record"
-              title={selectedSpecimen.commonName}
-              description={selectedSpecimen.scientificName}
+              eyebrow="Specimen Intake"
+              title="Add specimen"
+              description="Create a new botanical record in your private collection."
               actions={
                 <Button
                   variant="secondary"
@@ -699,7 +1090,9 @@ export default function App() {
                       aria-hidden="true"
                     />
                   }
-                  onClick={handleReturnToCollection}
+                  onClick={
+                    handleCancelAddSpecimen
+                  }
                 >
                   Back to collection
                 </Button>
@@ -707,339 +1100,181 @@ export default function App() {
             />
 
             <div className="mt-8">
-              <AnimatePresence initial={false}>
-                {isDeleteConfirming ? (
-                  <motion.div
-                    key="delete-confirmation"
-                    initial={
-                      shouldReduceMotion
-                        ? false
-                        : {
-                            opacity: 0,
-                            y: -4,
-                          }
-                    }
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: shouldReduceMotion
-                        ? 0
-                        : -4,
-                    }}
-                    transition={{
-                      duration: shouldReduceMotion
-                        ? 0.1
-                        : 0.18,
-                      ease: "easeOut",
-                    }}
-                  >
-                    <Surface
-                      variant="subtle"
-                      className="mb-5 px-4 py-4 sm:px-5"
-                    >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0">
-                          <p className="metadata-label">
-                            Permanent removal
-                          </p>
-
-                          <h2
-                            id="delete-specimen-confirmation-heading"
-                            tabIndex={-1}
-                            className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
-                          >
-                            Remove this specimen?
-                          </h2>
-
-                          <p className="mt-1.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
-                            This botanical record will be permanently deleted.
-                          </p>
-
-                          {deleteError ? (
-                            <p
-                              role="alert"
-                              className="mt-2 text-sm leading-5 text-[var(--color-text-secondary)]"
-                            >
-                              {deleteError}
-                            </p>
-                          ) : null}
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                          <IconButton
-                            variant="default"
-                            size="compact"
-                            aria-label="Cancel specimen deletion"
-                            icon={<X size={16} />}
-                            onClick={handleCancelDelete}
-                          />
-
-                          <IconButton
-                            variant="default"
-                            size="compact"
-                            aria-label="Confirm specimen deletion"
-                            icon={<Check size={16} />}
-                            className="border-[var(--color-reminder-overdue)] bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)] hover:brightness-95 active:brightness-90"
-                            onClick={handleConfirmDelete}
-                          />
-                        </div>
-                      </div>
-                    </Surface>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-
-              <ExpandedSpecimenView
-                specimen={selectedSpecimen}
-                actions={
-                  <>
-                    <Button
-                      size="compact"
-                      variant="secondary"
-                      leadingIcon={
-                        <Pencil
-                          size={15}
-                          aria-hidden="true"
-                        />
-                      }
-                      onClick={handleEditSpecimen}
-                    >
-                      Edit specimen
-                    </Button>
-
-                    <Button
-                      id="delete-specimen-button"
-                      size="compact"
-                      variant="secondary"
-                      leadingIcon={
-                        <Trash2
-                          size={15}
-                          aria-hidden="true"
-                        />
-                      }
-                      className="border-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]"
-                      onClick={handleRequestDelete}
-                    >
-                      Delete specimen
-                    </Button>
-                  </>
+              <AddSpecimenForm
+                onCancel={
+                  handleCancelAddSpecimen
+                }
+                onCreate={
+                  handleCreateSpecimen
                 }
               />
             </div>
-          </motion.div>
+          </>
         ) : null}
-      </AnimatePresence>
 
-      {view === "add-specimen" ? (
-        <>
-          <PageHeader
-            eyebrow="Specimen Intake"
-            title="Add specimen"
-            description="Create a new botanical record for your personal herbarium."
-            actions={
-              <Button
-                variant="secondary"
-                leadingIcon={
-                  <ArrowLeft
-                    size={16}
-                    aria-hidden="true"
-                  />
-                }
-                onClick={handleCancelAddSpecimen}
-              >
-                Back to collection
-              </Button>
-            }
-          />
-
-          <div className="mt-8">
-            <AddSpecimenForm
-              onCancel={handleCancelAddSpecimen}
-              onCreated={handleSpecimenCreated}
+        {view === "edit-specimen" &&
+        selectedSpecimen ? (
+          <>
+            <PageHeader
+              eyebrow="Specimen Revision"
+              title={`Edit ${selectedSpecimen.commonName}`}
+              description="Revise the botanical record in your private archive."
+              actions={
+                <Button
+                  variant="secondary"
+                  leadingIcon={
+                    <ArrowLeft
+                      size={16}
+                      aria-hidden="true"
+                    />
+                  }
+                  onClick={
+                    handleCancelEditSpecimen
+                  }
+                >
+                  Back to specimen
+                </Button>
+              }
             />
-          </div>
-        </>
-      ) : null}
 
-      {view === "edit-specimen" &&
-      selectedSpecimen ? (
-        <>
-          <PageHeader
-            eyebrow="Specimen Revision"
-            title={`Edit ${selectedSpecimen.commonName}`}
-            description="Revise the botanical record while preserving its archive history."
-            actions={
-              <Button
-                variant="secondary"
-                leadingIcon={
-                  <ArrowLeft
-                    size={16}
-                    aria-hidden="true"
-                  />
+            <div className="mt-8">
+              <EditSpecimenForm
+                specimen={selectedSpecimen}
+                onCancel={
+                  handleCancelEditSpecimen
                 }
-                onClick={handleCancelEditSpecimen}
-              >
-                Back to specimen
-              </Button>
-            }
-          />
+                onUpdate={
+                  handleUpdateSpecimen
+                }
+              />
+            </div>
+          </>
+        ) : null}
 
-          <div className="mt-8">
-            <EditSpecimenForm
-              specimen={selectedSpecimen}
-              onCancel={handleCancelEditSpecimen}
-              onUpdated={handleSpecimenUpdated}
+        {view === "settings" ? (
+          <>
+            <PageHeader
+              eyebrow="Archive Preferences"
+              title="Settings"
+              description="Adjust the appearance of Verdarium and review your private archive."
             />
-          </div>
-        </>
-      ) : null}
 
-      {view === "settings" ? (
-        <>
-          <PageHeader
-            eyebrow="Archive Preferences"
-            title="Settings"
-            description="Adjust the appearance of Verdarium and manage your botanical archive."
-          />
+            <div className="mt-8 max-w-3xl space-y-6">
+              <AccountMenu
+                archiveStatus={archiveStatus}
+                isSigningOut={isSigningOut}
+                warningMessage={
+                  archiveWarning ??
+                  (archiveStatus === "error"
+                    ? cloudError
+                    : null)
+                }
+                onReviewConflict={() => {
+                  setConflictError(null);
+                  setIsConflictDialogOpen(true);
+                }}
+                onSignOut={() => {
+                  void handleSignOut();
+                }}
+              />
 
-          <div className="mt-8 max-w-3xl space-y-6">
-            <Surface className="p-6 sm:p-8">
-              <section
-                aria-labelledby="settings-appearance-heading"
-              >
-                <div className="max-w-2xl">
-                  <p className="metadata-label">
-                    Presentation
-                  </p>
+              <Surface className="p-6 sm:p-8">
+                <section
+                  aria-labelledby="settings-appearance-heading"
+                >
+                  <div className="max-w-2xl">
+                    <p className="metadata-label">
+                      Presentation
+                    </p>
 
-                  <h2
-                    id="settings-appearance-heading"
-                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-                  >
-                    Appearance
-                  </h2>
+                    <h2
+                      id="settings-appearance-heading"
+                      className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                    >
+                      Appearance
+                    </h2>
 
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                    Choose the visual atmosphere used
-                    throughout your botanical archive.
-                  </p>
-                </div>
-
-                <div className="mt-7 border-t border-[var(--color-border)] pt-6">
-                  <ThemeSelector
-                    value={theme}
-                    onChange={handleThemeChange}
-                  />
-                </div>
-              </section>
-            </Surface>
-
-            <Surface className="p-6 sm:p-8">
-              <section
-                aria-labelledby="settings-collection-heading"
-              >
-                <div className="max-w-2xl">
-                  <p className="metadata-label">
-                    Archive stewardship
-                  </p>
-
-                  <h2
-                    id="settings-collection-heading"
-                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-                  >
-                    Collection management
-                  </h2>
-
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                    Create a portable backup of your
-                    collection or restore Verdarium from
-                    a previously exported archive.
-                  </p>
-                </div>
-
-                <div className="mt-7 border-t border-[var(--color-border)] pt-6">
-                  <ExportCollectionForm
-                    specimens={collectionState.specimens}
-                  />
-                </div>
-
-                <div className="mt-8 border-t border-[var(--color-border)] pt-8">
-                  <ImportCollectionForm
-                    onImported={handleCollectionImported}
-                  />
-                </div>
-              </section>
-            </Surface>
-
-            <Surface className="p-6 sm:p-8">
-              <section
-                aria-labelledby="settings-archive-heading"
-              >
-                <div className="max-w-2xl">
-                  <p className="metadata-label">
-                    Archive storage
-                  </p>
-
-                  <h2
-                    id="settings-archive-heading"
-                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
-                  >
-                    Archive information
-                  </h2>
-
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                    {isCloudActive
-                      ? "Verdarium is connected to your private cloud collection while retaining a local browser copy."
-                      : "Verdarium currently keeps your botanical collection locally in this browser. Export the archive periodically if you want a portable backup."}
-                  </p>
-                </div>
-
-                <dl className="mt-7 grid gap-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2">
-                  <div>
-                    <dt className="metadata-label">
-                      Specimens
-                    </dt>
-
-                    <dd className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
-                      {specimenCount}
-                    </dd>
+                    <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                      Choose the visual
+                      atmosphere used throughout
+                      your botanical archive.
+                    </p>
                   </div>
 
-                  <div>
-                    <dt className="metadata-label">
-                      Storage
-                    </dt>
-
-                    <dd className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
-                      {isCloudActive
-                        ? "Private cloud + this browser"
-                        : "This browser"}
-                    </dd>
+                  <div className="mt-7 border-t border-[var(--color-border)] pt-6">
+                    <ThemeSelector
+                      value={theme}
+                      onChange={
+                        handleThemeChange
+                      }
+                    />
                   </div>
-                </dl>
+                </section>
+              </Surface>
 
-                <p className="mt-6 border-t border-[var(--color-border)] pt-6 text-xs leading-5 text-[var(--color-text-muted)]">
-                  {isCloudActive
-                    ? "Cloud synchronization is active for this signed-in session. Multi-device conflict resolution will be expanded in a later Verdarium feature."
-                    : "Collection data is not automatically synchronized between browsers or devices."}
-                </p>
+              <Surface className="p-6 sm:p-8">
+                <section
+                  aria-labelledby="settings-archive-heading"
+                >
+                  <div className="max-w-2xl">
+                    <p className="metadata-label">
+                      Archive record
+                    </p>
 
-                {cloudError ? (
-                  <p
-                    role="alert"
-                    className="mt-4 text-sm leading-6 text-[var(--color-text-secondary)]"
-                  >
-                    {cloudError}
-                  </p>
-                ) : null}
-              </section>
-            </Surface>
-          </div>
-        </>
-      ) : null}
-    </AppShell>
+                    <h2
+                      id="settings-archive-heading"
+                      className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                    >
+                      Collection information
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                      Verdarium preserves this
+                      botanical collection in
+                      your private cloud archive.
+                    </p>
+                  </div>
+
+                  <dl className="mt-7 grid gap-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-2">
+                    <div>
+                      <dt className="metadata-label">
+                        Specimens
+                      </dt>
+
+                      <dd className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+                        {specimens.length}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt className="metadata-label">
+                        Storage
+                      </dt>
+
+                      <dd className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+                        Private cloud
+                      </dd>
+                    </div>
+                  </dl>
+                </section>
+              </Surface>
+            </div>
+          </>
+        ) : null}
+      </AppShell>
+
+      <CollectionConflictDialog
+        isOpen={isConflictDialogOpen}
+        isResolving={isResolvingConflict}
+        errorMessage={conflictError}
+        onResolve={(choice) => {
+          void handleResolveConflict(choice);
+        }}
+        onClose={() => {
+          setIsConflictDialogOpen(false);
+          setConflictError(null);
+        }}
+      />
+    </>
   );
 }
