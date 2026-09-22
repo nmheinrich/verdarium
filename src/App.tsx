@@ -44,6 +44,10 @@ import {
   PageHeader,
 } from "@/components/layout";
 import {
+  CollectionSharingSettings,
+  SharedCollectionView,
+} from "@/components/sharing";
+import {
   Button,
   ErrorState,
   IconButton,
@@ -53,6 +57,8 @@ import {
   initializeTheme,
   setTheme,
 } from "@/lib";
+import { loadSharedCollection } from "@/sharing/sharingService";
+import type { SharedCollection } from "@/sharing/types";
 import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
 import type {
   Specimen,
@@ -80,6 +86,22 @@ type SpecimenMutationOutcome =
       message: string;
     };
 
+function getSharedRouteToken(): string | null {
+  const match = window.location.pathname.match(
+    /^\/shared\/([^/]+)\/?$/,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
+
 export default function App() {
   const shouldReduceMotion = useReducedMotion();
 
@@ -87,6 +109,23 @@ export default function App() {
     state: authState,
     signOut,
   } = useAuth();
+
+  const sharedRouteToken = getSharedRouteToken();
+
+  const [
+    sharedCollection,
+    setSharedCollection,
+  ] = useState<SharedCollection | null>(null);
+
+  const [
+    isSharedCollectionLoading,
+    setIsSharedCollectionLoading,
+  ] = useState(sharedRouteToken !== null);
+
+  const [
+    sharedCollectionError,
+    setSharedCollectionError,
+  ] = useState<string | null>(null);
 
   const [view, setView] =
     useState<AppView>("collection");
@@ -185,12 +224,57 @@ export default function App() {
     archiveStatus === "cloud";
 
   useEffect(() => {
+    if (!sharedRouteToken) {
+      return;
+    }
+
+    const shareToken = sharedRouteToken;
+    let isCancelled = false;
+
+    async function openSharedCollection() {
+      setIsSharedCollectionLoading(true);
+      setSharedCollection(null);
+      setSharedCollectionError(null);
+
+      const result =
+        await loadSharedCollection(
+          shareToken,
+        );
+
+      if (isCancelled) {
+        return;
+      }
+
+      if (!result.success) {
+        setSharedCollectionError(
+          result.error.message,
+        );
+        setIsSharedCollectionLoading(false);
+        return;
+      }
+
+      setSharedCollection(result.data);
+      setSharedCollectionError(null);
+      setIsSharedCollectionLoading(false);
+    }
+
+    void openSharedCollection();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [sharedRouteToken]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     async function initializeCollection() {
       await Promise.resolve();
 
-      if (isCancelled) {
+      if (
+        isCancelled ||
+        sharedRouteToken
+      ) {
         return;
       }
 
@@ -259,6 +343,7 @@ export default function App() {
     authState.status,
     authenticatedUserId,
     connectionAttempt,
+    sharedRouteToken,
   ]);
 
   useEffect(() => {
@@ -623,6 +708,64 @@ export default function App() {
     setIsSigningOut(false);
     setView("collection");
   };
+
+  if (sharedRouteToken) {
+    if (isSharedCollectionLoading) {
+      return (
+        <AppShell navigation={null}>
+          <Surface
+            variant="subtle"
+            className="mx-auto max-w-3xl p-8 sm:p-10"
+          >
+            <p
+              role="status"
+              className="metadata-label"
+            >
+              Opening shared archive
+            </p>
+
+            <h1 className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl">
+              Retrieving botanical collection
+            </h1>
+
+            <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--color-text-secondary)]">
+              Verdarium is opening the read-only
+              botanical record associated with
+              this sharing link.
+            </p>
+          </Surface>
+        </AppShell>
+      );
+    }
+
+    if (
+      sharedCollectionError ||
+      !sharedCollection
+    ) {
+      return (
+        <AppShell navigation={null}>
+          <div className="mx-auto max-w-3xl">
+            <ErrorState
+              eyebrow="Shared archive"
+              title="Botanical archive unavailable"
+              description={
+                sharedCollectionError ??
+                "This shared collection is unavailable or is no longer being shared."
+              }
+            />
+          </div>
+        </AppShell>
+      );
+    }
+
+    return (
+      <AppShell navigation={null}>
+        <SharedCollectionView
+          collection={sharedCollection}
+        />
+      </AppShell>
+    );
+  }
 
   if (authState.status !== "signedIn") {
     return (
@@ -1177,6 +1320,8 @@ export default function App() {
                   void handleSignOut();
                 }}
               />
+
+              <CollectionSharingSettings />
 
               <Surface className="p-6 sm:p-8">
                 <section
