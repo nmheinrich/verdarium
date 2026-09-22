@@ -54,12 +54,12 @@ export function createSupabaseCollectionStore(
           success: true,
           data: specimens,
         };
-      } catch {
-        return failure(
-          "invalid-remote-data",
-          "Verdarium received invalid specimen data from cloud storage.",
-        );
-      }
+        } catch {
+            return failure(
+                "invalid-remote-data",
+                "Verdarium received invalid specimen data from cloud storage.",
+            );
+        }
     },
 
     async replaceCollection(

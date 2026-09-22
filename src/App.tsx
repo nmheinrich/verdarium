@@ -32,6 +32,11 @@ import { ArchiveEntry } from "@/components/auth/ArchiveEntry";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { CollectionConflictDialog } from "@/components/auth/CollectionConflictDialog";
 import { ExpandedSpecimenView } from "@/components/cards";
+import {
+  CareHistory,
+  CareReminderForm,
+  CareView,
+} from "@/components/care";
 import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
@@ -62,16 +67,28 @@ import type { SharedCollection } from "@/sharing/types";
 import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
 import type {
   Specimen,
+  SpecimenReminder,
   ThemeId,
 } from "@/types";
 
 const navigationItems = [
-  { label: "Collection", value: "collection" },
-  { label: "Settings", value: "settings" },
+  {
+    label: "Collection",
+    value: "collection",
+  },
+  {
+    label: "Care",
+    value: "care",
+  },
+  {
+    label: "Settings",
+    value: "settings",
+  },
 ];
 
 type AppView =
   | "collection"
+  | "care"
   | "add-specimen"
   | "specimen"
   | "edit-specimen"
@@ -110,35 +127,59 @@ export default function App() {
     signOut,
   } = useAuth();
 
-  const sharedRouteToken = getSharedRouteToken();
+  const sharedRouteToken =
+    getSharedRouteToken();
 
   const [
     sharedCollection,
     setSharedCollection,
-  ] = useState<SharedCollection | null>(null);
+  ] =
+    useState<SharedCollection | null>(
+      null,
+    );
 
   const [
     isSharedCollectionLoading,
     setIsSharedCollectionLoading,
-  ] = useState(sharedRouteToken !== null);
+  ] = useState(
+    sharedRouteToken !== null,
+  );
 
   const [
     sharedCollectionError,
     setSharedCollectionError,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [view, setView] =
     useState<AppView>("collection");
 
-  const [theme, setActiveTheme] =
-    useState<ThemeId>(() => initializeTheme());
+  const [
+    theme,
+    setActiveTheme,
+  ] = useState<ThemeId>(
+    () => initializeTheme(),
+  );
 
-  const [specimens, setSpecimens] = useState<
-    Specimen[]
-  >([]);
+  const [
+    specimens,
+    setSpecimens,
+  ] = useState<Specimen[]>([]);
 
-  const [selectedSpecimenId, setSelectedSpecimenId] =
-    useState<string | null>(null);
+  const [
+    careHistoryRefreshTokens,
+    setCareHistoryRefreshTokens,
+  ] = useState<Record<string, number>>({});
+
+  const [
+    selectedSpecimenId,
+    setSelectedSpecimenId,
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     isDeleteConfirming,
@@ -148,23 +189,34 @@ export default function App() {
   const [
     deleteError,
     setDeleteError,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     archiveStatus,
     setArchiveStatus,
   ] =
-    useState<ArchiveConnectionStatus>("connecting");
+    useState<ArchiveConnectionStatus>(
+      "connecting",
+    );
 
   const [
     archiveWarning,
     setArchiveWarning,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     cloudError,
     setCloudError,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     isAuthDialogOpen,
@@ -184,7 +236,10 @@ export default function App() {
   const [
     conflictError,
     setConflictError,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     isSigningOut,
@@ -212,13 +267,16 @@ export default function App() {
       ? null
       : specimens.find(
           (specimen) =>
-            specimen.id === selectedSpecimenId,
+            specimen.id ===
+            selectedSpecimenId,
         ) ?? null;
 
   const activeNavigationItem =
     view === "settings"
       ? "settings"
-      : "collection";
+      : view === "care"
+        ? "care"
+        : "collection";
 
   const isCollectionReady =
     archiveStatus === "cloud";
@@ -228,11 +286,16 @@ export default function App() {
       return;
     }
 
-    const shareToken = sharedRouteToken;
+    const shareToken =
+      sharedRouteToken;
+
     let isCancelled = false;
 
     async function openSharedCollection() {
-      setIsSharedCollectionLoading(true);
+      setIsSharedCollectionLoading(
+        true,
+      );
+
       setSharedCollection(null);
       setSharedCollectionError(null);
 
@@ -249,13 +312,23 @@ export default function App() {
         setSharedCollectionError(
           result.error.message,
         );
-        setIsSharedCollectionLoading(false);
+
+        setIsSharedCollectionLoading(
+          false,
+        );
+
         return;
       }
 
-      setSharedCollection(result.data);
+      setSharedCollection(
+        result.data,
+      );
+
       setSharedCollectionError(null);
-      setIsSharedCollectionLoading(false);
+
+      setIsSharedCollectionLoading(
+        false,
+      );
     }
 
     void openSharedCollection();
@@ -283,14 +356,20 @@ export default function App() {
         !authenticatedUserId
       ) {
         activeUserIdRef.current = null;
+
         setSpecimens([]);
         setSelectedSpecimenId(null);
-        setArchiveStatus("connecting");
+        setArchiveStatus(
+          "connecting",
+        );
         setArchiveWarning(null);
         setCloudError(null);
-        setIsConflictDialogOpen(false);
+        setIsConflictDialogOpen(
+          false,
+        );
         setConflictError(null);
         setView("collection");
+
         return;
       }
 
@@ -299,7 +378,9 @@ export default function App() {
 
       setSpecimens([]);
       setSelectedSpecimenId(null);
-      setArchiveStatus("connecting");
+      setArchiveStatus(
+        "connecting",
+      );
       setArchiveWarning(null);
       setCloudError(null);
       setConflictError(null);
@@ -315,22 +396,42 @@ export default function App() {
         return;
       }
 
-      if (outcome.status === "conflict") {
-        setArchiveStatus("conflict");
-        setCloudError(outcome.message);
-        setIsConflictDialogOpen(true);
+      if (
+        outcome.status ===
+        "conflict"
+      ) {
+        setArchiveStatus(
+          "conflict",
+        );
+        setCloudError(
+          outcome.message,
+        );
+        setIsConflictDialogOpen(
+          true,
+        );
+
         return;
       }
 
-      if (outcome.status === "error") {
+      if (
+        outcome.status === "error"
+      ) {
         setArchiveStatus("error");
-        setCloudError(outcome.message);
+        setCloudError(
+          outcome.message,
+        );
+
         return;
       }
 
-      setSpecimens(outcome.specimens);
+      setSpecimens(
+        outcome.specimens,
+      );
+
       setArchiveStatus("cloud");
-      setArchiveWarning(outcome.warning);
+      setArchiveWarning(
+        outcome.warning,
+      );
       setCloudError(null);
     }
 
@@ -351,105 +452,141 @@ export default function App() {
       return;
     }
 
-    const animationFrame = requestAnimationFrame(() => {
-      document
-        .getElementById(
-          "delete-specimen-confirmation-heading",
-        )
-        ?.focus();
-    });
+    const animationFrame =
+      requestAnimationFrame(() => {
+        document
+          .getElementById(
+            "delete-specimen-confirmation-heading",
+          )
+          ?.focus();
+      });
 
     return () => {
-      cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(
+        animationFrame,
+      );
     };
   }, [isDeleteConfirming]);
 
-  const handleCreateSpecimen = async (
-    specimen: Specimen,
-  ): Promise<SpecimenMutationOutcome> => {
-    if (!isCollectionReady) {
+  const handleCreateSpecimen =
+    async (
+      specimen: Specimen,
+    ): Promise<SpecimenMutationOutcome> => {
+      if (!isCollectionReady) {
+        return {
+          success: false,
+          message:
+            "The private archive is not ready. Please wait or try opening it again.",
+        };
+      }
+
+      const storeResult =
+        await getCloudCollectionStore();
+
+      if (!storeResult.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not reach the private archive. Your entered information has been preserved.",
+        };
+      }
+
+      const result =
+        await storeResult.store.addSpecimen(
+          specimen,
+        );
+
+      if (!result.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not save this specimen to the private archive. Your entered information has been preserved.",
+        };
+      }
+
+      setSpecimens(result.data);
+      setSelectedSpecimenId(null);
+      setCloudError(null);
+      setView("collection");
+
       return {
-        success: false,
-        message:
-          "The private archive is not ready. Please wait or try opening it again.",
+        success: true,
       };
-    }
-
-    const storeResult =
-      await getCloudCollectionStore();
-
-    if (!storeResult.success) {
-      return {
-        success: false,
-        message:
-          "Verdarium could not reach the private archive. Your entered information has been preserved.",
-      };
-    }
-
-    const result =
-      await storeResult.store.addSpecimen(specimen);
-
-    if (!result.success) {
-      return {
-        success: false,
-        message:
-          "Verdarium could not save this specimen to the private archive. Your entered information has been preserved.",
-      };
-    }
-
-    setSpecimens(result.data);
-    setSelectedSpecimenId(null);
-    setCloudError(null);
-    setView("collection");
-
-    return {
-      success: true,
     };
-  };
 
-  const handleUpdateSpecimen = async (
-    specimen: Specimen,
-  ): Promise<SpecimenMutationOutcome> => {
-    if (!isCollectionReady) {
-      return {
-        success: false,
-        message:
-          "The private archive is not ready. Please wait or try opening it again.",
-      };
-    }
+  const handleUpdateSpecimen =
+    async (
+      specimen: Specimen,
+    ): Promise<SpecimenMutationOutcome> => {
+      if (!isCollectionReady) {
+        return {
+          success: false,
+          message:
+            "The private archive is not ready. Please wait or try opening it again.",
+        };
+      }
 
-    const storeResult =
-      await getCloudCollectionStore();
+      const storeResult =
+        await getCloudCollectionStore();
 
-    if (!storeResult.success) {
-      return {
-        success: false,
-        message:
-          "Verdarium could not reach the private archive. Your edits have been preserved.",
-      };
-    }
+      if (!storeResult.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not reach the private archive. Your edits have been preserved.",
+        };
+      }
 
-    const result =
-      await storeResult.store.updateSpecimen(
-        specimen,
+      const result =
+        await storeResult.store.updateSpecimen(
+          specimen,
+        );
+
+      if (!result.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not save these changes to the private archive. Your edits have been preserved.",
+        };
+      }
+
+      setSpecimens(result.data);
+      setSelectedSpecimenId(
+        specimen.id,
       );
+      setCloudError(null);
+      setView("specimen");
 
-    if (!result.success) {
       return {
-        success: false,
-        message:
-          "Verdarium could not save these changes to the private archive. Your edits have been preserved.",
+        success: true,
       };
-    }
-
-    setSpecimens(result.data);
-    setSelectedSpecimenId(specimen.id);
-    setCloudError(null);
-    setView("specimen");
-
-    return {
-      success: true,
     };
+
+  const handleReminderChange = (
+    specimenId: string,
+    reminder: SpecimenReminder,
+  ) => {
+    setSpecimens(
+      (currentSpecimens) =>
+        currentSpecimens.map(
+          (specimen) =>
+            specimen.id ===
+            specimenId
+              ? {
+                  ...specimen,
+                  reminder,
+                }
+              : specimen,
+        ),
+    );
+
+    setCareHistoryRefreshTokens(
+      (currentTokens) => ({
+        ...currentTokens,
+        [specimenId]:
+          (currentTokens[specimenId] ?? 0) + 1,
+      }),
+    );
   };
 
   const handleAddSpecimen = () => {
@@ -457,44 +594,64 @@ export default function App() {
       return;
     }
 
-    returnFocusSpecimenIdRef.current = null;
+    returnFocusSpecimenIdRef.current =
+      null;
+
     setView("add-specimen");
   };
 
-  const handleCancelAddSpecimen = () => {
-    setView("collection");
-  };
+  const handleCancelAddSpecimen =
+    () => {
+      setView("collection");
+    };
 
-  const handleSpecimenExitComplete = () => {
-    if (
-      view === "collection" ||
-      view === "settings"
-    ) {
-      setSelectedSpecimenId(null);
-    }
-  };
+  const handleSpecimenExitComplete =
+    () => {
+      if (
+        view === "collection" ||
+        view === "care" ||
+        view === "settings"
+      ) {
+        setSelectedSpecimenId(
+          null,
+        );
+      }
+    };
 
   const handleSelectSpecimen = (
     specimen: Specimen,
   ) => {
-    setSelectedSpecimenId(specimen.id);
-    setIsDeleteConfirming(false);
+    setSelectedSpecimenId(
+      specimen.id,
+    );
+
+    setIsDeleteConfirming(
+      false,
+    );
+
     setDeleteError(null);
+
     returnFocusSpecimenIdRef.current =
       specimen.id;
+
     setView("specimen");
   };
 
-  const handleReturnToCollection = () => {
-    if (selectedSpecimen) {
-      returnFocusSpecimenIdRef.current =
-        selectedSpecimen.id;
-    }
+  const handleReturnToCollection =
+    () => {
+      if (selectedSpecimen) {
+        returnFocusSpecimenIdRef.current =
+          selectedSpecimen.id;
+      }
 
-    setIsDeleteConfirming(false);
-    setDeleteError(null);
-    setView("collection");
-  };
+      setIsDeleteConfirming(
+        false,
+      );
+
+      setDeleteError(null);
+
+      setView("collection");
+    };
 
   const handleEditSpecimen = () => {
     if (!selectedSpecimen) {
@@ -502,80 +659,103 @@ export default function App() {
       return;
     }
 
-    setIsDeleteConfirming(false);
+    setIsDeleteConfirming(
+      false,
+    );
+
     setDeleteError(null);
+
     setView("edit-specimen");
   };
 
-  const handleCancelEditSpecimen = () => {
-    if (!selectedSpecimen) {
-      handleReturnToCollection();
-      return;
-    }
+  const handleCancelEditSpecimen =
+    () => {
+      if (!selectedSpecimen) {
+        handleReturnToCollection();
+        return;
+      }
 
-    setView("specimen");
-  };
+      setView("specimen");
+    };
 
-  const handleRequestDelete = () => {
-    setDeleteError(null);
-    setIsDeleteConfirming(true);
-  };
+  const handleRequestDelete =
+    () => {
+      setDeleteError(null);
+
+      setIsDeleteConfirming(
+        true,
+      );
+    };
 
   const handleCancelDelete = () => {
     setDeleteError(null);
-    setIsDeleteConfirming(false);
+
+    setIsDeleteConfirming(
+      false,
+    );
 
     requestAnimationFrame(() => {
       document
-        .getElementById("delete-specimen-button")
+        .getElementById(
+          "delete-specimen-button",
+        )
         ?.focus();
     });
   };
 
-  const handleConfirmDelete = async () => {
-    if (!selectedSpecimen) {
-      handleReturnToCollection();
-      return;
-    }
+  const handleConfirmDelete =
+    async () => {
+      if (!selectedSpecimen) {
+        handleReturnToCollection();
+        return;
+      }
 
-    if (!isCollectionReady) {
-      setDeleteError(
-        "The private archive is not ready. This specimen remains unchanged.",
+      if (!isCollectionReady) {
+        setDeleteError(
+          "The private archive is not ready. This specimen remains unchanged.",
+        );
+
+        return;
+      }
+
+      setDeleteError(null);
+
+      const storeResult =
+        await getCloudCollectionStore();
+
+      if (!storeResult.success) {
+        setDeleteError(
+          "Verdarium could not reach the private archive. This specimen remains unchanged.",
+        );
+
+        return;
+      }
+
+      const result =
+        await storeResult.store.deleteSpecimen(
+          selectedSpecimen.id,
+        );
+
+      if (!result.success) {
+        setDeleteError(
+          "Verdarium could not remove this specimen. The botanical record remains in your collection.",
+        );
+
+        return;
+      }
+
+      setSpecimens(result.data);
+      setSelectedSpecimenId(null);
+      setIsDeleteConfirming(
+        false,
       );
-      return;
-    }
+      setCloudError(null);
 
-    setDeleteError(null);
+      returnFocusSpecimenIdRef.current =
+        null;
 
-    const storeResult =
-      await getCloudCollectionStore();
-
-    if (!storeResult.success) {
-      setDeleteError(
-        "Verdarium could not reach the private archive. This specimen remains unchanged.",
-      );
-      return;
-    }
-
-    const result =
-      await storeResult.store.deleteSpecimen(
-        selectedSpecimen.id,
-      );
-
-    if (!result.success) {
-      setDeleteError(
-        "Verdarium could not remove this specimen. The botanical record remains in your collection.",
-      );
-      return;
-    }
-
-    setSpecimens(result.data);
-    setSelectedSpecimenId(null);
-    setIsDeleteConfirming(false);
-    setCloudError(null);
-    returnFocusSpecimenIdRef.current = null;
-    setView("collection");
-  };
+      setView("collection");
+    };
 
   const handleThemeChange = (
     nextTheme: ThemeId,
@@ -592,125 +772,196 @@ export default function App() {
       return;
     }
 
-    if (value === "settings") {
-      returnFocusSpecimenIdRef.current = null;
-      setIsDeleteConfirming(false);
+    if (value === "care") {
+      returnFocusSpecimenIdRef.current =
+        null;
+
+      setSelectedSpecimenId(null);
+      setIsDeleteConfirming(
+        false,
+      );
       setDeleteError(null);
+
+      setView("care");
+
+      return;
+    }
+
+    if (value === "settings") {
+      returnFocusSpecimenIdRef.current =
+        null;
+
+      setSelectedSpecimenId(null);
+      setIsDeleteConfirming(
+        false,
+      );
+      setDeleteError(null);
+
       setView("settings");
     }
   };
 
-  const handleSpecimenViewAnimationComplete = () => {
-    if (
-      view !== "specimen" ||
-      !selectedSpecimen
-    ) {
-      return;
-    }
+  const handleSpecimenViewAnimationComplete =
+    () => {
+      if (
+        view !== "specimen" ||
+        !selectedSpecimen
+      ) {
+        return;
+      }
 
-    document
-      .getElementById(
-        `expanded-specimen-${selectedSpecimen.id}-name`,
-      )
-      ?.focus();
-  };
+      document
+        .getElementById(
+          `expanded-specimen-${selectedSpecimen.id}-name`,
+        )
+        ?.focus();
+    };
 
-  const handleCollectionViewAnimationComplete = () => {
-    if (view !== "collection") {
-      return;
-    }
+  const handleCollectionViewAnimationComplete =
+    () => {
+      if (
+        view !== "collection"
+      ) {
+        return;
+      }
 
-    const specimenId =
-      returnFocusSpecimenIdRef.current;
+      const specimenId =
+        returnFocusSpecimenIdRef.current;
 
-    if (!specimenId) {
-      return;
-    }
+      if (!specimenId) {
+        return;
+      }
 
-    const specimenButton = document.getElementById(
-      `compact-specimen-${specimenId}-open`,
-    );
+      const specimenButton =
+        document.getElementById(
+          `compact-specimen-${specimenId}-open`,
+        );
 
-    if (specimenButton) {
-      specimenButton.focus();
-      returnFocusSpecimenIdRef.current = null;
-    }
-  };
+      if (specimenButton) {
+        specimenButton.focus();
 
-  const handleResolveConflict = async (
-    choice: CollectionConflictChoice,
-  ) => {
-    if (
-      isResolvingConflict ||
-      !authenticatedUserId
-    ) {
-      return;
-    }
+        returnFocusSpecimenIdRef.current =
+          null;
+      }
+    };
 
-    const resolvingUserId = authenticatedUserId;
+  const handleResolveConflict =
+    async (
+      choice: CollectionConflictChoice,
+    ) => {
+      if (
+        isResolvingConflict ||
+        !authenticatedUserId
+      ) {
+        return;
+      }
 
-    setIsResolvingConflict(true);
-    setConflictError(null);
+      const resolvingUserId =
+        authenticatedUserId;
 
-    const outcome =
-      await resolveCollectionConflict(choice);
+      setIsResolvingConflict(
+        true,
+      );
 
-    if (
-      activeUserIdRef.current !== resolvingUserId
-    ) {
-      setIsResolvingConflict(false);
-      return;
-    }
+      setConflictError(null);
 
-    if (outcome.status !== "ready") {
-      setConflictError(outcome.message);
-      setIsResolvingConflict(false);
-      return;
-    }
+      const outcome =
+        await resolveCollectionConflict(
+          choice,
+        );
 
-    setSpecimens(outcome.specimens);
-    setSelectedSpecimenId(null);
-    setArchiveStatus("cloud");
-    setArchiveWarning(outcome.warning);
-    setCloudError(null);
-    setConflictError(null);
-    setIsResolvingConflict(false);
-    setIsConflictDialogOpen(false);
-    setView("collection");
-  };
+      if (
+        activeUserIdRef.current !==
+        resolvingUserId
+      ) {
+        setIsResolvingConflict(
+          false,
+        );
 
-  const handleSignOut = async () => {
-    if (
-      isSigningOut ||
-      authState.status !== "signedIn"
-    ) {
-      return;
-    }
+        return;
+      }
 
-    setIsSigningOut(true);
-    setCloudError(null);
+      if (
+        outcome.status !== "ready"
+      ) {
+        setConflictError(
+          outcome.message,
+        );
 
-    const result = await signOut();
+        setIsResolvingConflict(
+          false,
+        );
 
-    if (!result.success) {
-      setCloudError(result.error.message);
+        return;
+      }
+
+      setSpecimens(
+        outcome.specimens,
+      );
+
+      setSelectedSpecimenId(null);
+      setArchiveStatus("cloud");
+      setArchiveWarning(
+        outcome.warning,
+      );
+      setCloudError(null);
+      setConflictError(null);
+      setIsResolvingConflict(
+        false,
+      );
+      setIsConflictDialogOpen(
+        false,
+      );
+      setView("collection");
+    };
+
+  const handleSignOut =
+    async () => {
+      if (
+        isSigningOut ||
+        authState.status !==
+          "signedIn"
+      ) {
+        return;
+      }
+
+      setIsSigningOut(true);
+      setCloudError(null);
+
+      const result =
+        await signOut();
+
+      if (!result.success) {
+        setCloudError(
+          result.error.message,
+        );
+
+        setIsSigningOut(false);
+
+        return;
+      }
+
+      activeUserIdRef.current =
+        null;
+
+      setSpecimens([]);
+      setSelectedSpecimenId(null);
+      setArchiveWarning(null);
+      setCloudError(null);
+
+      setIsConflictDialogOpen(
+        false,
+      );
+
+      setConflictError(null);
       setIsSigningOut(false);
-      return;
-    }
-
-    activeUserIdRef.current = null;
-    setSpecimens([]);
-    setSelectedSpecimenId(null);
-    setArchiveWarning(null);
-    setCloudError(null);
-    setIsConflictDialogOpen(false);
-    setConflictError(null);
-    setIsSigningOut(false);
-    setView("collection");
-  };
+      setView("collection");
+    };
 
   if (sharedRouteToken) {
-    if (isSharedCollectionLoading) {
+    if (
+      isSharedCollectionLoading
+    ) {
       return (
         <AppShell navigation={null}>
           <Surface
@@ -725,12 +976,14 @@ export default function App() {
             </p>
 
             <h1 className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl">
-              Retrieving botanical collection
+              Retrieving botanical
+              collection
             </h1>
 
             <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--color-text-secondary)]">
-              Verdarium is opening the read-only
-              botanical record associated with
+              Verdarium is opening
+              the read-only botanical
+              record associated with
               this sharing link.
             </p>
           </Surface>
@@ -761,27 +1014,38 @@ export default function App() {
     return (
       <AppShell navigation={null}>
         <SharedCollectionView
-          collection={sharedCollection}
+          collection={
+            sharedCollection
+          }
         />
       </AppShell>
     );
   }
 
-  if (authState.status !== "signedIn") {
+  if (
+    authState.status !==
+    "signedIn"
+  ) {
     return (
       <>
         <AppShell navigation={null}>
           <ArchiveEntry
             onOpenAuth={() => {
-              setIsAuthDialogOpen(true);
+              setIsAuthDialogOpen(
+                true,
+              );
             }}
           />
         </AppShell>
 
         <AuthDialog
-          isOpen={isAuthDialogOpen}
+          isOpen={
+            isAuthDialogOpen
+          }
           onClose={() => {
-            setIsAuthDialogOpen(false);
+            setIsAuthDialogOpen(
+              false,
+            );
           }}
         />
       </>
@@ -789,17 +1053,23 @@ export default function App() {
   }
 
   if (
-    (view === "specimen" ||
-      view === "edit-specimen") &&
+    (
+      view === "specimen" ||
+      view === "edit-specimen"
+    ) &&
     !selectedSpecimen
   ) {
     return (
       <AppShell
         navigation={
           <AppNav
-            items={navigationItems}
+            items={
+              navigationItems
+            }
             activeItem="collection"
-            onNavigate={handleNavigation}
+            onNavigate={
+              handleNavigation
+            }
           />
         }
       >
@@ -823,7 +1093,9 @@ export default function App() {
                     aria-hidden="true"
                   />
                 }
-                onClick={handleReturnToCollection}
+                onClick={
+                  handleReturnToCollection
+                }
               >
                 Back to collection
               </Button>
@@ -840,8 +1112,12 @@ export default function App() {
         navigation={
           <AppNav
             items={navigationItems}
-            activeItem={activeNavigationItem}
-            onNavigate={handleNavigation}
+            activeItem={
+              activeNavigationItem
+            }
+            onNavigate={
+              handleNavigation
+            }
           />
         }
       >
@@ -852,7 +1128,8 @@ export default function App() {
             handleSpecimenExitComplete
           }
         >
-          {view === "collection" ? (
+          {view ===
+          "collection" ? (
             <motion.div
               key="collection"
               initial={
@@ -878,12 +1155,18 @@ export default function App() {
                     }
               }
               transition={{
-                duration: shouldReduceMotion
-                  ? 0.1
-                  : 0.22,
+                duration:
+                  shouldReduceMotion
+                    ? 0.1
+                    : 0.22,
                 ease: shouldReduceMotion
                   ? "easeOut"
-                  : [0.22, 1, 0.36, 1],
+                  : [
+                      0.22,
+                      1,
+                      0.36,
+                      1,
+                    ],
               }}
               onAnimationComplete={
                 handleCollectionViewAnimationComplete
@@ -895,7 +1178,8 @@ export default function App() {
                 description="A quiet archive for documenting, studying, and caring for your botanical specimens."
                 actions={
                   isCollectionReady &&
-                  specimens.length > 0 ? (
+                  specimens.length >
+                    0 ? (
                     <button
                       type="button"
                       onClick={
@@ -926,12 +1210,15 @@ export default function App() {
                     role="status"
                     className="text-sm leading-6 text-[var(--color-text-secondary)]"
                   >
-                    {archiveWarning}
+                    {
+                      archiveWarning
+                    }
                   </p>
                 </Surface>
               ) : null}
 
-              {archiveStatus === "connecting" ? (
+              {archiveStatus ===
+              "connecting" ? (
                 <Surface
                   variant="subtle"
                   className="mt-8 p-8"
@@ -940,17 +1227,21 @@ export default function App() {
                     role="status"
                     className="metadata-label"
                   >
-                    Opening private archive
+                    Opening private
+                    archive
                   </p>
 
                   <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                    Verdarium is retrieving your botanical
+                    Verdarium is
+                    retrieving your
+                    botanical
                     collection.
                   </p>
                 </Surface>
               ) : null}
 
-              {archiveStatus === "error" ? (
+              {archiveStatus ===
+              "error" ? (
                 <div className="mt-8">
                   <ErrorState
                     eyebrow="Private archive unavailable"
@@ -965,8 +1256,11 @@ export default function App() {
                         variant="secondary"
                         onClick={() => {
                           setConnectionAttempt(
-                            (attempt) =>
-                              attempt + 1,
+                            (
+                              attempt,
+                            ) =>
+                              attempt +
+                              1,
                           );
                         }}
                       >
@@ -977,7 +1271,8 @@ export default function App() {
                 </div>
               ) : null}
 
-              {archiveStatus === "conflict" ? (
+              {archiveStatus ===
+              "conflict" ? (
                 <div className="mt-8">
                   <ErrorState
                     eyebrow="Legacy migration"
@@ -990,7 +1285,9 @@ export default function App() {
                       <Button
                         type="button"
                         onClick={() => {
-                          setConflictError(null);
+                          setConflictError(
+                            null,
+                          );
                           setIsConflictDialogOpen(
                             true,
                           );
@@ -1005,7 +1302,9 @@ export default function App() {
 
               {isCollectionReady ? (
                 <Dashboard
-                  specimens={specimens}
+                  specimens={
+                    specimens
+                  }
                   loadError={null}
                   onSpecimenSelect={
                     handleSelectSpecimen
@@ -1018,7 +1317,83 @@ export default function App() {
             </motion.div>
           ) : null}
 
-          {view === "specimen" &&
+          {view === "care" ? (
+            <motion.div
+              key="care"
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 6,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              transition={{
+                duration:
+                  shouldReduceMotion
+                    ? 0.1
+                    : 0.22,
+                ease: "easeOut",
+              }}
+            >
+              <PageHeader
+                eyebrow="Botanical Stewardship"
+                title="Care"
+                description="A quiet view of the care rhythms recorded across your collection."
+              />
+
+              {isCollectionReady ? (
+                <CareView
+                  specimens={
+                    specimens
+                  }
+                  onReminderChange={
+                    handleReminderChange
+                  }
+                  onOpenSpecimen={
+                    handleSelectSpecimen
+                  }
+                  onBrowseCollection={() => {
+                    setView(
+                      "collection",
+                    );
+                  }}
+                />
+              ) : (
+                <Surface
+                  variant="subtle"
+                  className="mt-8 p-8"
+                >
+                  <p
+                    role="status"
+                    className="metadata-label"
+                  >
+                    Opening care
+                    archive
+                  </p>
+
+                  <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+                    Verdarium is
+                    retrieving the
+                    care rhythms
+                    preserved with
+                    your botanical
+                    collection.
+                  </p>
+                </Surface>
+              )}
+            </motion.div>
+          ) : null}
+
+          {view ===
+            "specimen" &&
           selectedSpecimen ? (
             <motion.div
               key={`specimen-${selectedSpecimen.id}`}
@@ -1036,9 +1411,10 @@ export default function App() {
                 opacity: 0,
               }}
               transition={{
-                duration: shouldReduceMotion
-                  ? 0.1
-                  : 0.24,
+                duration:
+                  shouldReduceMotion
+                    ? 0.1
+                    : 0.24,
                 ease: "easeOut",
               }}
               onAnimationComplete={
@@ -1072,7 +1448,9 @@ export default function App() {
               />
 
               <div className="mt-8">
-                <AnimatePresence initial={false}>
+                <AnimatePresence
+                  initial={false}
+                >
                   {isDeleteConfirming ? (
                     <motion.div
                       key="delete-confirmation"
@@ -1109,12 +1487,15 @@ export default function App() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
                             <p className="metadata-label">
-                              Permanent removal
+                              Permanent
+                              removal
                             </p>
 
                             <h2
                               id="delete-specimen-confirmation-heading"
-                              tabIndex={-1}
+                              tabIndex={
+                                -1
+                              }
                               className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
                             >
                               Remove this
@@ -1122,10 +1503,13 @@ export default function App() {
                             </h2>
 
                             <p className="mt-1.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
-                              This botanical
-                              record will be
-                              permanently deleted
-                              from the private
+                              This
+                              botanical
+                              record will
+                              be
+                              permanently
+                              deleted from
+                              the private
                               archive.
                             </p>
 
@@ -1134,7 +1518,9 @@ export default function App() {
                                 role="alert"
                                 className="mt-2 text-sm leading-5 text-[var(--color-text-secondary)]"
                               >
-                                {deleteError}
+                                {
+                                  deleteError
+                                }
                               </p>
                             ) : null}
                           </div>
@@ -1145,7 +1531,11 @@ export default function App() {
                               size="compact"
                               aria-label="Cancel specimen deletion"
                               icon={
-                                <X size={16} />
+                                <X
+                                  size={
+                                    16
+                                  }
+                                />
                               }
                               onClick={
                                 handleCancelDelete
@@ -1158,7 +1548,9 @@ export default function App() {
                               aria-label="Confirm specimen deletion"
                               icon={
                                 <Check
-                                  size={16}
+                                  size={
+                                    16
+                                  }
                                 />
                               }
                               className="border-[var(--color-reminder-overdue)] bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)] hover:brightness-95 active:brightness-90"
@@ -1174,7 +1566,9 @@ export default function App() {
                 </AnimatePresence>
 
                 <ExpandedSpecimenView
-                  specimen={selectedSpecimen}
+                  specimen={
+                    selectedSpecimen
+                  }
                   actions={
                     <>
                       <Button
@@ -1182,7 +1576,9 @@ export default function App() {
                         variant="secondary"
                         leadingIcon={
                           <Pencil
-                            size={15}
+                            size={
+                              15
+                            }
                             aria-hidden="true"
                           />
                         }
@@ -1199,7 +1595,9 @@ export default function App() {
                         variant="secondary"
                         leadingIcon={
                           <Trash2
-                            size={15}
+                            size={
+                              15
+                            }
                             aria-hidden="true"
                           />
                         }
@@ -1213,12 +1611,40 @@ export default function App() {
                     </>
                   }
                 />
+
+                <div className="mt-6 space-y-6">
+                  <CareReminderForm
+                    specimen={
+                      selectedSpecimen
+                    }
+                    onReminderChange={(
+                      reminder,
+                    ) => {
+                      handleReminderChange(
+                        selectedSpecimen.id,
+                        reminder,
+                      );
+                    }}
+                  />
+
+                  <CareHistory
+                    specimenId={
+                      selectedSpecimen.id
+                    }
+                    refreshToken={
+                      careHistoryRefreshTokens[
+                        selectedSpecimen.id
+                      ] ?? 0
+                    }
+                  />
+                </div>
               </div>
             </motion.div>
           ) : null}
         </AnimatePresence>
 
-        {view === "add-specimen" ? (
+        {view ===
+        "add-specimen" ? (
           <>
             <PageHeader
               eyebrow="Specimen Intake"
@@ -1255,7 +1681,8 @@ export default function App() {
           </>
         ) : null}
 
-        {view === "edit-specimen" &&
+        {view ===
+          "edit-specimen" &&
         selectedSpecimen ? (
           <>
             <PageHeader
@@ -1282,7 +1709,9 @@ export default function App() {
 
             <div className="mt-8">
               <EditSpecimenForm
-                specimen={selectedSpecimen}
+                specimen={
+                  selectedSpecimen
+                }
                 onCancel={
                   handleCancelEditSpecimen
                 }
@@ -1304,17 +1733,26 @@ export default function App() {
 
             <div className="mt-8 max-w-3xl space-y-6">
               <AccountMenu
-                archiveStatus={archiveStatus}
-                isSigningOut={isSigningOut}
+                archiveStatus={
+                  archiveStatus
+                }
+                isSigningOut={
+                  isSigningOut
+                }
                 warningMessage={
                   archiveWarning ??
-                  (archiveStatus === "error"
+                  (archiveStatus ===
+                  "error"
                     ? cloudError
                     : null)
                 }
                 onReviewConflict={() => {
-                  setConflictError(null);
-                  setIsConflictDialogOpen(true);
+                  setConflictError(
+                    null,
+                  );
+                  setIsConflictDialogOpen(
+                    true,
+                  );
                 }}
                 onSignOut={() => {
                   void handleSignOut();
@@ -1340,9 +1778,12 @@ export default function App() {
                     </h2>
 
                     <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                      Choose the visual
-                      atmosphere used throughout
-                      your botanical archive.
+                      Choose the
+                      visual
+                      atmosphere used
+                      throughout your
+                      botanical
+                      archive.
                     </p>
                   </div>
 
@@ -1370,13 +1811,17 @@ export default function App() {
                       id="settings-archive-heading"
                       className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
                     >
-                      Collection information
+                      Collection
+                      information
                     </h2>
 
                     <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
-                      Verdarium preserves this
-                      botanical collection in
-                      your private cloud archive.
+                      Verdarium
+                      preserves this
+                      botanical
+                      collection in
+                      your private
+                      cloud archive.
                     </p>
                   </div>
 
@@ -1387,7 +1832,9 @@ export default function App() {
                       </dt>
 
                       <dd className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
-                        {specimens.length}
+                        {
+                          specimens.length
+                        }
                       </dd>
                     </div>
 
@@ -1409,14 +1856,25 @@ export default function App() {
       </AppShell>
 
       <CollectionConflictDialog
-        isOpen={isConflictDialogOpen}
-        isResolving={isResolvingConflict}
-        errorMessage={conflictError}
+        isOpen={
+          isConflictDialogOpen
+        }
+        isResolving={
+          isResolvingConflict
+        }
+        errorMessage={
+          conflictError
+        }
         onResolve={(choice) => {
-          void handleResolveConflict(choice);
+          void handleResolveConflict(
+            choice,
+          );
         }}
         onClose={() => {
-          setIsConflictDialogOpen(false);
+          setIsConflictDialogOpen(
+            false,
+          );
+
           setConflictError(null);
         }}
       />

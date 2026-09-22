@@ -1,13 +1,13 @@
 export type ReminderFrequencyUnit =
-  | 'day'
-  | 'week'
-  | 'month';
+  | "day"
+  | "week"
+  | "month";
 
 export type ReminderStatus =
-  | 'none'
-  | 'upcoming'
-  | 'due'
-  | 'overdue';
+  | "none"
+  | "upcoming"
+  | "due"
+  | "overdue";
 
 export interface ReminderFrequency {
   interval: number;
@@ -20,5 +20,8 @@ export interface SpecimenReminder {
   frequency: ReminderFrequency;
 
   lastCompletedAt?: string;
+
   nextDueAt?: string;
+
+  snoozedUntil?: string;
 }
