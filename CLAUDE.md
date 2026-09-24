@@ -8,7 +8,7 @@ Verdarium is a premium digital botanical archive: a place to catalog, organize, 
 
 ## Current goal
 
-Reach a coherent MVP polished enough to put in front of real plant collectors, and learn whether archive-first positioning is compelling enough to support a paid product later. The headline MVP change is **care recorded directly on specimen tiles** (see `specs/001-care-on-tiles.md`). Priorities live in `ROADMAP.md`. If a request conflicts with the roadmap, say so before starting.
+Reach a coherent MVP polished enough to put in front of real plant collectors, and learn whether archive-first positioning is compelling enough to support a paid product later. The headline MVP changes are the **design system redesign** (`specs/003-design-system-adoption.md`) and **care recorded directly on specimen tiles** (`specs/001-care-on-tiles.md`). Priorities live in `ROADMAP.md`. If a request conflicts with the roadmap, say so before starting.
 
 ## Workspace map
 
@@ -51,9 +51,11 @@ npm run build    # tsc -b && vite build — must pass before any PR
 - Follow `routines/supabase-migration-check.md` for any migration PR.
 
 **Product and design**
+- The **Verdarium design system** artifact (https://claude.ai/artifact/LH7dSvQKKg6XxccrmMcwjN) is the visual source of truth. Read its `project/README.md` through the Artifact tool before any UI work. Summary and rules are in `context/brand-and-design.md`.
 - Collection first, care second. Care supports the archive and must never make it feel like a checklist app.
 - Use curated botanical illustrations (`src/constants/illustrations.ts`), not photography.
-- Use design tokens and existing `components/ui` primitives. No hardcoded colors. All three themes (Archive, Herbarium, Night Archive) must look right.
+- Use design tokens and `components/ui` primitives. No hardcoded colors. All three themes (Archive, Herbarium, Night Archive) must look right.
+- Don't commit licensed font files (TAY Roony) to this public repo until licensing is settled (see spec 003).
 - Respect `prefers-reduced-motion` (see the `useReducedMotion` usage in `App.tsx`).
 - The tone is calm, precise, and scientific. Use specimen, archive, and record vocabulary; avoid gamification and exclamation marks.
 

@@ -1,56 +1,85 @@
 # 001 — Care on specimen tiles
 
-**Status:** draft · **Roadmap:** Now · **Owner:** Heinrich
+**Status:** agreed · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
 
 ## Problem
 Care currently lives in a separate Care view (`src/components/care/CareView.tsx`, a primary nav item). That makes Verdarium feel reminder-first: to record that you watered a plant, you leave the collection. Collectors think specimen-first ("I watered the Monstera"), not task-first.
 
 ## Goal
 - Care state is visible, quietly, on every specimen tile that has a reminder.
-- Care can be recorded (done, snooze, skip) directly from the tile or the expanded specimen view, without navigating away.
-- The Care view becomes a secondary **"Due today"** list: a convenience for days with a lot to do, not a main destination.
+- Care can be recorded (done, snooze, skip) directly from the tile or the expanded specimen view, without navigating away, with an optional short note.
+- **Due today** becomes a **filter** on the collection.
+- The Care view is replaced by a secondary **Due next** view: the upcoming care schedule.
 
 ## Non-goals
 - New reminder types (fertilize, repot) or multiple reminders per specimen
 - Notifications or push reminders
-- Changes to the care history schema
+
+## Decisions (2026-09-24)
+- "Due today" is a filter on the collection, not its own view.
+- "Due next" is the new secondary view.
+- Recording care allows a note, in a very minimal window.
+- Due and overdue specimens float to the top **only when the Due today filter is on**. The unfiltered archive keeps its normal sort.
 
 ## User experience
 
 ### Tile (`BotanicalSpecimenCard`, `CompactSpecimenCard`)
 - No reminder: no care UI at all.
-- Upcoming: small muted line, e.g. "Next care in 3 days".
-- Due or overdue: a soft tinted band using `--color-reminder-due` or `--color-reminder-overdue`, plus a single quiet **Record care** action.
-- After recording: a brief confirmation ("Recorded · Sep 23"), the state moves to upcoming, and an undo is available for a few seconds.
-- Snooze and skip sit in a small overflow menu on the tile (reusing `CareSpecimenActions` logic).
-- Tile actions must not trigger opening the specimen (stop propagation), and must be keyboard-accessible.
+- Upcoming: a quiet `Badge` on `color-reminder-upcoming` with a `color-botanical` dot, for example "Next care in 3 days".
+- Due: a `Badge` on `color-reminder-due` with a `color-reminder-due-ink` dot, reading "Care due today".
+- Overdue: a `Badge` on `color-reminder-overdue` with a `color-reminder-overdue-ink` dot, reading "Care overdue · 2 days". The state is always written out in words, not signalled by color alone.
+- Due or overdue tiles also show a single quiet **Record care** action (a tonal or ghost `Button`, size `sm`).
+- Snooze and skip sit in a small overflow menu (an `IconButton` opening an elevated `Surface`), reusing the `CareSpecimenActions` logic.
+- Tile actions must not open the specimen (stop propagation). They must be keyboard-accessible, and each `IconButton` has a label.
+
+### Record care with a note (minimal window)
+- **Record care** records immediately. The tile then shows "Recorded · Sep 24" with two quiet text actions: **Add note** and **Undo**, available for about 6 seconds.
+- **Add note** opens a small popover anchored to the tile (an elevated `Surface`) containing:
+  - one short `Input` (single line, 140 characters max, placeholder "Repotted, pest check…")
+  - a **Save** button
+  - Esc or clicking outside closes it without saving
+- No dialog, no required fields, and no extra step for people who don't want notes.
+- The note appears alongside that event in `CareHistory` in the expanded specimen view.
+
+### Collection filter: Due today
+- A filter in `CollectionFilters` that combines with search and the other filters.
+- When active: shows only due and overdue specimens, **overdue first, then due**, then the normal sort within each group.
+- When inactive: the collection keeps its normal archive sort, and care state never reorders it.
+- `CollectionSummary` shows a quiet entry point, "3 specimens due today", which turns the filter on.
+- Empty state (filter on, nothing due): "Nothing is due today."
+
+### Due next view (replaces the Care view)
+- A secondary view, reached from `AppNav` as a quieter item after Collection, or from `CollectionSummary`. Final placement follows the design system's navigation once it exists.
+- Lists specimens with active reminders in order of next due date, grouped as **Overdue · Today · This week · Later**.
+- Each row is a compact specimen label (the common name in `subtitle`, the scientific name in `scientific-name`, and the reminder badge) with the same Record care, note, snooze and skip actions.
+- It reads like a stewardship register, not a to-do list: no checkboxes, counters or progress bars.
+- Empty state: "No care is scheduled. Reminders can be set on any specimen record."
 
 ### Expanded specimen view
-- A care section showing current state, the record, snooze, and skip actions, and `CareHistory`.
-
-### "Due today"
-- Removed as a peer of Collection in `AppNav`. Reached via a quiet entry on the dashboard (e.g. in `CollectionSummary`: "3 specimens due today") and/or a collection filter.
-- Shows only due and overdue specimens, using the same tiles and actions as the collection.
-- Empty state: calm and positive ("Nothing due today.").
+- A care section showing current state, record/snooze/skip, and `CareHistory` with notes.
 
 ## Data and backend
-- No schema change expected. Reuse `recordCare`, `skipCare`, and `snoozeCare` from `src/care/careService.ts` and the selectors in `careSelectors.ts`.
-- Must work identically with the local and cloud stores.
-- Use `useLocalDateRollover` so the state updates at local midnight.
+- Reuse `recordCare`, `skipCare`, `snoozeCare` (`src/care/careService.ts`) and `careSelectors.ts`. Add a selector for Due next grouping.
+- **Notes need a small migration.** `care_events.metadata` (jsonb) can hold `{"note": "…"}`, but `record_specimen_care(p_action_id, p_specimen_id, p_completed_at)` has no note parameter. Options:
+  - (a) a new migration adding an optional `p_note text default null` to `record_specimen_care`, stored in `metadata.note` (trimmed, 140 characters max, validated server-side)
+  - (b) a separate `add_care_note(p_event_id, p_note)` RPC, which fits the "record first, add note after" flow better
+  
+  **Recommendation: (b)**, because the note is added after the record exists. Follow `routines/supabase-migration-check.md` either way.
+- Local store: care history entries need an optional `note` field so signed-out collections behave the same. Update `src/care/types.ts`, `src/validation/reminder.ts` and the export/import schema.
+- Use `useLocalDateRollover` so states update at local midnight.
 
 ## Acceptance criteria
 - [ ] Care can be recorded from a tile in both card variants without opening the specimen
-- [ ] Due and overdue states are visible but calm in all three themes and on mobile
-- [ ] Undo is available immediately after recording
-- [ ] "Care" is no longer a primary nav item, and "Due today" is reachable from the collection
-- [ ] Care history reflects actions taken from tiles (signed in)
-- [ ] Keyboard and screen-reader accessible (labelled buttons, focus visible)
-- [ ] Lint and build pass, and REVIEW.md checklist is done
+- [ ] Undo and Add note are available right after recording. A saved note appears in care history (local and cloud).
+- [ ] The Due today filter shows only due and overdue specimens, overdue first. The unfiltered collection order is unchanged.
+- [ ] The Due next view replaces the Care view, grouped Overdue, Today, This week, Later
+- [ ] Reminder badges use the design system tokens and wording in all three themes and on mobile
+- [ ] Keyboard and screen-reader accessible (labelled buttons, visible focus, popover focus handling)
+- [ ] Migration passes `routines/supabase-migration-check.md`, and lint and build pass
 
 ## Open questions
-- Should "Due today" be a filter chip on the collection, a separate lightweight view, or both?
-- Is undo enough, or should recording care also allow a short note ("repotted, pest check")?
-- Should overdue specimens float to the top of the collection by default, or does that break the archive feel?
+- Should Due next be in the primary nav, or only reachable from the collection summary?
+- Should snooze and skip also accept a note, or only recorded care?
 
 ## Demo moment
-A 5–8 second clip: scrolling the archive, tapping **Record care** on a due tile, and the calm confirmation.
+A 5–8 second clip: turn on the Due today filter, press **Record care** on an overdue tile, add "Repotted" in the note popover, and see the calm confirmation.
