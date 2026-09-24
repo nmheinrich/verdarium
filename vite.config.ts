@@ -19,12 +19,14 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    // Vercel builds provide VITE_*; local builds fall back to the
+    // SUPABASE_* names that Stripe Projects writes to .env.
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
-        env.SUPABASE_PROJECT_URL ?? '',
+        env.VITE_SUPABASE_URL || env.SUPABASE_PROJECT_URL || '',
       ),
       'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(
-        env.SUPABASE_PUBLISHABLE_KEY ?? '',
+        env.VITE_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_PUBLISHABLE_KEY || '',
       ),
     },
   };
