@@ -9,15 +9,25 @@ import {
   Surface,
 } from "@/components/ui";
 
-import {
-  parseImportedCollection,
-  saveCollection,
-} from "@/storage";
+import { parseImportedCollection } from "@/storage";
 
 import type { Specimen } from "@/types";
 
+export type CollectionImportOutcome =
+  | {
+      success: true;
+      specimens: Specimen[];
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 interface ImportCollectionFormProps {
-  onImported: (specimens: Specimen[]) => void;
+  /** Writes the validated specimens to the archive, replacing it. */
+  onImport: (
+    specimens: Specimen[],
+  ) => Promise<CollectionImportOutcome>;
 }
 
 interface PendingImport {
@@ -29,12 +39,8 @@ function getInvalidArchiveMessage(): string {
   return "Verdarium could not validate the selected file as a compatible botanical archive. Your current collection has not been changed.";
 }
 
-function getImportSaveErrorMessage(): string {
-  return "The archive was validated, but Verdarium could not save it to this browser. Your current collection remains unchanged.";
-}
-
 export function ImportCollectionForm({
-  onImported,
+  onImport,
 }: ImportCollectionFormProps) {
   const [pendingImport, setPendingImport] =
     useState<PendingImport | null>(null);
@@ -120,8 +126,8 @@ export function ImportCollectionForm({
     });
   };
 
-  const handleConfirmImport = () => {
-    if (!pendingImport) {
+  const handleConfirmImport = async () => {
+    if (!pendingImport || isImporting) {
       return;
     }
 
@@ -129,26 +135,22 @@ export function ImportCollectionForm({
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const result = saveCollection(
+    const result = await onImport(
       pendingImport.specimens,
     );
 
     if (!result.success) {
-      setErrorMessage(
-        getImportSaveErrorMessage(),
-      );
+      setErrorMessage(result.message);
       setIsImporting(false);
       return;
     }
 
-    onImported(result.data);
-
     setSuccessMessage(
-      `Imported ${result.data.length} ${
-        result.data.length === 1
+      `Imported ${result.specimens.length} ${
+        result.specimens.length === 1
           ? "specimen"
           : "specimens"
-      } successfully.`,
+      }.`,
     );
 
     setPendingImport(null);
@@ -242,8 +244,9 @@ export function ImportCollectionForm({
             {pendingImport.specimens.length === 1
               ? "specimen"
               : "specimens"}
-            . Importing will replace the existing
-            botanical archive.
+            . Importing replaces every specimen in
+            the archive, and the care history of the
+            current specimens is removed.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -258,7 +261,9 @@ export function ImportCollectionForm({
 
             <Button
               type="button"
-              onClick={handleConfirmImport}
+              onClick={() => {
+                void handleConfirmImport();
+              }}
               disabled={isImporting}
             >
               {isImporting

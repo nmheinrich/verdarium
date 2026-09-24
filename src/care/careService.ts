@@ -301,9 +301,37 @@ function parseCareMutationResult(
   };
 }
 
+// Messages raised by the care RPCs (`raise exception`, SQLSTATE P0001)
+// that are safe and useful to show as written.
+const READABLE_CARE_EXCEPTIONS: Record<string, string> = {
+  "Snooze date must be later than the current effective care date.":
+    "Choose a snooze date after the current care date.",
+  "This specimen does not have an enabled care reminder.":
+    "This specimen has no active care reminder.",
+  "Care reminder has no next care date.":
+    "This care reminder has no next care date yet.",
+  "Care note must be 140 characters or fewer.":
+    "Care notes can be up to 140 characters.",
+  "Specimen not found or access denied.":
+    "Verdarium could not find this specimen in your archive.",
+};
+
 function normalizeCareError(
   code: string,
+  message?: string,
 ): CareError {
+  if (code === "P0001" && message) {
+    const readableMessage =
+      READABLE_CARE_EXCEPTIONS[message];
+
+    if (readableMessage) {
+      return createCareError(
+        code,
+        readableMessage,
+      );
+    }
+  }
+
   switch (code) {
     case "PGRST301":
     case "42501":
@@ -350,6 +378,7 @@ async function runCareMutation(
         error: normalizeCareError(
           error.code ||
             "care_mutation_failed",
+          error.message,
         ),
       };
     }
@@ -407,6 +436,8 @@ export async function recordCare(
 ): Promise<
   CareResult<CareMutationResult>
 > {
+  const note = input.note?.trim();
+
   return runCareMutation(
     "record_specimen_care",
     {
@@ -414,6 +445,11 @@ export async function recordCare(
       p_specimen_id: input.specimenId,
       p_completed_at:
         input.completedAt,
+      // Only sent when present, so recording without a note keeps working
+      // before migration 20260924090000 is applied.
+      ...(note
+        ? { p_note: note }
+        : {}),
     },
   );
 }

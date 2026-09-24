@@ -36,6 +36,8 @@ export interface RecordCareInput {
   actionId: string;
   specimenId: string;
   completedAt: string;
+  /** Optional short note, 140 characters max, stored in metadata.note. */
+  note?: string;
 }
 
 export interface SnoozeCareInput {

@@ -81,7 +81,7 @@ export function ExportCollectionForm({
         specimens.length === 1
           ? "specimen"
           : "specimens"
-      } successfully.`,
+      }.`,
     );
   };
 
