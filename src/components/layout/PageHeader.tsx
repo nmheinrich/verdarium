@@ -29,7 +29,7 @@ export function PageHeader({
 
         <h1
           className={cn(
-            "font-display text-3xl leading-tight tracking-tight text-[var(--color-text-primary)] sm:text-4xl",
+            "font-display type-headline text-[var(--color-text-primary)]",
             eyebrow && "mt-2",
           )}
         >

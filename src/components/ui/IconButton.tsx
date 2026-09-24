@@ -37,14 +37,15 @@ export function IconButton({
       title={title ?? ariaLabel}
       disabled={disabled}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[var(--radius-full)] border border-transparent bg-transparent text-[var(--color-text-secondary)]",
+        "inline-flex shrink-0 items-center justify-center rounded-[var(--radius-full)] border text-[var(--color-text-secondary)]",
         "transition-[background-color,border-color,color,transform] duration-[160ms] ease-[var(--ease-standard)]",
-        "enabled:hover:bg-[var(--color-botanical-soft)] enabled:hover:text-[var(--color-text-primary)] enabled:active:translate-y-[0.5px] enabled:active:scale-[0.985]",
+        "enabled:hover:text-[var(--color-text-primary)] enabled:active:translate-y-[0.5px] enabled:active:scale-[0.985]",
         "aria-pressed:bg-[var(--color-botanical-soft)] aria-pressed:text-[var(--color-botanical)]",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]",
         "disabled:cursor-not-allowed disabled:opacity-45",
-        isRaised &&
-          "border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-control)] enabled:hover:border-[var(--color-botanical-muted)] enabled:hover:bg-[var(--color-surface)]",
+        isRaised
+          ? "border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-control)] enabled:hover:border-[var(--color-botanical-muted)] enabled:hover:bg-[var(--color-surface)]"
+          : "border-transparent bg-transparent enabled:hover:bg-[var(--color-botanical-soft)]",
         isSmall ? "size-8 [&_svg]:size-4" : "size-10 [&_svg]:size-[1.125rem]",
         className,
       )}

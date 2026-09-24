@@ -21,12 +21,12 @@ const variantClasses: Record<BadgeVariant, string> = {
   neutral:
     "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]",
   botanical:
-    "bg-[var(--color-botanical-soft)] text-[var(--color-botanical)]",
+    "border-transparent bg-[var(--color-botanical-soft)] text-[var(--color-botanical)]",
   upcoming:
-    "bg-[var(--color-reminder-upcoming)] text-[var(--color-text-primary)]",
-  due: "bg-[var(--color-reminder-due)] text-[var(--color-text-primary)]",
+    "border-transparent bg-[var(--color-reminder-upcoming)] text-[var(--color-text-primary)]",
+  due: "border-transparent bg-[var(--color-reminder-due)] text-[var(--color-text-primary)]",
   overdue:
-    "bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]",
+    "border-transparent bg-[var(--color-reminder-overdue)] text-[var(--color-text-primary)]",
 };
 
 const dotClasses: Record<BadgeVariant, string> = {
@@ -55,7 +55,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex h-6 w-fit items-center gap-1.5 whitespace-nowrap rounded-[var(--radius-full)] border border-transparent px-2.5",
+        "inline-flex h-6 w-fit items-center gap-1.5 whitespace-nowrap rounded-[var(--radius-full)] border px-2.5",
         "text-xs font-medium leading-none",
         variantClasses[variant],
         className,

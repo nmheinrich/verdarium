@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib";
 
@@ -7,7 +7,7 @@ type ButtonVariant = "primary" | "secondary" | "tonal" | "ghost";
 // "default" and "compact" are the original size names and map to md and sm.
 type ButtonSize = "sm" | "md" | "lg" | "default" | "compact";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ComponentProps<"button"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   leadingIcon?: ReactNode;
@@ -18,13 +18,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--color-botanical)] text-[var(--color-text-on-botanical)] shadow-[var(--shadow-control)] enabled:hover:bg-[var(--color-botanical-hover)]",
+    "border-transparent bg-[var(--color-botanical)] text-[var(--color-text-on-botanical)] shadow-[var(--shadow-control)] enabled:hover:bg-[var(--color-botanical-hover)]",
   secondary:
     "border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] shadow-[var(--shadow-control)] enabled:hover:border-[var(--color-botanical-muted)] enabled:hover:bg-[var(--color-surface)]",
   tonal:
-    "bg-[var(--color-botanical-soft)] text-[var(--color-botanical)] enabled:hover:bg-[var(--color-selection)]",
+    "border-transparent bg-[var(--color-botanical-soft)] text-[var(--color-botanical)] enabled:hover:bg-[var(--color-selection)]",
   ghost:
-    "bg-transparent text-[var(--color-text-secondary)] enabled:hover:bg-[var(--color-botanical-soft)] enabled:hover:text-[var(--color-text-primary)] enabled:active:bg-[var(--color-selection)]",
+    "border-transparent bg-transparent text-[var(--color-text-secondary)] enabled:hover:bg-[var(--color-botanical-soft)] enabled:hover:text-[var(--color-text-primary)] enabled:active:bg-[var(--color-selection)]",
 };
 
 const sizeClasses: Record<"sm" | "md" | "lg", string> = {
@@ -58,7 +58,7 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-[var(--radius-md)] border border-transparent font-medium leading-none tracking-[0.005em]",
+        "relative inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-[var(--radius-md)] border font-medium leading-none tracking-[0.005em]",
         "transition-[background-color,border-color,color,box-shadow,transform] duration-[160ms] ease-[var(--ease-standard)]",
         "enabled:active:translate-y-[0.5px] enabled:active:scale-[0.985]",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]",
