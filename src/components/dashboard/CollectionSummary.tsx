@@ -1,9 +1,11 @@
 import type { Specimen } from "@/types";
 
-import { Surface } from "@/components/ui";
+import { Button, Surface } from "@/components/ui";
 
 interface CollectionSummaryProps {
   specimens: Specimen[];
+  dueCount?: number;
+  onShowDueToday?: () => void;
 }
 
 interface SummaryItem {
@@ -13,6 +15,8 @@ interface SummaryItem {
 
 export function CollectionSummary({
   specimens,
+  dueCount = 0,
+  onShowDueToday,
 }: CollectionSummaryProps) {
   const favoriteCount = specimens.filter(
     (specimen) => specimen.isFavorite,
@@ -73,6 +77,21 @@ export function CollectionSummary({
               </div>
             ))}
           </dl>
+
+          {dueCount > 0 && onShowDueToday ? (
+            <Button
+              variant="tonal"
+              size="sm"
+              onClick={onShowDueToday}
+              leadingIcon={
+                <span className="block size-1.5 rounded-[var(--radius-full)] bg-[var(--color-reminder-due-ink)]" />
+              }
+            >
+              {dueCount === 1
+                ? "1 specimen due today"
+                : `${dueCount} specimens due today`}
+            </Button>
+          ) : null}
         </div>
       </Surface>
     </section>

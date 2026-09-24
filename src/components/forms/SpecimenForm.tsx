@@ -10,6 +10,8 @@ import {
   Surface,
 } from "@/components/ui";
 
+import { IllustrationPicker } from "./IllustrationPicker";
+
 export interface SpecimenFormValues {
   commonName: string;
   family: string;
@@ -25,6 +27,7 @@ export interface SpecimenFormValues {
   notes: string;
   tags: string;
   isFavorite: boolean;
+  illustrationKey: string;
 }
 
 export interface SpecimenFormErrors {
@@ -217,6 +220,32 @@ export function SpecimenForm({
               </p>
             ) : null}
           </div>
+        </div>
+      </Surface>
+
+      <Surface className="mt-6 p-6 sm:p-8">
+        <div className="max-w-2xl">
+          <p className="metadata-label">
+            Specimen plate
+          </p>
+
+          <h2 className="mt-3 font-display type-title text-[var(--color-text-primary)]">
+            Botanical illustration
+          </h2>
+
+          <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+            Choose the watercolor plate that represents this specimen in the
+            archive. It can be changed at any time.
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <IllustrationPicker
+            value={values.illustrationKey}
+            onChange={(illustrationKey) =>
+              updateField("illustrationKey", illustrationKey)
+            }
+          />
         </div>
       </Surface>
 

@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 
+import {
+  DEFAULT_ILLUSTRATION_KEY,
+  getBotanicalIllustration,
+} from "@/constants/illustrations";
 import type { Specimen } from "@/types";
 
 import {
@@ -49,6 +53,9 @@ function createInitialValues(
     notes: specimen.notes ?? "",
     tags: specimen.tags.join(", "),
     isFavorite: specimen.isFavorite,
+    illustrationKey:
+      getBotanicalIllustration(specimen.illustrationKey)?.key ??
+      DEFAULT_ILLUSTRATION_KEY,
   };
 }
 
@@ -155,6 +162,7 @@ export function EditSpecimenForm({
       healthStatus: values.healthStatus,
       tags: parseTags(values.tags),
       isFavorite: values.isFavorite,
+      illustrationKey: values.illustrationKey,
       updatedAt: new Date().toISOString(),
     };
 

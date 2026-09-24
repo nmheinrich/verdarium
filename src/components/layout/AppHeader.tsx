@@ -8,6 +8,7 @@ interface AppHeaderProps {
   className?: string;
 }
 
+/** The app header (design system: AppNav): wordmark, actions and primary views. */
 export function AppHeader({
   navigation,
   actions,
@@ -21,14 +22,13 @@ export function AppHeader({
       )}
     >
       <div className="mx-auto flex max-w-[var(--page-max-width)] flex-col px-[var(--page-padding-inline)]">
-        <div className="flex min-h-20 items-center justify-between gap-6">
-          <div className="min-w-0">
-            <p className="font-display type-subtitle text-[var(--color-text-primary)]">
+        <div className="flex min-h-[4.5rem] items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <p className="font-display text-2xl leading-none tracking-[0.03em] text-[var(--color-text-primary)]">
               Verdarium
             </p>
-
-            <p className="metadata-label mt-1.5 truncate">
-              Botanical Archive
+            <p className="metadata-label truncate">
+              Botanical archive
             </p>
           </div>
 
