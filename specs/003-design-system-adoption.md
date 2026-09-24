@@ -1,6 +1,6 @@
 # 003 — Design system adoption (redesign)
 
-**Status:** draft · **Roadmap:** Now · **Owner:** Heinrich
+**Status:** in progress — tokens, type utilities, UI primitives, and tiles/filters/navigation are applied (#5, #6/#7 merged; the tile, filters and nav were also added to the design system artifact on 2026-09-24). Blocked on hosting the TAY Roony font (`TAYROONY_WOFF2_URL` in Vercel, tracked in `ROADMAP.md`) before the acceptance criteria below can be verified · **Roadmap:** Now · **Owner:** Heinrich
 
 **Source of truth:** the Verdarium design system artifact, https://claude.ai/artifact/LH7dSvQKKg6XxccrmMcwjN (synced from `main@cf318bb` on 2026-09-24, then adjusted). Read its `project/README.md` and `project/tokens.json` before any UI work.
 
@@ -44,13 +44,13 @@ The specimen tile, filters and navigation are being added to the design system (
    
    Check every view in the three themes on desktop and mobile.
 
-## Font hosting (decided 2026-09-24)
+## Font hosting (decided 2026-09-24, implemented)
 TAY Roony is licensed and the repo is public, so its files are **never committed**. The Vercel build fetches them from a private source.
-- **Storage:** a private Supabase Storage bucket (for example `build-assets/fonts/`), or another private location Heinrich picks. The bucket must not be public.
-- **Build:** a `prebuild` script (`scripts/fetch-fonts.mjs`) downloads `TAYRoony.woff2` and `.woff` into `public/fonts/` using a server-only credential. It must never use a `VITE_*` variable, because those end up in the client bundle.
-- **Vercel env:** add something like `FONT_SOURCE_URL` and `FONT_SOURCE_TOKEN` for the Build step, in both Preview and Production.
-- **Git:** add `public/fonts/` to `.gitignore`.
-- **Local dev:** the same script runs with the credential from `.env`. If it can't fetch, the build still passes and the Newsreader fallback is used, with a clear warning printed.
+- **Storage:** a private Supabase Storage bucket, decided as the default (execution — uploading the file and setting the Vercel env var — is pending; tracked in `ROADMAP.md`).
+- **Build:** a `prebuild`/`predev` script (`scripts/fetch-fonts.mjs`, shipped) downloads `TAYRoony.woff2` into `public/fonts/` using a server-only credential. It never uses a `VITE_*` variable, because those end up in the client bundle.
+- **Vercel env:** the implemented variable is a single signed URL, `TAYROONY_WOFF2_URL`, for the Build step in both Preview and Production. (This spec originally proposed separate `FONT_SOURCE_URL`/`FONT_SOURCE_TOKEN` variables; the shipped script uses one signed URL instead.)
+- **Git:** `public/fonts/` is gitignored.
+- **Local dev:** the same script runs with the credential from `.env`/`.env.local`. If `TAYROONY_WOFF2_URL` isn't set, the build still passes, the Newsreader fallback is used, and a warning is printed. This is the current state of production: the variable isn't set in Vercel yet, so the live font 404s and falls back.
 - **Note:** once deployed, the woff2 is served publicly to browsers, as with any web font. Confirm the TAY Roony web license covers self-hosting on `verdarium-neon.vercel.app`.
 
 ## Acceptance criteria
@@ -63,7 +63,7 @@ TAY Roony is licensed and the repo is public, so its files are **never committed
 - [ ] Screenshots of before and after in each theme are added to the PR (and good ones go to `demos/screenshots/`)
 
 ## Open questions
-- Where should the private font source live? A Supabase Storage bucket is the proposed default.
+- ~~Where should the private font source live?~~ Decided: a private Supabase Storage bucket. Uploading the file and setting `TAYROONY_WOFF2_URL` in Vercel is the pending action (tracked in `ROADMAP.md`).
 
 ## Demo moment
 Before and after of the full archive in each theme. This is the hero screenshot set for `demos/`.

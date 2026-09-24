@@ -8,6 +8,6 @@ A spec is required for anything that changes user-facing behaviour, the data mod
 
 | # | Spec | Status |
 |---|---|---|
-| 001 | [Care on specimen tiles](001-care-on-tiles.md) | agreed |
+| 001 | [Care on specimen tiles](001-care-on-tiles.md) | in progress |
 | 002 | [Support link (Buy me a coffee)](002-support-link.md) | on hold |
-| 003 | [Design system adoption (redesign)](003-design-system-adoption.md) | draft |
+| 003 | [Design system adoption (redesign)](003-design-system-adoption.md) | in progress |

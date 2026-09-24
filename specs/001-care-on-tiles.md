@@ -1,6 +1,6 @@
 # 001 — Care on specimen tiles
 
-**Status:** tiles, notes, snooze, skip and Due next shipped (#8, migration applied); the expanded specimen view is in review · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
+**Status:** tiles, notes, snooze, skip, Due next, and the expanded specimen view all shipped (#8, #9; note migration applied). Confirmed working on production by Heinrich (redesign + care-on-tiles, 2026-09-24). The Due today filter, cross-theme/mobile badge check, and accessibility acceptance criteria below are not yet formally verified · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
 
 ## Problem
 Care currently lives in a separate Care view (`src/components/care/CareView.tsx`, a primary nav item). That makes Verdarium feel reminder-first: to record that you watered a plant, you leave the collection. Collectors think specimen-first ("I watered the Monstera"), not task-first.

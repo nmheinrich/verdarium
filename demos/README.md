@@ -28,7 +28,7 @@ Naming: `YYYY-MM-DD-<flow>-<theme>-<device>.<ext>`, e.g. `2026-10-01-record-care
 | Hero: Night Archive (desktop) | Screenshot | To do |
 | Specimen record, expanded view with illustration and metadata | Screenshot | To do |
 | Adding a specimen, from empty form to a card in the archive | Clip | To do |
-| Record care from a tile (after spec 001) | Clip | Blocked on 001 |
+| Record care from a tile (spec 001, shipped 2026-09-24) | Clip | To do |
 | Theme switching: Archive → Herbarium → Night Archive | Clip | To do |
 | Shared collection link, the view from a friend's phone | Clip | To do |
 | Mobile: scrolling the collection | Clip | To do |
