@@ -18,6 +18,16 @@
       "redirectUrl": null,
       "requestedAt": "2026-09-20T20:12:21.992Z",
       "status": "complete"
+    },
+    "vercel": {
+      "accountRequestId": "facctrq_61VSN7eyEbR6fu6T016QHZajIuSQLIO7jmgfesHW422C",
+      "configuration": {},
+      "linkedAt": "2026-09-23T23:01:31.390Z",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "redirectUrl": null,
+      "requestedAt": "2026-09-23T23:01:31.389Z",
+      "status": "complete"
     }
   },
   "resources": {
@@ -44,6 +54,30 @@
       "providerId": "prvdr_61UIXYHdsyF69pZbG52n2",
       "providerName": "Supabase",
       "resourceId": "fres_61VRF3nPBoV6XQhxy16QHZajIuSQLIO7jmgfesHW42oS",
+      "serviceId": "project"
+    },
+    "vercel-plan": {
+      "configuration": {},
+      "createdAt": "2026-09-23T23:02:39.892Z",
+      "lastRevealedAt": "2026-09-23T23:02:40.222Z",
+      "lastStatus": "complete",
+      "name": "vercel-plan",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "resourceId": "fres_61VSN8oP2w0kJFDqJ16QHZajIuSQLIO7jmgfesHW4KTg",
+      "serviceId": "hobby"
+    },
+    "vercel-project": {
+      "configuration": {
+        "name": "verdarium"
+      },
+      "createdAt": "2026-09-23T23:02:43.430Z",
+      "lastRevealedAt": "2026-09-23T23:02:43.745Z",
+      "lastStatus": "complete",
+      "name": "vercel-project",
+      "providerId": "prvdr_61ULUAr4zlQgZkvXY5LsG",
+      "providerName": "Vercel",
+      "resourceId": "fres_61VSN8rPOFuZCBgWM16QHZajIuSQLIO7jmgfesHW4Mym",
       "serviceId": "project"
     }
   }
