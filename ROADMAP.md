@@ -26,13 +26,19 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 | Item | Spec | Status |
 |---|---|---|
 | Design system adoption, phase 1 (tokens) and phase 3 (UI primitives) | `specs/003-design-system-adoption.md` | Draft spec |
-| Decide TAY Roony licensing / hosting (blocks type phase) | `specs/003-design-system-adoption.md` | Needs Heinrich |
+| Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | In progress |
 | Care on specimen tiles, with a note popover, the Due today filter and the Due next view | `specs/001-care-on-tiles.md` | Agreed |
+| **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fix ready (`vercel.json`) |
+| **Bug:** export and import are not reachable in the app (`ExportCollectionForm` and `ImportCollectionForm` are never rendered) | — | To do |
+| **Bug:** snooze offers dates on or before the current due date, and the server rejects them with a vague error | spec 001 | To do |
+| **Bug:** the Care card illustration overflows its 10rem column and draws a line through the text | spec 003, phase 4 | To do |
+| **Bug:** navigating (for example after adding a specimen or opening one) keeps the old scroll position | — | To do |
+| **Copy:** the default public share title is lowercase ("botanical collection") | — | To do |
 
 ## Next
 
 - Design system phases 2 and 4: fonts, then applying it across the app (`specs/003-design-system-adoption.md`)
-- Extend the design system to app-level components (specimen tile, filters, nav, dialogs)
+- Private font source and build-time fetch for TAY Roony (spec 003)
 - First-run and onboarding polish, including an empty collection state and a sample specimen
 - Replace the README with product and developer docs
 - Capture the first demo set for posting online
@@ -72,5 +78,7 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 | 2026-09-24 | Recording care allows a note in a minimal popover |
 | 2026-09-24 | Due and overdue float to the top only when the Due today filter is on |
 | 2026-09-24 | Support link on hold |
+| 2026-09-24 | TAY Roony stays out of git and is fetched at Vercel build time from a private source |
+| 2026-09-24 | Only the newest design system artifact counts; older redesign artifacts are superseded |
 | 2026-09-24 | Redesign: the Verdarium design system artifact is the visual source of truth |
 | 2026-09-23 | Real customer notes are kept out of the public repo (`customers/private/`, gitignored) |

@@ -16,8 +16,12 @@ The app's tokens, type and UI primitives have drifted from the intended look. Th
 ## Goal
 Bring the app in line with the design system so every new feature (starting with `001`) is built on it.
 
+Only the newest design system artifact counts. The older "redesign concept" and "Redesign Notes for Web Designer" artifacts (2026-09-19) are superseded.
+
+The specimen tile, filters and navigation are being added to the design system (2026-09-24), so phase 4 builds from those designs.
+
 ## Non-goals (this spec)
-- Redesigning app-level layouts (cards, forms, navigation). The design system doesn't cover them yet. Handle them in follow-up specs or extend the design system first.
+- Forms and dialogs beyond the UI primitives (to be added to the design system later)
 - New illustrations.
 
 ## Phases (each a separate PR)
@@ -25,7 +29,7 @@ Bring the app in line with the design system so every new feature (starting with
 1. **Tokens.** Update `src/styles/tokens.css` to match `tokens.json` for all three themes (`data-theme` on `:root`), and add the new tokens. Add the per-theme shadows and the radius and spacing tokens (`page-padding-inline`, `page-max-width`).
 2. **Type.** Add the fonts:
    - Newsreader and Figtree from Google Fonts with `display=swap`
-   - TAY Roony self-hosted (see the license question below)
+   - TAY Roony kept **out of git** and fetched during the Vercel build (see "Font hosting" below)
    
    Then define the type styles as utilities: `display`, `headline`, `title`, `subtitle`, `scientific-name`, `body-lg`, `body`, `button`, `caption`, `metadata-label`. Keep the fallbacks so layout holds if a font fails.
 3. **UI primitives.** Rebuild `src/components/ui` (`Button`, `IconButton`, `Input`, `Badge`, `Surface`) to the design system's variants, sizes and states:
@@ -40,6 +44,15 @@ Bring the app in line with the design system so every new feature (starting with
    
    Check every view in the three themes on desktop and mobile.
 
+## Font hosting (decided 2026-09-24)
+TAY Roony is licensed and the repo is public, so its files are **never committed**. The Vercel build fetches them from a private source.
+- **Storage:** a private Supabase Storage bucket (for example `build-assets/fonts/`), or another private location Heinrich picks. The bucket must not be public.
+- **Build:** a `prebuild` script (`scripts/fetch-fonts.mjs`) downloads `TAYRoony.woff2` and `.woff` into `public/fonts/` using a server-only credential. It must never use a `VITE_*` variable, because those end up in the client bundle.
+- **Vercel env:** add something like `FONT_SOURCE_URL` and `FONT_SOURCE_TOKEN` for the Build step, in both Preview and Production.
+- **Git:** add `public/fonts/` to `.gitignore`.
+- **Local dev:** the same script runs with the credential from `.env`. If it can't fetch, the build still passes and the Newsreader fallback is used, with a clear warning printed.
+- **Note:** once deployed, the woff2 is served publicly to browsers, as with any web font. Confirm the TAY Roony web license covers self-hosting on `verdarium-neon.vercel.app`.
+
 ## Acceptance criteria
 - [ ] No hardcoded colors. Every token from `tokens.json` exists in `tokens.css` for all three themes.
 - [ ] Text contrast is 4.5:1 or better and input borders 3:1 or better in every theme. Spot-check with devtools.
@@ -50,12 +63,7 @@ Bring the app in line with the design system so every new feature (starting with
 - [ ] Screenshots of before and after in each theme are added to the PR (and good ones go to `demos/screenshots/`)
 
 ## Open questions
-- **TAY Roony license (blocking phase 2).** It is a licensed font (Taylor Penton), and this repo is public. Committing the `.woff2` here would make it publicly downloadable from GitHub, and any web license needs to cover self-hosting on `verdarium-neon.vercel.app`. Options:
-  - confirm the license allows public-repo distribution
-  - keep the font out of git and inject it at build time from a private source (for example a private Supabase storage bucket or a Vercel build step)
-  - make the repo private
-- Should the design system be extended to cover app-level components (specimen tile, filters, nav, dialogs) before phase 4, or should they be designed in code and synced back?
-- The older artifacts "Verdarium — redesign concept" and "Verdarium — Redesign Notes for Web Designer" (2026-09-19): superseded by the design system, or still relevant for layout?
+- Where should the private font source live? A Supabase Storage bucket is the proposed default.
 
 ## Demo moment
 Before and after of the full archive in each theme. This is the hero screenshot set for `demos/`.

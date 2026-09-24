@@ -43,3 +43,4 @@ git status --short
 
 | Date | PR | Outcome |
 |---|---|---|
+| 2026-09-24 | #2 and the favicon/share fix | Full production smoke test. Add, edit, care (record, skip, snooze), history, search, filters, sort, themes, mobile and sign-out all pass. Found: share links 404 (fixed), no export in the UI, the snooze UX, the Care card overflow, scroll position |

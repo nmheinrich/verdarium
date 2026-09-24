@@ -26,7 +26,7 @@
 | Concern | Tool |
 |---|---|
 | Version control | GitHub — `nmheinrich/verdarium` (**public**) |
-| Hosting | Vercel (Hobby), project `verdarium`, live at https://verdarium-neon.vercel.app. PR branches get preview deploys and `main` deploys to production |
+| Hosting | Vercel (Hobby), project `verdarium`, live at https://verdarium-neon.vercel.app. Git-connected to `nmheinrich/verdarium` since 2026-09-24: pushed branches get preview deploys (protected by Vercel login), and merging to `main` deploys to production. `vercel.json` rewrites extensionless paths (such as `/shared/:token`) to `index.html` |
 | Database, auth | Supabase (Free), project `verdarium`, region Americas |
 | Provisioning and credentials | Stripe Projects (`stripe projects status`, `stripe projects env`, `stripe projects env --pull`) |
 
@@ -34,7 +34,15 @@
 
 - The frontend reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, and both must be set in Vercel.
 - The Stripe Projects `.env` provides `SUPABASE_*` and `VERCEL_*` values. In Vercel, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` were added manually, mapped from `SUPABASE_PROJECT_URL` and `SUPABASE_PUBLISHABLE_KEY`. If Supabase credentials are rotated, update those two Vercel variables too.
-- Never commit `.env*` (the only exception is `.env.example`) or `.projects/vault`.
+- Never commit `.env*` (the only exception is `.env.example`), `.projects/vault` or `.vercel/`.
+- **Local dev against the real Supabase:** put only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` (gitignored).
+
+### Vercel CLI
+
+- Export `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` from `.env`. Never pass the token as a flag.
+- If the token is rejected, run `stripe projects rotate vercel-project`, then `stripe projects env --pull --yes`.
+- To deploy a preview without committing, and without uploading `.env`, run `vercel pull --yes --environment=preview`, then `vercel build`, then `vercel deploy --prebuilt`.
+- Previews are protected. To check routes, use `vercel curl <path> --deployment <url>`.
 
 ### Project skills
 
