@@ -1,6 +1,6 @@
 # 002 — Support link (Buy me a coffee)
 
-**Status:** draft · **Roadmap:** Next · **Owner:** Heinrich
+**Status:** on hold (2026-09-24) · **Roadmap:** Later · **Owner:** Heinrich
 
 ## Problem
 Verdarium is free during validation. Appreciative collectors have no way to support it, and we have no lightweight signal of willingness to pay.

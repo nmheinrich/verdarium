@@ -16,7 +16,7 @@ How work gets reviewed before it reaches `main`, which is production on Vercel.
 - [ ] The change was checked in the browser: the happy path plus one edge case (empty collection, overdue care, signed out)
 - [ ] It looks right in **Archive, Herbarium, and Night Archive**, at desktop and around 375px mobile width
 - [ ] It works signed out (local collection) and signed in (cloud sync), where relevant
-- [ ] Tokens and `components/ui` primitives are used; there are no hardcoded colors or one-off buttons
+- [ ] Matches the design system (https://claude.ai/artifact/LH7dSvQKKg6XxccrmMcwjN): tokens, type styles, component variants. There are no hardcoded colors or one-off buttons. Any design system drift is noted in the PR.
 - [ ] Motion respects reduced-motion settings
 - [ ] Copy matches the voice in `context/brand-and-design.md`
 - [ ] No secrets or customer data are in the diff (the repo is public)
