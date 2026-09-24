@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import { DEFAULT_ILLUSTRATION_KEY } from "@/constants/illustrations";
 import { createId } from "@/lib";
 import type { Specimen } from "@/types";
 
@@ -40,6 +41,7 @@ const initialValues: SpecimenFormValues = {
   notes: "",
   tags: "",
   isFavorite: false,
+  illustrationKey: DEFAULT_ILLUSTRATION_KEY,
 };
 
 function buildScientificName({
@@ -144,6 +146,7 @@ export function AddSpecimenForm({
       healthStatus: values.healthStatus,
       tags: parseTags(values.tags),
       isFavorite: values.isFavorite,
+      illustrationKey: values.illustrationKey,
       createdAt: timestamp,
       updatedAt: timestamp,
     };

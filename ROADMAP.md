@@ -25,15 +25,17 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 
 | Item | Spec | Status |
 |---|---|---|
-| Design system adoption, phase 1 (tokens) and phase 3 (UI primitives) | `specs/003-design-system-adoption.md` | Draft spec |
+| Redesign phase 1: tokens, type (TAY Roony fetched at build) and UI primitives | `specs/003-design-system-adoption.md` | PR #5 |
+| Redesign phase 2: header, collection filters (Due today), museum-label tiles, illustration picker | `specs/003-design-system-adoption.md`, `specs/001-care-on-tiles.md` | PR (stacked on #5) |
+| Host TAY Roony in a private Supabase bucket and set `TAYROONY_WOFF2_URL` in Vercel | spec 003 | Needs Heinrich |
 | Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | In progress |
-| Care on specimen tiles, with a note popover, the Due today filter and the Due next view | `specs/001-care-on-tiles.md` | Agreed |
-| **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fix ready (`vercel.json`) |
+| Redesign phase 3: Record care on tiles, care note (migration), undo, Due next view | `specs/001-care-on-tiles.md` | Next |
+| **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fixed (#3) |
+| **Bug:** production blank after first Git-built deploy (Supabase env overridden in `vite.config.ts`) | — | Fixed (#4) |
 | **Bug:** export and import are not reachable in the app (`ExportCollectionForm` and `ImportCollectionForm` are never rendered) | — | To do |
 | **Bug:** snooze offers dates on or before the current due date, and the server rejects them with a vague error | spec 001 | To do |
 | **Bug:** the Care card illustration overflows its 10rem column and draws a line through the text | spec 003, phase 4 | To do |
-| **Bug:** navigating (for example after adding a specimen or opening one) keeps the old scroll position | — | To do |
-| **Copy:** the default public share title is lowercase ("botanical collection") | — | To do |
+| **Bug:** navigating (for example after adding a specimen or opening one) keeps the old scroll position | — | Fixed in phase 2 |
 
 ## Next
 

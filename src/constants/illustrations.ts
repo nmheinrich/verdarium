@@ -38,6 +38,9 @@ export const BOTANICAL_ILLUSTRATIONS = [
   },
 ] as const satisfies readonly BotanicalIllustrationDefinition[];
 
+export const DEFAULT_ILLUSTRATION_KEY: string =
+  BOTANICAL_ILLUSTRATIONS[0].key;
+
 export type BotanicalIllustrationKey =
   (typeof BOTANICAL_ILLUSTRATIONS)[number]["key"];
 
