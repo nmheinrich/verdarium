@@ -32,3 +32,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# AI workspace: never commit real customer data or raw recordings
+customers/private/
+demos/raw/
