@@ -21,11 +21,15 @@
   color: var(--color-text-muted);
 }
 
+/* TAY Roony has one weight and needs air between its capitals. */
+.font-display {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
 .scientific-name {
-  font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
+  font-family: var(--font-serif);
   font-style: italic;
   letter-spacing: 0.01em;
 }
@@ -44,4 +48,37 @@
   white-space: nowrap;
   border: 0;
   clip: rect(0 0 0 0);
+}
+/* Display type scale from the design system (TAY Roony, caps only). */
+.type-display {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.type-headline {
+  font-size: 1.625rem;
+  line-height: 1.15;
+}
+
+.type-title {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+}
+
+.type-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 40rem) {
+  .type-display {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .type-display {
+    font-size: 3rem;
+  }
 }

@@ -17,13 +17,14 @@ export function Input({
       disabled={disabled}
       aria-invalid={invalid || undefined}
       className={cn(
-        "min-h-11 w-full rounded-[var(--radius-sm)] border bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] shadow-none transition-[background-color,border-color,color] duration-[var(--transition-base)] ease-[var(--ease-standard)]",
-        "border-[var(--color-border)] placeholder:text-[var(--color-text-muted)]",
-        "hover:border-[var(--color-border-strong)]",
-        "focus-visible:border-[var(--color-focus)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]",
-        "disabled:cursor-not-allowed disabled:bg-[var(--color-background)] disabled:text-[var(--color-text-muted)] disabled:opacity-70",
+        "h-10 w-full rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-[var(--color-surface-elevated)] px-3.5 text-sm leading-5 text-[var(--color-text-primary)] shadow-[var(--shadow-control)] outline-none",
+        "transition-[border-color,box-shadow] duration-[160ms] ease-[var(--ease-standard)]",
+        "placeholder:text-[var(--color-text-muted)]",
+        "enabled:hover:border-[var(--color-text-muted)]",
+        "focus:border-[var(--color-botanical)] focus:shadow-[0_0_0_3px_var(--color-botanical-soft)] enabled:focus:border-[var(--color-botanical)]",
+        "disabled:cursor-not-allowed disabled:opacity-55 disabled:shadow-none",
         invalid &&
-          "border-[var(--color-reminder-overdue)] focus-visible:border-[var(--color-reminder-overdue)]",
+          "border-[var(--color-reminder-overdue-ink)] focus:border-[var(--color-reminder-overdue-ink)] focus:shadow-[0_0_0_3px_var(--color-reminder-overdue)] enabled:hover:border-[var(--color-reminder-overdue-ink)]",
         className,
       )}
       {...props}

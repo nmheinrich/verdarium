@@ -163,7 +163,7 @@ export function ImportCollectionForm({
       <div className="max-w-2xl">
         <h3
           id="import-collection-heading"
-          className="font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+          className="font-display type-subtitle text-[var(--color-text-primary)]"
         >
           Import archive
         </h3>
@@ -229,7 +229,7 @@ export function ImportCollectionForm({
             ref={confirmationHeadingRef}
             id="import-confirmation-heading"
             tabIndex={-1}
-            className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+            className="mt-2 font-display type-subtitle text-[var(--color-text-primary)]"
           >
             Replace the current collection?
           </h4>

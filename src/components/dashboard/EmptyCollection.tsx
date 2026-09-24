@@ -24,7 +24,7 @@ export function EmptyCollection({
 
             <h2
               id="empty-collection-heading"
-              className="mt-3 max-w-xl font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
+              className="mt-3 max-w-xl font-display type-headline text-[var(--color-text-primary)]"
             >
               Begin your botanical archive
             </h2>
@@ -40,7 +40,7 @@ export function EmptyCollection({
                 <button
                   type="button"
                   onClick={onAddSpecimen}
-                  className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:text-2xl"
+                  className="group inline-flex items-center gap-2 font-display type-subtitle text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
                 >
                   <Plus
                     size={18}

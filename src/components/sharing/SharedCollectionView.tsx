@@ -199,7 +199,7 @@ export function SharedCollectionView({
                   </p>
                 </div>
 
-                <h1 className="mt-4 font-serif text-4xl leading-tight text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl">
+                <h1 className="mt-4 font-display type-display text-[var(--color-text-primary)]">
                   {collection.title ??
                     "Botanical Collection"}
                 </h1>
@@ -222,7 +222,7 @@ export function SharedCollectionView({
                     Specimens
                   </dt>
 
-                  <dd className="mt-1.5 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+                  <dd className="mt-1.5 font-display type-title text-[var(--color-text-primary)]">
                     {collection.specimens.length}
                   </dd>
                 </div>
@@ -264,7 +264,7 @@ export function SharedCollectionView({
 
                     <h2
                       id="shared-collection-specimens-heading"
-                      className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)] sm:text-3xl"
+                      className="mt-2 font-display type-title text-[var(--color-text-primary)]"
                     >
                       Specimen collection
                     </h2>
@@ -305,7 +305,7 @@ export function SharedCollectionView({
 
                   <h2
                     id="shared-collection-empty-heading"
-                    className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                    className="mt-3 font-display type-title text-[var(--color-text-primary)]"
                   >
                     This archive is awaiting its
                     first public specimen

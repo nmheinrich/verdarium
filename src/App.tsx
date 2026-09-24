@@ -975,7 +975,7 @@ export default function App() {
               Opening shared archive
             </p>
 
-            <h1 className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl">
+            <h1 className="mt-3 font-display type-headline text-[var(--color-text-primary)]">
               Retrieving botanical
               collection
             </h1>
@@ -1185,7 +1185,7 @@ export default function App() {
                       onClick={
                         handleAddSpecimen
                       }
-                      className="group inline-flex items-center gap-2 font-serif text-xl text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 sm:text-2xl"
+                      className="group inline-flex items-center gap-2 font-display type-subtitle text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2"
                     >
                       <Plus
                         size={18}
@@ -1496,7 +1496,7 @@ export default function App() {
                               tabIndex={
                                 -1
                               }
-                              className="mt-1.5 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+                              className="mt-1.5 font-display type-subtitle text-[var(--color-text-primary)]"
                             >
                               Remove this
                               specimen?
@@ -1772,7 +1772,7 @@ export default function App() {
 
                     <h2
                       id="settings-appearance-heading"
-                      className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                      className="mt-3 font-display type-title text-[var(--color-text-primary)]"
                     >
                       Appearance
                     </h2>
@@ -1809,7 +1809,7 @@ export default function App() {
 
                     <h2
                       id="settings-archive-heading"
-                      className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                      className="mt-3 font-display type-title text-[var(--color-text-primary)]"
                     >
                       Collection
                       information
@@ -1831,7 +1831,7 @@ export default function App() {
                         Specimens
                       </dt>
 
-                      <dd className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+                      <dd className="mt-2 font-display type-title text-[var(--color-text-primary)]">
                         {
                           specimens.length
                         }

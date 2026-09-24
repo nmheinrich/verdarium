@@ -51,7 +51,7 @@ export function CollectionSummary({
 
             <h2
               id="collection-summary-heading"
-              className="mt-1 font-serif text-base leading-tight text-[var(--color-text-primary)] sm:text-lg"
+              className="mt-1 font-display type-subtitle text-[var(--color-text-primary)]"
             >
               Botanical archive
             </h2>
@@ -67,7 +67,7 @@ export function CollectionSummary({
                   {item.label}
                 </dt>
 
-                <dd className="font-serif text-base leading-none text-[var(--color-text-primary)]">
+                <dd className="font-display text-base text-[var(--color-text-primary)]">
                   {item.value}
                 </dd>
               </div>

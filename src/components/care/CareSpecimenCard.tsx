@@ -118,7 +118,7 @@ export function CareSpecimenCard({
 
                 <h3
                   id={`care-specimen-${specimen.id}-name`}
-                  className="mt-2 break-words font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+                  className="mt-2 break-words font-display type-title text-[var(--color-text-primary)]"
                 >
                   {specimen.commonName}
                 </h3>

@@ -239,7 +239,7 @@ export function CollectionConflictDialog({
                   ref={headingRef}
                   id="collection-conflict-heading"
                   tabIndex={-1}
-                  className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] focus:outline-none"
+                  className="mt-3 font-display type-headline text-[var(--color-text-primary)] focus:outline-none"
                 >
                   Choose the collection to preserve
                 </h2>
@@ -263,7 +263,7 @@ export function CollectionConflictDialog({
                     className="text-[var(--color-text-muted)]"
                   />
 
-                  <h3 className="mt-4 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+                  <h3 className="mt-4 font-display type-subtitle text-[var(--color-text-primary)]">
                     Migrate the browser collection
                   </h3>
 
@@ -294,7 +294,7 @@ export function CollectionConflictDialog({
                     className="text-[var(--color-text-muted)]"
                   />
 
-                  <h3 className="mt-4 font-serif text-xl leading-tight text-[var(--color-text-primary)]">
+                  <h3 className="mt-4 font-display type-subtitle text-[var(--color-text-primary)]">
                     Keep the cloud collection
                   </h3>
 

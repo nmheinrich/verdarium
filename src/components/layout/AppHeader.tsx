@@ -23,7 +23,7 @@ export function AppHeader({
       <div className="mx-auto flex max-w-[var(--page-max-width)] flex-col px-[var(--page-padding-inline)]">
         <div className="flex min-h-20 items-center justify-between gap-6">
           <div className="min-w-0">
-            <p className="font-serif text-xl leading-none tracking-tight text-[var(--color-text-primary)]">
+            <p className="font-display type-subtitle text-[var(--color-text-primary)]">
               Verdarium
             </p>
 

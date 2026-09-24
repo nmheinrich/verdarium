@@ -74,7 +74,7 @@ export function BotanicalSpecimenCard({
 
             <h2
               id={`specimen-${specimen.id}-name`}
-              className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-3 font-display type-title text-[var(--color-text-primary)]"
             >
               {specimen.commonName}
             </h2>

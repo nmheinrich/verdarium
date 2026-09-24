@@ -30,7 +30,7 @@ export function RecentSpecimens({
 
           <h2
             id="recent-specimens-heading"
-            className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+            className="mt-3 font-display type-title text-[var(--color-text-primary)]"
           >
             Recently updated specimens
           </h2>

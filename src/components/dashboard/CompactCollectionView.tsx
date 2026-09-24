@@ -26,7 +26,7 @@ export function CompactCollectionView({
 
         <h2
           id="compact-collection-heading"
-          className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+          className="mt-2 font-display type-title text-[var(--color-text-primary)]"
         >
           Specimen collection
         </h2>

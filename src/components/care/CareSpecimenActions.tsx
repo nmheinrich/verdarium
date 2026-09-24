@@ -125,7 +125,7 @@ export function CareSpecimenActions({
 
             <h4
               id={`care-actions-${careSpecimen.specimen.id}-heading`}
-              className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-2 font-display type-subtitle text-[var(--color-text-primary)]"
             >
               Adjust care for{" "}
               {specimenName}

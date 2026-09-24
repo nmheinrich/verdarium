@@ -43,7 +43,7 @@ export function ArchiveEntry({
               Collection access
             </p>
 
-            <h2 className="mt-3 max-w-xl font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl">
+            <h2 className="mt-3 max-w-xl font-display type-headline text-[var(--color-text-primary)]">
               Enter your personal herbarium
             </h2>
 
@@ -90,7 +90,7 @@ export function ArchiveEntry({
             Private by design
           </p>
 
-          <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+          <h2 className="mt-3 font-display type-title text-[var(--color-text-primary)]">
             One account, one collection
           </h2>
 

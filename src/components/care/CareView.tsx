@@ -534,7 +534,7 @@ export function CareView({
 
             <h2
               id={headingId}
-              className="mt-2 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-2 font-display type-title text-[var(--color-text-primary)]"
             >
               {description}
             </h2>
@@ -650,7 +650,7 @@ export function CareView({
 
           <h2
             id="care-empty-heading"
-            className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)]"
+            className="mt-3 font-display type-headline text-[var(--color-text-primary)]"
           >
             No care rhythms have been
             recorded yet
@@ -704,7 +704,7 @@ export function CareView({
 
               <h2
                 id="care-overview-heading"
-                className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)]"
+                className="mt-3 font-display type-headline text-[var(--color-text-primary)]"
               >
                 {attentionCount > 0
                   ? `${attentionCount} ${
@@ -737,7 +737,7 @@ export function CareView({
                   </p>
                 </div>
 
-                <p className="mt-2 font-serif text-xl text-[var(--color-text-primary)]">
+                <p className="mt-2 font-display type-subtitle text-[var(--color-text-primary)]">
                   {
                     nextCare.specimen
                       .commonName
@@ -787,7 +787,7 @@ export function CareView({
 
             <h2
               id="skip-care-confirmation-heading"
-              className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-2 font-display type-subtitle text-[var(--color-text-primary)]"
             >
               Skip care for{" "}
               {

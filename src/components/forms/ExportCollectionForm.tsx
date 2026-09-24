@@ -92,7 +92,7 @@ export function ExportCollectionForm({
       <div className="max-w-2xl">
         <h3
           id="export-collection-heading"
-          className="font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+          className="font-display type-subtitle text-[var(--color-text-primary)]"
         >
           Export archive
         </h3>

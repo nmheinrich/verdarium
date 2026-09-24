@@ -89,7 +89,7 @@ export function CompactSpecimenCard({
 
             <h2
               id={headingId}
-              className="mt-2 font-serif text-xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-2 font-display type-subtitle text-[var(--color-text-primary)]"
             >
               {specimen.commonName}
             </h2>
