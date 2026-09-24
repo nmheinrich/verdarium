@@ -1,6 +1,6 @@
 # 001 — Care on specimen tiles
 
-**Status:** in review (phase 3 PR; tile, note, snooze, skip and Due next done; the expanded specimen view still to do) · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
+**Status:** tiles, notes, snooze, skip and Due next shipped (#8, migration applied); the expanded specimen view is in review · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
 
 ## Problem
 Care currently lives in a separate Care view (`src/components/care/CareView.tsx`, a primary nav item). That makes Verdarium feel reminder-first: to record that you watered a plant, you leave the collection. Collectors think specimen-first ("I watered the Monstera"), not task-first.
@@ -57,6 +57,7 @@ Care currently lives in a separate Care view (`src/components/care/CareView.tsx`
 
 ### Expanded specimen view
 - A care section showing current state, record/snooze/skip, and `CareHistory` with notes.
+- Implemented as `SpecimenCarePanel`: state, next (or snoozed) date and last recorded date, **Record care** with the same Recorded · Add note · Undo window as the tiles (it shares their pending records), and **Snooze or skip** opening the same options inline. The cadence form follows the next care date when care is recorded, so saving it never writes back a stale date.
 
 ## Data and backend
 - Reuse `recordCare`, `skipCare`, `snoozeCare` (`src/care/careService.ts`) and `careSelectors.ts`. Add a selector for Due next grouping.
@@ -71,7 +72,7 @@ Care currently lives in a separate Care view (`src/components/care/CareView.tsx`
 
 ## Acceptance criteria
 - [x] Care can be recorded from a tile in both densities without opening the specimen
-- [x] Undo and Add note are available right after recording. A saved note appears in care history (cloud; verified against a mocked backend, needs the migration in production)
+- [x] Undo and Add note are available right after recording. A saved note appears in care history (cloud; migration applied, confirmed on production by Heinrich)
 - [ ] The Due today filter shows only due and overdue specimens, overdue first. The unfiltered collection order is unchanged.
 - [x] The Due next view replaces the Care view, grouped Overdue, Today, This week, Later
 - [ ] Reminder badges use the design system tokens and wording in all three themes and on mobile
