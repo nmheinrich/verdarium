@@ -107,6 +107,29 @@ export function CareReminderForm({
       getTodayDateValue(),
   );
 
+  // Care recorded, snoozed or skipped elsewhere (tiles, the care panel)
+  // moves the next care date; follow it so saving the cadence never
+  // writes back a stale date.
+  const [
+    syncedNextDueAt,
+    setSyncedNextDueAt,
+  ] = useState(
+    existingReminder?.nextDueAt,
+  );
+
+  if (
+    existingReminder?.nextDueAt !==
+    syncedNextDueAt
+  ) {
+    setSyncedNextDueAt(
+      existingReminder?.nextDueAt,
+    );
+    setNextDueAt(
+      existingReminder?.nextDueAt ??
+        getTodayDateValue(),
+    );
+  }
+
   const [
     pendingAction,
     setPendingAction,

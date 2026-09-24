@@ -25,12 +25,12 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 
 | Item | Spec | Status |
 |---|---|---|
-| Redesign phase 1: tokens, type (TAY Roony fetched at build) and UI primitives | `specs/003-design-system-adoption.md` | PR #5 |
-| Redesign phase 2: header, collection filters (Due today), museum-label tiles, illustration picker | `specs/003-design-system-adoption.md`, `specs/001-care-on-tiles.md` | PR #7 |
-| Host TAY Roony in a private Supabase bucket and set `TAYROONY_WOFF2_URL` in Vercel | spec 003 | Needs Heinrich |
+| Redesign phase 1: tokens, type (TAY Roony fetched at build) and UI primitives | `specs/003-design-system-adoption.md` | Merged (#5) |
+| Redesign phase 2: header, collection filters (Due today), museum-label tiles, illustration picker | `specs/003-design-system-adoption.md`, `specs/001-care-on-tiles.md` | Merged (#7) |
+| Host TAY Roony in a private Supabase bucket and set `TAYROONY_WOFF2_URL` in Vercel | spec 003 | On hold; Heinrich adds it to Vercel (the live font 404s until then) |
 | Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | In progress |
-| Redesign phase 3: Record care on tiles, care note (migration), undo, snooze and skip, Due next view | `specs/001-care-on-tiles.md` | PR (merge #7 first); note migration not yet applied |
-| Care in the expanded specimen view (record, snooze, skip from the record) | `specs/001-care-on-tiles.md` | Next |
+| Redesign phase 3: Record care on tiles, care note (migration), undo, snooze and skip, Due next view | `specs/001-care-on-tiles.md` | Merged (#8); note migration applied |
+| Care in the expanded specimen view (record, note, undo, snooze, skip from the record) | `specs/001-care-on-tiles.md` | PR |
 | **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fixed (#3) |
 | **Bug:** production blank after first Git-built deploy (Supabase env overridden in `vite.config.ts`) | — | Fixed (#4) |
 | **Bug:** export and import are not reachable in the app (`ExportCollectionForm` and `ImportCollectionForm` are never rendered) | — | Fixed in phase 3 (Settings; import now writes to the cloud archive) |

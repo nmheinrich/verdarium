@@ -3,7 +3,6 @@ import {
   useId,
   useRef,
   useState,
-  type FormEvent,
   type ReactNode,
 } from "react";
 
@@ -17,10 +16,11 @@ import {
 } from "lucide-react";
 
 import { Badge, Button, IconButton } from "@/components/ui";
+
+import { CareNoteForm } from "./CareNoteForm";
 import { cn } from "@/lib";
 import type { CareStateLabel } from "@/lib";
 
-const NOTE_MAX_LENGTH = 140;
 
 export interface SpecimenTileRecordedState {
   label: string;
@@ -93,7 +93,6 @@ export function SpecimenTile({
   const optionsPopoverRef = useRef<HTMLDivElement>(null);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [noteDraft, setNoteDraft] = useState("");
 
   const onNoteOpenChange = recorded?.onNoteOpenChange;
 
@@ -102,7 +101,6 @@ export function SpecimenTile({
     careState?.status === "overdue";
 
   const openNote = () => {
-    setNoteDraft(recorded?.note ?? "");
     setIsOptionsOpen(false);
     setIsNoteOpen(true);
     onNoteOpenChange?.(true);
@@ -110,7 +108,6 @@ export function SpecimenTile({
 
   const closeNote = () => {
     setIsNoteOpen(false);
-    setNoteDraft("");
     onNoteOpenChange?.(false);
     window.setTimeout(() => noteButtonRef.current?.focus(), 0);
   };
@@ -145,8 +142,7 @@ export function SpecimenTile({
         !noteButtonRef.current?.contains(target)
       ) {
         setIsNoteOpen(false);
-        setNoteDraft("");
-        onNoteOpenChange?.(false);
+            onNoteOpenChange?.(false);
       }
 
       if (
@@ -165,6 +161,22 @@ export function SpecimenTile({
     };
   }, [isNoteVisible, isOptionsVisible, onNoteOpenChange]);
 
+  // An open note pauses the pending commit; if the tile goes away with the
+  // note still open, resume it so the record is not held indefinitely.
+  const noteOpenChangeRef = useRef(onNoteOpenChange);
+
+  useEffect(() => {
+    noteOpenChangeRef.current = onNoteOpenChange;
+  }, [onNoteOpenChange]);
+
+  useEffect(() => {
+    if (!isNoteVisible) {
+      return;
+    }
+
+    return () => noteOpenChangeRef.current?.(false);
+  }, [isNoteVisible]);
+
   // Move focus into the options popover when it opens.
   useEffect(() => {
     if (isOptionsVisible) {
@@ -174,17 +186,6 @@ export function SpecimenTile({
     }
   }, [isOptionsVisible]);
 
-  const saveNote = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const note = noteDraft.trim();
-
-    if (note && recorded?.onSaveNote) {
-      recorded.onSaveNote(note.slice(0, NOTE_MAX_LENGTH));
-    }
-
-    closeNote();
-  };
 
   const showCareRow =
     Boolean(recorded) ||
@@ -402,54 +403,17 @@ export function SpecimenTile({
         ) : null}
 
         {isNoteVisible ? (
-          <form
+          <CareNoteForm
             ref={notePopoverRef}
             id={noteId}
-            onSubmit={saveNote}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.stopPropagation();
-                closeNote();
-              }
+            initialNote={recorded?.note}
+            onSave={(note) => {
+              recorded?.onSaveNote?.(note);
+              closeNote();
             }}
-            className="absolute inset-x-3 bottom-3 z-[2] rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-3.5 shadow-[var(--shadow-elevated)]"
-          >
-            <label
-              htmlFor={`${noteId}-input`}
-              className="metadata-label text-[var(--color-text-secondary)]"
-            >
-              Care note
-            </label>
-            <input
-              id={`${noteId}-input`}
-              autoFocus
-              maxLength={NOTE_MAX_LENGTH}
-              value={noteDraft}
-              onChange={(event) => setNoteDraft(event.target.value)}
-              placeholder="Repotted, pest check…"
-              aria-describedby={`${noteId}-count`}
-              className="mt-2 h-10 w-full rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-[var(--color-surface-elevated)] px-3.5 text-sm text-[var(--color-text-primary)] shadow-[var(--shadow-control)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-botanical)] focus:shadow-[0_0_0_3px_var(--color-botanical-soft)]"
-            />
-            <p
-              id={`${noteId}-count`}
-              className="mt-2 text-xs text-[var(--color-text-secondary)]"
-            >
-              {noteDraft.length}/{NOTE_MAX_LENGTH}
-            </p>
-            <div className="mt-2.5 flex justify-end gap-1.5">
-              <Button variant="ghost" size="sm" onClick={closeNote}>
-                Cancel
-              </Button>
-              <Button
-                variant="tonal"
-                size="sm"
-                type="submit"
-                disabled={!noteDraft.trim()}
-              >
-                Save note
-              </Button>
-            </div>
-          </form>
+            onCancel={closeNote}
+            className="absolute inset-x-3 bottom-3 z-[2]"
+          />
         ) : null}
       </div>
     </article>

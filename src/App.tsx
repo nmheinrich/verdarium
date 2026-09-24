@@ -37,6 +37,7 @@ import {
   CareHistory,
   CareReminderForm,
   DueNextView,
+  SpecimenCarePanel,
 } from "@/components/care";
 import { Dashboard } from "@/components/dashboard";
 import {
@@ -1704,6 +1705,12 @@ export default function App() {
                 />
 
                 <div className="mt-6 space-y-6">
+                  <SpecimenCarePanel
+                    specimen={
+                      selectedSpecimen
+                    }
+                  />
+
                   <CareReminderForm
                     specimen={
                       selectedSpecimen
