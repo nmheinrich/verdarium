@@ -20,3 +20,4 @@ List anything that needs a decision at the end of the PR description instead of 
 
 | Date | By | Outcome |
 |---|---|---|
+| 2026-09-24 | Claude | First run. Statuses updated across `ROADMAP.md`, `specs/001`, `specs/003`, `specs/README.md`, and `demos/README.md`. Multi-collection and six post-MVP feature ideas reviewed and ranked (none scheduled). Flagged a possible product-name conflict (`verdarium.green`) for Heinrich's decision — see PR. |
