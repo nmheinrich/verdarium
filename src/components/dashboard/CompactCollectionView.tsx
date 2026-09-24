@@ -1,12 +1,38 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
+import { SpecimenTile } from "@/components/cards";
+import { getBotanicalIllustration } from "@/constants/illustrations";
+import { getCareStateLabel } from "@/lib";
 import type { Specimen } from "@/types";
-
-import { CompactSpecimenCard } from "@/components/cards";
 
 interface CompactCollectionViewProps {
   specimens: Specimen[];
   onSpecimenSelect?: (specimen: Specimen) => void;
+}
+
+function formatHealthStatus(
+  healthStatus: Specimen["healthStatus"],
+): string {
+  return healthStatus.charAt(0).toUpperCase() + healthStatus.slice(1);
+}
+
+function formatLocation(specimen: Specimen): string | undefined {
+  const locationParts = [
+    specimen.location?.room,
+    specimen.location?.position,
+  ].filter(Boolean);
+
+  return locationParts.length > 0
+    ? locationParts.join(" · ")
+    : undefined;
+}
+
+function formatBinomial(specimen: Specimen): string {
+  const { genus, species } = specimen.classification;
+
+  return genus && species
+    ? `${genus} ${species}`
+    : specimen.scientificName;
 }
 
 export function CompactCollectionView({
@@ -20,25 +46,10 @@ export function CompactCollectionView({
   }
 
   return (
-    <section aria-labelledby="compact-collection-heading">
-      <div className="mb-6">
-        <p className="metadata-label">Collection index</p>
-
-        <h2
-          id="compact-collection-heading"
-          className="mt-2 font-display type-title text-[var(--color-text-primary)]"
-        >
-          Specimen collection
-        </h2>
-
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-secondary)]">
-          A compact view for scanning the botanical records in your archive.
-        </p>
-      </div>
-
+    <section aria-label="Specimen collection">
       <motion.ul
         layout={!shouldReduceMotion}
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+        className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-6"
       >
         <AnimatePresence initial={false} mode="popLayout">
           {specimens.map((specimen) => (
@@ -71,11 +82,26 @@ export function CompactCollectionView({
                 duration: shouldReduceMotion ? 0.1 : 0.2,
                 ease: "easeOut",
               }}
-              className="min-w-0"
+              className="flex min-w-0"
             >
-              <CompactSpecimenCard
-                specimen={specimen}
-                onSelect={onSpecimenSelect}
+              <SpecimenTile
+                className="w-full"
+                commonName={specimen.commonName}
+                scientificName={formatBinomial(specimen)}
+                cultivar={specimen.classification.cultivar}
+                illustration={
+                  getBotanicalIllustration(specimen.illustrationKey)?.src
+                }
+                label={formatLocation(specimen)}
+                health={formatHealthStatus(specimen.healthStatus)}
+                favorite={specimen.isFavorite}
+                careState={getCareStateLabel(specimen.reminder)}
+                openButtonId={`compact-specimen-${specimen.id}-open`}
+                onOpen={
+                  onSpecimenSelect
+                    ? () => onSpecimenSelect(specimen)
+                    : undefined
+                }
               />
             </motion.li>
           ))}

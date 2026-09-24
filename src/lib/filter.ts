@@ -1,25 +1,39 @@
 import { getReminderStatus } from "@/lib/reminder";
+
 import type {
-  ReminderStatus,
   Specimen,
   SpecimenHealthStatus,
 } from "@/types";
 
 export interface SpecimenFilters {
   healthStatus: SpecimenHealthStatus | "all";
-  reminderStatus: Exclude<ReminderStatus, "none"> | "all";
+  /** Only specimens whose care is due today or overdue. */
+  dueToday: boolean;
   favoritesOnly: boolean;
 }
 
 export const DEFAULT_SPECIMEN_FILTERS: SpecimenFilters = {
   healthStatus: "all",
-  reminderStatus: "all",
+  dueToday: false,
   favoritesOnly: false,
 };
+
+export function isSpecimenCareDue(
+  specimen: Specimen,
+  referenceDate = new Date(),
+): boolean {
+  const status = getReminderStatus(
+    specimen.reminder,
+    referenceDate,
+  );
+
+  return status === "due" || status === "overdue";
+}
 
 export function filterSpecimens(
   specimens: Specimen[],
   filters: SpecimenFilters,
+  referenceDate = new Date(),
 ): Specimen[] {
   return specimens.filter((specimen) => {
     if (
@@ -30,8 +44,8 @@ export function filterSpecimens(
     }
 
     if (
-      filters.reminderStatus !== "all" &&
-      getReminderStatus(specimen.reminder) !== filters.reminderStatus
+      filters.dueToday &&
+      !isSpecimenCareDue(specimen, referenceDate)
     ) {
       return false;
     }
@@ -44,6 +58,31 @@ export function filterSpecimens(
   });
 }
 
+/**
+ * Stable reorder that puts overdue specimens before due ones. Only applied
+ * while the Due today filter is on; the unfiltered archive keeps its sort.
+ */
+export function orderByCareUrgency(
+  specimens: Specimen[],
+  referenceDate = new Date(),
+): Specimen[] {
+  const overdue: Specimen[] = [];
+  const rest: Specimen[] = [];
+
+  for (const specimen of specimens) {
+    if (
+      getReminderStatus(specimen.reminder, referenceDate) ===
+      "overdue"
+    ) {
+      overdue.push(specimen);
+    } else {
+      rest.push(specimen);
+    }
+  }
+
+  return [...overdue, ...rest];
+}
+
 export function countActiveSpecimenFilters(
   filters: SpecimenFilters,
 ): number {
@@ -53,7 +92,7 @@ export function countActiveSpecimenFilters(
     activeCount += 1;
   }
 
-  if (filters.reminderStatus !== "all") {
+  if (filters.dueToday) {
     activeCount += 1;
   }
 

@@ -23,7 +23,13 @@ export {
   countActiveSpecimenFilters,
   DEFAULT_SPECIMEN_FILTERS,
   filterSpecimens,
+  isSpecimenCareDue,
+  orderByCareUrgency,
 } from "./filter";
+
+export { getCareStateLabel } from "./careLabel";
+
+export type { CareStateLabel } from "./careLabel";
 
 export type { SpecimenFilters } from "./filter";
 

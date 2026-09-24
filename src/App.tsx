@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -60,8 +61,10 @@ import {
 } from "@/components/ui";
 import {
   initializeTheme,
+  isSpecimenCareDue,
   setTheme,
 } from "@/lib";
+import { useLocalDateRollover } from "@/care/useLocalDateRollover";
 import { loadSharedCollection } from "@/sharing/sharingService";
 import type { SharedCollection } from "@/sharing/types";
 import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
@@ -253,6 +256,39 @@ export default function App() {
 
   const returnFocusSpecimenIdRef =
     useRef<string | null>(null);
+
+  // Each view starts at the top, except returning to the collection from a
+  // specimen, where focus (and scroll) goes back to that specimen's tile.
+  useEffect(() => {
+    if (
+      view === "collection" &&
+      returnFocusSpecimenIdRef.current
+    ) {
+      return;
+    }
+
+    window.scrollTo({ top: 0 });
+  }, [view]);
+
+  const careRolloverToken = useLocalDateRollover();
+
+  const careDueCount = useMemo(
+    () => {
+      void careRolloverToken;
+
+      return specimens.filter((specimen) =>
+        isSpecimenCareDue(specimen),
+      ).length;
+    },
+    [specimens, careRolloverToken],
+  );
+
+  const primaryNavigationItems = navigationItems.map(
+    (item) =>
+      item.value === "care"
+        ? { ...item, count: careDueCount }
+        : item,
+  );
 
   const activeUserIdRef =
     useRef<string | null>(null);
@@ -814,7 +850,8 @@ export default function App() {
         .getElementById(
           `expanded-specimen-${selectedSpecimen.id}-name`,
         )
-        ?.focus();
+        // The view opens at the top; move focus without jumping past the plate.
+        ?.focus({ preventScroll: true });
     };
 
   const handleCollectionViewAnimationComplete =
@@ -1064,7 +1101,7 @@ export default function App() {
         navigation={
           <AppNav
             items={
-              navigationItems
+              primaryNavigationItems
             }
             activeItem="collection"
             onNavigate={
@@ -1111,7 +1148,7 @@ export default function App() {
       <AppShell
         navigation={
           <AppNav
-            items={navigationItems}
+            items={primaryNavigationItems}
             activeItem={
               activeNavigationItem
             }
@@ -1180,23 +1217,16 @@ export default function App() {
                   isCollectionReady &&
                   specimens.length >
                     0 ? (
-                    <button
-                      type="button"
+                    <Button
                       onClick={
                         handleAddSpecimen
                       }
-                      className="group inline-flex items-center gap-2 font-display type-subtitle text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2"
+                      leadingIcon={
+                        <Plus strokeWidth={1.75} />
+                      }
                     >
-                      <Plus
-                        size={18}
-                        aria-hidden="true"
-                        className="text-[var(--color-text-muted)]"
-                      />
-
-                      <span className="underline-offset-4 group-hover:underline group-focus-visible:underline">
-                        Add specimen
-                      </span>
-                    </button>
+                      Add specimen
+                    </Button>
                   ) : null
                 }
               />

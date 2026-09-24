@@ -7,6 +7,8 @@ import {
   DEFAULT_SPECIMEN_FILTERS,
   DEFAULT_SPECIMEN_SORT,
   filterSpecimens,
+  isSpecimenCareDue,
+  orderByCareUrgency,
   searchSpecimens,
   sortSpecimens,
 } from "@/lib";
@@ -14,7 +16,7 @@ import {
 import type { CollectionStorageError } from "@/storage";
 import type { Specimen } from "@/types";
 
-import { CollectionSearch } from "./CollectionSearch";
+import { CollectionFilters } from "./CollectionFilters";
 import { CollectionSummary } from "./CollectionSummary";
 import { CompactCollectionView } from "./CompactCollectionView";
 import { EmptyCollection } from "./EmptyCollection";
@@ -81,13 +83,13 @@ export function Dashboard({
   const activeFilterCount =
     countActiveSpecimenFilters(filters);
 
-  const isSortActive =
-    sortOption !== DEFAULT_SPECIMEN_SORT;
-
-  const activeToolCount =
-    activeFilterCount +
-    (trimmedSearchQuery.length > 0 ? 1 : 0) +
-    (isSortActive ? 1 : 0);
+  const dueCount = useMemo(
+    () =>
+      specimens.filter((specimen) =>
+        isSpecimenCareDue(specimen),
+      ).length,
+    [specimens],
+  );
 
   const visibleSpecimens = useMemo(() => {
     const searchedSpecimens = searchSpecimens(
@@ -100,10 +102,15 @@ export function Dashboard({
       filters,
     );
 
-    return sortSpecimens(
+    const sortedSpecimens = sortSpecimens(
       filteredSpecimens,
       sortOption,
     );
+
+    // Care only reorders the archive while Due today is on.
+    return filters.dueToday
+      ? orderByCareUrgency(sortedSpecimens)
+      : sortedSpecimens;
   }, [
     specimens,
     searchQuery,
@@ -137,29 +144,50 @@ export function Dashboard({
     );
   }
 
-  const isSearchActive =
-    trimmedSearchQuery.length > 0;
-
-  const areFiltersActive =
+  const areCollectionToolsActive =
+    trimmedSearchQuery.length > 0 ||
     activeFilterCount > 0;
 
-  const areCollectionToolsActive =
-    isSearchActive ||
-    areFiltersActive ||
-    isSortActive;
+  const resultLabel = areCollectionToolsActive
+    ? `${visibleSpecimens.length} of ${specimens.length} specimens${
+        filters.dueToday ? " · overdue first" : ""
+      }`
+    : `${specimens.length} ${
+        specimens.length === 1 ? "specimen" : "specimens"
+      }`;
+
+  const clearCollectionTools = () => {
+    setSearchQuery("");
+    setFilters(DEFAULT_SPECIMEN_FILTERS);
+  };
 
   return (
     <div className="mt-8 space-y-6">
-      <CollectionSummary specimens={specimens} />
+      <CollectionSummary
+        specimens={specimens}
+        dueCount={dueCount}
+        onShowDueToday={() =>
+          setFilters({
+            ...DEFAULT_SPECIMEN_FILTERS,
+            dueToday: true,
+          })
+        }
+      />
 
-      <CollectionSearch
-        value={searchQuery}
+      <CollectionFilters
+        query={searchQuery}
+        onQueryChange={setSearchQuery}
         filters={filters}
-        sortOption={sortOption}
-        activeCount={activeToolCount}
-        onChange={setSearchQuery}
         onFiltersChange={setFilters}
+        sortOption={sortOption}
         onSortChange={setSortOption}
+        dueCount={dueCount}
+        resultLabel={resultLabel}
+        onClear={
+          areCollectionToolsActive
+            ? clearCollectionTools
+            : undefined
+        }
       />
 
       {visibleSpecimens.length > 0 ? (
