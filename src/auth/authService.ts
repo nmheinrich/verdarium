@@ -245,6 +245,41 @@ export async function signInWithPassword(
   }
 }
 
+export async function deleteOwnAccount(): Promise<AuthResult<void>> {
+  try {
+    const { error } = await supabase.rpc(
+      "delete_own_account",
+    );
+
+    if (error) {
+      return {
+        success: false,
+        error: normalizeAuthError(error),
+      };
+    }
+
+    // The auth user no longer exists on the server, so its session is no
+    // longer valid. Clear it from this browser rather than waiting for a
+    // failed refresh to surface it.
+    await supabase.auth.signOut({
+      scope: "local",
+    });
+
+    return {
+      success: true,
+      data: undefined,
+    };
+  } catch {
+    return {
+      success: false,
+      error: createAuthError(
+        "auth_network_error",
+        "Verdarium could not reach the private archive. Please check your connection and try again.",
+      ),
+    };
+  }
+}
+
 export async function signOutFromBrowser(): Promise<AuthResult<void>> {
   try {
     const { error } = await supabase.auth.signOut({

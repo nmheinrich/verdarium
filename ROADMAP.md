@@ -30,7 +30,9 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 | Host TAY Roony in a private Supabase bucket and set `TAYROONY_WOFF2_URL` in Vercel | spec 003 | On hold; Heinrich adds it to Vercel (the live font 404s until then) |
 | Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | In progress |
 | Redesign phase 3: Record care on tiles, care note (migration), undo, snooze and skip, Due next view | `specs/001-care-on-tiles.md` | Merged (#8); note migration applied |
-| Care in the expanded specimen view (record, note, undo, snooze, skip from the record) | `specs/001-care-on-tiles.md` | PR |
+| Care in the expanded specimen view (record, note, undo, snooze, skip from the record) | `specs/001-care-on-tiles.md` | Merged (#9) |
+| Require confirm password on sign up | — | PR (#10) |
+| Delete account (Settings danger zone; immediate, permanent, no soft delete) | — | PR |
 | **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fixed (#3) |
 | **Bug:** production blank after first Git-built deploy (Supabase env overridden in `vite.config.ts`) | — | Fixed (#4) |
 | **Bug:** export and import are not reachable in the app (`ExportCollectionForm` and `ImportCollectionForm` are never rendered) | — | Fixed in phase 3 (Settings; import now writes to the cloud archive) |
@@ -75,6 +77,7 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 
 | Date | Decision |
 |---|---|
+| 2026-09-24 | Delete account is immediate and permanent, no soft delete; implemented as a Postgres RPC (`security definer`, calls `delete from auth.users` for the caller only) rather than a new Edge Function, since deleting the auth row cascades through the existing collection/specimen/care-event foreign keys |
 | 2026-09-23 | App is free during validation; add Buy me a coffee; consider a premium tier for large collections later |
 | 2026-09-23 | Care moves onto specimen tiles; the Care view becomes a secondary "Due today" list |
 | 2026-09-23 | PR-based flow: Claude pushes branches and opens PRs, and Heinrich merges to `main` (production) |
