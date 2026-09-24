@@ -40,3 +40,6 @@ demos/raw/
 
 # Vercel CLI local project config (contains pulled env files)
 .vercel
+
+# Licensed display font, fetched at build time (see scripts/fetch-fonts.mjs)
+public/fonts/

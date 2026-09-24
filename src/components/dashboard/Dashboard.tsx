@@ -181,7 +181,7 @@ export function Dashboard({
 
             <h2
               id="collection-tools-empty-heading"
-              className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-3 font-display type-title text-[var(--color-text-primary)]"
             >
               No specimens match these criteria
             </h2>

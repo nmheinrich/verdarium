@@ -327,7 +327,7 @@ export function AuthDialog({
                   ref={headingRef}
                   id="auth-dialog-heading"
                   tabIndex={-1}
-                  className="mt-3 font-serif text-3xl leading-tight text-[var(--color-text-primary)] focus:outline-none"
+                  className="mt-3 font-display type-headline text-[var(--color-text-primary)] focus:outline-none"
                 >
                   {confirmationEmail
                     ? "Confirm your email"

@@ -2,8 +2,11 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import { cn } from "@/lib";
 
-type IconButtonVariant = "default" | "ghost";
-type IconButtonSize = "default" | "compact";
+// "default" is the original name for the raised, bordered variant.
+type IconButtonVariant = "ghost" | "secondary" | "default";
+
+// "default" and "compact" are the original size names and map to md and sm.
+type IconButtonSize = "sm" | "md" | "default" | "compact";
 
 interface IconButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
@@ -13,45 +16,43 @@ interface IconButtonProps
   size?: IconButtonSize;
 }
 
-const variantClasses: Record<IconButtonVariant, string> = {
-  default:
-    "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-primary)] active:bg-[var(--color-botanical-soft)] disabled:border-[var(--color-border)] disabled:bg-[var(--color-surface)] disabled:text-[var(--color-text-muted)]",
-
-  ghost:
-    "border border-transparent bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-botanical-soft)] hover:text-[var(--color-text-primary)] active:bg-[var(--color-selection)] disabled:bg-transparent disabled:text-[var(--color-text-muted)]",
-};
-
-const sizeClasses: Record<IconButtonSize, string> = {
-  default: "size-11",
-  compact: "size-9",
-};
-
 export function IconButton({
   "aria-label": ariaLabel,
   icon,
-  variant = "default",
-  size = "default",
+  variant = "ghost",
+  size = "md",
   className,
   type = "button",
   disabled,
+  title,
   ...props
 }: IconButtonProps) {
+  const isSmall = size === "sm" || size === "compact";
+  const isRaised = variant === "secondary" || variant === "default";
+
   return (
     <button
       type={type}
       aria-label={ariaLabel}
+      title={title ?? ariaLabel}
       disabled={disabled}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[var(--radius-sm)] transition-[background-color,border-color,color] duration-[var(--transition-base)] ease-[var(--ease-standard)]",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)]",
-        "disabled:cursor-not-allowed",
-        variantClasses[variant],
-        sizeClasses[size],
+        "inline-flex shrink-0 items-center justify-center rounded-[var(--radius-full)] border border-transparent bg-transparent text-[var(--color-text-secondary)]",
+        "transition-[background-color,border-color,color,transform] duration-[160ms] ease-[var(--ease-standard)]",
+        "enabled:hover:bg-[var(--color-botanical-soft)] enabled:hover:text-[var(--color-text-primary)] enabled:active:translate-y-[0.5px] enabled:active:scale-[0.985]",
+        "aria-pressed:bg-[var(--color-botanical-soft)] aria-pressed:text-[var(--color-botanical)]",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]",
+        "disabled:cursor-not-allowed disabled:opacity-45",
+        isRaised &&
+          "border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-control)] enabled:hover:border-[var(--color-botanical-muted)] enabled:hover:bg-[var(--color-surface)]",
+        isSmall ? "size-8 [&_svg]:size-4" : "size-10 [&_svg]:size-[1.125rem]",
         className,
       )}
       {...props}
     >
-      <span aria-hidden="true">{icon}</span>
+      <span aria-hidden="true" className="inline-flex">
+        {icon}
+      </span>
     </button>
   );
 }

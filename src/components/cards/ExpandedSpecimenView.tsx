@@ -133,7 +133,7 @@ export function ExpandedSpecimenView({
                 <h2
                   id={headingId}
                   tabIndex={-1}
-                  className="mt-3 break-words font-serif text-3xl leading-tight text-[var(--color-text-primary)] sm:text-4xl"
+                  className="mt-3 break-words font-display type-headline text-[var(--color-text-primary)]"
                 >
                   {specimen.commonName}
                 </h2>

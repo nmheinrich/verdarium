@@ -307,7 +307,7 @@ export function CareReminderForm({
 
           <h2
             id={`care-reminder-${specimen.id}-heading`}
-            className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+            className="mt-3 font-display type-title text-[var(--color-text-primary)]"
           >
             Recurring care reminder
           </h2>

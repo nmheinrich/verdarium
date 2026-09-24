@@ -78,7 +78,7 @@ export function AccountMenu({
 
           <h2
             id="settings-account-heading"
-            className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+            className="mt-3 font-display type-title text-[var(--color-text-primary)]"
           >
             Account
           </h2>

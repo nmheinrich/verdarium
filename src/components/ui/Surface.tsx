@@ -10,13 +10,11 @@ interface SurfaceProps extends HTMLAttributes<HTMLDivElement> {
 
 const variantClasses: Record<SurfaceVariant, string> = {
   default:
-    "border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-subtle)]",
-
+    "rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-[var(--shadow-subtle)]",
   elevated:
-    "border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-elevated)]",
-
+    "rounded-[var(--radius-xl)] bg-[var(--color-surface-elevated)] shadow-[var(--shadow-elevated)]",
   subtle:
-    "border border-[var(--color-border)] bg-[var(--color-background)] shadow-none",
+    "rounded-[var(--radius-lg)] bg-[var(--color-background)] shadow-none",
 };
 
 export function Surface({
@@ -28,7 +26,7 @@ export function Surface({
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-md)]",
+        "border border-[var(--color-border)] text-[var(--color-text-primary)]",
         variantClasses[variant],
         className,
       )}

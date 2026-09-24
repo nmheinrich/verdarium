@@ -39,7 +39,7 @@ export function ThemeSelector({
               }`}
             >
               <div className="min-w-0">
-                <p className="font-serif text-lg leading-tight text-[var(--color-text-primary)]">
+                <p className="font-display type-subtitle text-[var(--color-text-primary)]">
                   {theme.name}
                 </p>
 

@@ -17,6 +17,7 @@ export function Label({
       className={cn(
         "metadata-label inline-block",
         muted && "text-[var(--color-text-muted)]",
+        !muted && "text-[var(--color-text-secondary)]",
         className,
       )}
       {...props}

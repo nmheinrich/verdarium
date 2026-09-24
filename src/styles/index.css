@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: TAYRoony, Newsreader, ui-serif, Georgia, serif;
+  --font-serif: Newsreader, ui-serif, Georgia, serif;
+  --font-sans: Figtree, ui-sans-serif, system-ui, sans-serif;
+}
+
 @import "./tokens.css";
-@import "./base.css";
-@import "./utilities.css";
+@import "./base.css" layer(base);
+@import "./utilities.css" layer(components);

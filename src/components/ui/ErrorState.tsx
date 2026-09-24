@@ -29,7 +29,7 @@ export function ErrorState({
 
         <h2
           id={titleId}
-          className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)] sm:text-3xl"
+          className="mt-3 font-display type-title text-[var(--color-text-primary)]"
         >
           {title}
         </h2>

@@ -329,7 +329,7 @@ export function CareHistory({
 
             <h2
               id={`care-history-${specimenId}-heading`}
-              className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]"
+              className="mt-3 font-display type-title text-[var(--color-text-primary)]"
             >
               Recorded care activity
             </h2>

@@ -74,7 +74,7 @@ export function SpecimenForm({
             Specimen intake
           </p>
 
-          <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+          <h2 className="mt-3 font-display type-title text-[var(--color-text-primary)]">
             Botanical identity
           </h2>
 
@@ -226,7 +226,7 @@ export function SpecimenForm({
             Collection details
           </p>
 
-          <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+          <h2 className="mt-3 font-display type-title text-[var(--color-text-primary)]">
             Placement and condition
           </h2>
         </div>
@@ -355,7 +355,7 @@ export function SpecimenForm({
             Archive record
           </p>
 
-          <h2 className="mt-3 font-serif text-2xl leading-tight text-[var(--color-text-primary)]">
+          <h2 className="mt-3 font-display type-title text-[var(--color-text-primary)]">
             Acquisition and notes
           </h2>
         </div>
