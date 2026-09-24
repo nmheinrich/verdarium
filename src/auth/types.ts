@@ -71,4 +71,12 @@ export interface AuthContextValue {
   ): Promise<AuthResult<SignInOutcome>>;
 
   signOut(): Promise<AuthResult<void>>;
+
+  /**
+   * Permanently deletes the signed-in user's account and everything
+   * derived from it (their collection, specimens and care history).
+   * Immediate, no soft delete. See
+   * supabase/migrations/20260924160000_add_delete_own_account.sql.
+   */
+  deleteAccount(): Promise<AuthResult<void>>;
 }

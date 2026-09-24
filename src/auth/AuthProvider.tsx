@@ -9,6 +9,7 @@ import type { Session } from "@supabase/supabase-js";
 
 import { AuthContext } from "@/auth/AuthContext";
 import {
+  deleteOwnAccount,
   mapSupabaseUser,
   signInWithPassword,
   signOutFromBrowser,
@@ -166,14 +167,36 @@ export function AuthProvider({
       return result;
     }, []);
 
+  const deleteAccount: AuthContextValue["deleteAccount"] =
+    useCallback(async () => {
+      const result = await deleteOwnAccount();
+
+      if (result.success) {
+        setState({
+          status: "signedOut",
+          user: null,
+          message: null,
+        });
+      }
+
+      return result;
+    }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       state,
       signUp,
       signIn,
       signOut,
+      deleteAccount,
     }),
-    [signIn, signOut, signUp, state],
+    [
+      deleteAccount,
+      signIn,
+      signOut,
+      signUp,
+      state,
+    ],
   );
 
   return (

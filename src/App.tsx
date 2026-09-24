@@ -32,6 +32,7 @@ import {
 import { ArchiveEntry } from "@/components/auth/ArchiveEntry";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { CollectionConflictDialog } from "@/components/auth/CollectionConflictDialog";
+import { DeleteAccountSection } from "@/components/auth/DeleteAccountSection";
 import { ExpandedSpecimenView } from "@/components/cards";
 import {
   CareHistory,
@@ -136,6 +137,7 @@ export default function App() {
   const {
     state: authState,
     signOut,
+    deleteAccount,
   } = useAuth();
 
   const sharedRouteToken =
@@ -256,6 +258,16 @@ export default function App() {
     isSigningOut,
     setIsSigningOut,
   ] = useState(false);
+
+  const [
+    isDeletingAccount,
+    setIsDeletingAccount,
+  ] = useState(false);
+
+  const [
+    deleteAccountError,
+    setDeleteAccountError,
+  ] = useState<string | null>(null);
 
   const [
     connectionAttempt,
@@ -1055,6 +1067,54 @@ export default function App() {
 
       setConflictError(null);
       setIsSigningOut(false);
+      setView("collection");
+    };
+
+  const handleDeleteAccount =
+    async () => {
+      if (
+        isDeletingAccount ||
+        authState.status !==
+          "signedIn"
+      ) {
+        return;
+      }
+
+      setIsDeletingAccount(true);
+      setDeleteAccountError(null);
+
+      // Save care recorded in the last few seconds before the account
+      // (and everything in it) is gone for good.
+      await tileCare.flushAll();
+
+      const result =
+        await deleteAccount();
+
+      if (!result.success) {
+        setDeleteAccountError(
+          result.error.message,
+        );
+
+        setIsDeletingAccount(false);
+
+        return;
+      }
+
+      activeUserIdRef.current =
+        null;
+
+      setSpecimens([]);
+      setSelectedSpecimenId(null);
+      setArchiveWarning(null);
+      setCloudError(null);
+
+      setIsConflictDialogOpen(
+        false,
+      );
+
+      setConflictError(null);
+      setIsDeletingAccount(false);
+      setDeleteAccountError(null);
       setView("collection");
     };
 
@@ -1981,6 +2041,21 @@ export default function App() {
                   </dl>
                 </section>
               </Surface>
+
+              {authState.status ===
+              "signedIn" ? (
+                <DeleteAccountSection
+                  isDeleting={
+                    isDeletingAccount
+                  }
+                  errorMessage={
+                    deleteAccountError
+                  }
+                  onConfirmDelete={() => {
+                    void handleDeleteAccount();
+                  }}
+                />
+              ) : null}
             </div>
           </>
         ) : null}
