@@ -25,6 +25,11 @@ dist-ssr
 
 # Environment variables / secrets
 
+
+# AI workspace: never commit real customer data or raw recordings
+customers/private/
+demos/raw/
+
 .projects/cache
 .projects/vault
 .projects/state.test.json
@@ -33,6 +38,5 @@ dist-ssr
 .env.*
 !.env.example
 
-# AI workspace: never commit real customer data or raw recordings
-customers/private/
-demos/raw/
+# Vercel CLI local project config (contains pulled env files)
+.vercel
