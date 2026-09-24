@@ -187,6 +187,24 @@ function getEventDescription(
   }
 }
 
+function getEventNote(
+  event: CareEvent,
+): string | null {
+  if (
+    event.eventType !==
+      "care_completed" ||
+    typeof event.metadata?.note !==
+      "string"
+  ) {
+    return null;
+  }
+
+  const note =
+    event.metadata.note.trim();
+
+  return note || null;
+}
+
 function getEventIcon(
   eventType: CareEventType,
 ) {
@@ -405,6 +423,9 @@ export function CareHistory({
                       event,
                     );
 
+                  const note =
+                    getEventNote(event);
+
                   const isLast =
                     index ===
                     events.length - 1;
@@ -450,6 +471,15 @@ export function CareHistory({
                         {description ? (
                           <p className="mt-1 text-sm leading-6 text-[var(--color-text-secondary)]">
                             {description}
+                          </p>
+                        ) : null}
+
+                        {note ? (
+                          <p className="mt-1.5 border-l-2 border-[var(--color-botanical-muted)] pl-3 text-sm leading-6 text-[var(--color-text-primary)]">
+                            <span className="sr-only">
+                              Note:{" "}
+                            </span>
+                            {note}
                           </p>
                         ) : null}
 

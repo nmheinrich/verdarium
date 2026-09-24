@@ -36,13 +36,16 @@ import { ExpandedSpecimenView } from "@/components/cards";
 import {
   CareHistory,
   CareReminderForm,
-  CareView,
+  DueNextView,
 } from "@/components/care";
 import { Dashboard } from "@/components/dashboard";
 import {
   AddSpecimenForm,
   EditSpecimenForm,
+  ExportCollectionForm,
+  ImportCollectionForm,
   ThemeSelector,
+  type CollectionImportOutcome,
 } from "@/components/forms";
 import {
   AppNav,
@@ -65,6 +68,10 @@ import {
   setTheme,
 } from "@/lib";
 import { useLocalDateRollover } from "@/care/useLocalDateRollover";
+import {
+  TileCareContext,
+  useTileCare,
+} from "@/care/useTileCare";
 import { loadSharedCollection } from "@/sharing/sharingService";
 import type { SharedCollection } from "@/sharing/types";
 import { getCloudCollectionStore } from "@/storage/supabase/cloudCollectionStore";
@@ -80,8 +87,8 @@ const navigationItems = [
     value: "collection",
   },
   {
-    label: "Care",
-    value: "care",
+    label: "Due next",
+    value: "due-next",
   },
   {
     label: "Settings",
@@ -91,7 +98,7 @@ const navigationItems = [
 
 type AppView =
   | "collection"
-  | "care"
+  | "due-next"
   | "add-specimen"
   | "specimen"
   | "edit-specimen"
@@ -285,7 +292,7 @@ export default function App() {
 
   const primaryNavigationItems = navigationItems.map(
     (item) =>
-      item.value === "care"
+      item.value === "due-next"
         ? { ...item, count: careDueCount }
         : item,
   );
@@ -310,8 +317,8 @@ export default function App() {
   const activeNavigationItem =
     view === "settings"
       ? "settings"
-      : view === "care"
-        ? "care"
+      : view === "due-next"
+        ? "due-next"
         : "collection";
 
   const isCollectionReady =
@@ -625,6 +632,58 @@ export default function App() {
     );
   };
 
+  const tileCare =
+    useTileCare(handleReminderChange);
+
+  const handleImportCollection =
+    async (
+      importedSpecimens: Specimen[],
+    ): Promise<CollectionImportOutcome> => {
+      if (!isCollectionReady) {
+        return {
+          success: false,
+          message:
+            "The private archive is not ready. Please wait or try opening it again.",
+        };
+      }
+
+      // Care recorded in the last few seconds belongs to the old records.
+      await tileCare.flushAll();
+
+      const storeResult =
+        await getCloudCollectionStore();
+
+      if (!storeResult.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not reach the private archive. Your current collection has not been changed.",
+        };
+      }
+
+      const result =
+        await storeResult.store.replaceCollection(
+          importedSpecimens,
+        );
+
+      if (!result.success) {
+        return {
+          success: false,
+          message:
+            "Verdarium could not import this archive. Your current collection has not been changed.",
+        };
+      }
+
+      setSpecimens(result.data);
+      setCareHistoryRefreshTokens({});
+      setCloudError(null);
+
+      return {
+        success: true,
+        specimens: result.data,
+      };
+    };
+
   const handleAddSpecimen = () => {
     if (!isCollectionReady) {
       return;
@@ -645,7 +704,7 @@ export default function App() {
     () => {
       if (
         view === "collection" ||
-        view === "care" ||
+        view === "due-next" ||
         view === "settings"
       ) {
         setSelectedSpecimenId(
@@ -808,7 +867,7 @@ export default function App() {
       return;
     }
 
-    if (value === "care") {
+    if (value === "due-next") {
       returnFocusSpecimenIdRef.current =
         null;
 
@@ -818,7 +877,7 @@ export default function App() {
       );
       setDeleteError(null);
 
-      setView("care");
+      setView("due-next");
 
       return;
     }
@@ -964,6 +1023,9 @@ export default function App() {
 
       setIsSigningOut(true);
       setCloudError(null);
+
+      // Save care recorded in the last few seconds before the session ends.
+      await tileCare.flushAll();
 
       const result =
         await signOut();
@@ -1144,7 +1206,9 @@ export default function App() {
   }
 
   return (
-    <>
+    <TileCareContext.Provider
+      value={tileCare}
+    >
       <AppShell
         navigation={
           <AppNav
@@ -1347,9 +1411,9 @@ export default function App() {
             </motion.div>
           ) : null}
 
-          {view === "care" ? (
+          {view === "due-next" ? (
             <motion.div
-              key="care"
+              key="due-next"
               initial={
                 shouldReduceMotion
                   ? false
@@ -1374,18 +1438,15 @@ export default function App() {
               }}
             >
               <PageHeader
-                eyebrow="Botanical Stewardship"
-                title="Care"
-                description="A quiet view of the care rhythms recorded across your collection."
+                eyebrow="Care register"
+                title="Due next"
+                description="The care schedule across your collection, in order of the next date."
               />
 
               {isCollectionReady ? (
-                <CareView
+                <DueNextView
                   specimens={
                     specimens
-                  }
-                  onReminderChange={
-                    handleReminderChange
                   }
                   onOpenSpecimen={
                     handleSelectSpecimen
@@ -1791,6 +1852,39 @@ export default function App() {
 
               <CollectionSharingSettings />
 
+              {isCollectionReady ? (
+                <Surface className="p-6 sm:p-8">
+                  <section aria-labelledby="settings-archive-files-heading">
+                    <div className="max-w-2xl">
+                      <p className="metadata-label">
+                        Archive files
+                      </p>
+
+                      <h2
+                        id="settings-archive-files-heading"
+                        className="mt-3 font-display type-title text-[var(--color-text-primary)]"
+                      >
+                        Export and import
+                      </h2>
+                    </div>
+
+                    <div className="mt-7 space-y-8 border-t border-[var(--color-border)] pt-6">
+                      <ExportCollectionForm
+                        specimens={specimens}
+                      />
+
+                      <div className="border-t border-[var(--color-border)] pt-6">
+                        <ImportCollectionForm
+                          onImport={
+                            handleImportCollection
+                          }
+                        />
+                      </div>
+                    </div>
+                  </section>
+                </Surface>
+              ) : null}
+
               <Surface className="p-6 sm:p-8">
                 <section
                   aria-labelledby="settings-appearance-heading"
@@ -1908,6 +2002,6 @@ export default function App() {
           setConflictError(null);
         }}
       />
-    </>
+    </TileCareContext.Provider>
   );
 }

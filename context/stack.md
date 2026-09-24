@@ -10,10 +10,10 @@
 
 | Path | Responsibility |
 |---|---|
-| `src/App.tsx` | View routing (`collection`, `care`, `specimen`, `settings`, …) and top-level state |
+| `src/App.tsx` | View routing (`collection`, `due-next`, `specimen`, `settings`, …) and top-level state |
 | `src/components/` | `ui/` primitives, `cards/`, `dashboard/`, `care/`, `forms/`, `sharing/`, `auth/`, `layout/`, `illustrations/` |
 | `src/types/` | `Specimen`, `SpecimenReminder`, theme types |
-| `src/care/` | Care selectors, the care service (record, skip, snooze), and local date rollover |
+| `src/care/` | Care selectors, the care service (record, skip, snooze), snooze date options, `useTileCare` (care recorded on tiles with a deferred commit, shared through `TileCareContext`), and local date rollover |
 | `src/storage/` | Store contracts, local store, and a Supabase-backed store (`storage/supabase/`) with sync |
 | `src/auth/` | Supabase auth provider and the collection session coordinator (local vs cloud conflict) |
 | `src/sharing/` | Share tokens and loading shared collections |

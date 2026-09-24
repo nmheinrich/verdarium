@@ -1,6 +1,6 @@
 # 001 — Care on specimen tiles
 
-**Status:** agreed · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
+**Status:** in review (phase 3 PR; tile, note, snooze, skip and Due next done; the expanded specimen view still to do) · **Roadmap:** Now · **Owner:** Heinrich · **Depends on:** `003-design-system-adoption.md` for tile styling (the logic can land first)
 
 ## Problem
 Care currently lives in a separate Care view (`src/components/care/CareView.tsx`, a primary nav item). That makes Verdarium feel reminder-first: to record that you watered a plant, you leave the collection. Collectors think specimen-first ("I watered the Monstera"), not task-first.
@@ -33,7 +33,7 @@ Care currently lives in a separate Care view (`src/components/care/CareView.tsx`
 - Tile actions must not open the specimen (stop propagation). They must be keyboard-accessible, and each `IconButton` has a label.
 
 ### Record care with a note (minimal window)
-- **Record care** records immediately. The tile then shows "Recorded · Sep 24" with two quiet text actions: **Add note** and **Undo**, available for about 6 seconds.
+- **Record care** shows "Recorded · Sep 24" at once, with two quiet text actions: **Add note** and **Undo**, available for about 6 seconds. It is a **deferred commit**: the record is written when the window ends, or at once when the page is hidden or closed, or before sign-out or import. Undo cancels before anything is written. The window pauses while the note popover is open.
 - **Add note** opens a small popover anchored to the tile (an elevated `Surface`) containing:
   - one short `Input` (single line, 140 characters max, placeholder "Repotted, pest check…")
   - a **Save** button
@@ -64,15 +64,16 @@ Care currently lives in a separate Care view (`src/components/care/CareView.tsx`
   - (a) a new migration adding an optional `p_note text default null` to `record_specimen_care`, stored in `metadata.note` (trimmed, 140 characters max, validated server-side)
   - (b) a separate `add_care_note(p_event_id, p_note)` RPC, which fits the "record first, add note after" flow better
   
-  **Recommendation: (b)**, because the note is added after the record exists. Follow `routines/supabase-migration-check.md` either way.
+  **Chosen: (a)** (2026-09-24), with the deferred commit above, so the note is sent with the record and no separate RPC is needed. Migration: `supabase/migrations/20260924090000_add_care_note_to_record.sql`. Until it is applied, a call with `p_note` fails with PostgREST `PGRST202`; the app then records care without the note and tells the person the note was not saved.
+- Snooze options are computed from the effective due date (after the scheduled date, any current snooze, and both the local and the UTC day), so the server never rejects them. Server errors are shown in readable form.
 - Local store: care history entries need an optional `note` field so signed-out collections behave the same. Update `src/care/types.ts`, `src/validation/reminder.ts` and the export/import schema.
 - Use `useLocalDateRollover` so states update at local midnight.
 
 ## Acceptance criteria
-- [ ] Care can be recorded from a tile in both card variants without opening the specimen
-- [ ] Undo and Add note are available right after recording. A saved note appears in care history (local and cloud).
+- [x] Care can be recorded from a tile in both densities without opening the specimen
+- [x] Undo and Add note are available right after recording. A saved note appears in care history (cloud; verified against a mocked backend, needs the migration in production)
 - [ ] The Due today filter shows only due and overdue specimens, overdue first. The unfiltered collection order is unchanged.
-- [ ] The Due next view replaces the Care view, grouped Overdue, Today, This week, Later
+- [x] The Due next view replaces the Care view, grouped Overdue, Today, This week, Later
 - [ ] Reminder badges use the design system tokens and wording in all three themes and on mobile
 - [ ] Keyboard and screen-reader accessible (labelled buttons, visible focus, popover focus handling)
 - [ ] Migration passes `routines/supabase-migration-check.md`, and lint and build pass

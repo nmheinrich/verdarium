@@ -1,38 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-import { SpecimenTile } from "@/components/cards";
-import { getBotanicalIllustration } from "@/constants/illustrations";
-import { getCareStateLabel } from "@/lib";
+import { SpecimenCareTile } from "@/components/care";
 import type { Specimen } from "@/types";
 
 interface CompactCollectionViewProps {
   specimens: Specimen[];
   onSpecimenSelect?: (specimen: Specimen) => void;
-}
-
-function formatHealthStatus(
-  healthStatus: Specimen["healthStatus"],
-): string {
-  return healthStatus.charAt(0).toUpperCase() + healthStatus.slice(1);
-}
-
-function formatLocation(specimen: Specimen): string | undefined {
-  const locationParts = [
-    specimen.location?.room,
-    specimen.location?.position,
-  ].filter(Boolean);
-
-  return locationParts.length > 0
-    ? locationParts.join(" · ")
-    : undefined;
-}
-
-function formatBinomial(specimen: Specimen): string {
-  const { genus, species } = specimen.classification;
-
-  return genus && species
-    ? `${genus} ${species}`
-    : specimen.scientificName;
 }
 
 export function CompactCollectionView({
@@ -84,18 +57,9 @@ export function CompactCollectionView({
               }}
               className="flex min-w-0"
             >
-              <SpecimenTile
+              <SpecimenCareTile
                 className="w-full"
-                commonName={specimen.commonName}
-                scientificName={formatBinomial(specimen)}
-                cultivar={specimen.classification.cultivar}
-                illustration={
-                  getBotanicalIllustration(specimen.illustrationKey)?.src
-                }
-                label={formatLocation(specimen)}
-                health={formatHealthStatus(specimen.healthStatus)}
-                favorite={specimen.isFavorite}
-                careState={getCareStateLabel(specimen.reminder)}
+                specimen={specimen}
                 openButtonId={`compact-specimen-${specimen.id}-open`}
                 onOpen={
                   onSpecimenSelect

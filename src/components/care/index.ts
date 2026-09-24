@@ -1,5 +1,5 @@
 export { CareHistory } from "./CareHistory";
+export { CareOptionsMenu } from "./CareOptionsMenu";
 export { CareReminderForm } from "./CareReminderForm";
-export { CareSpecimenActions } from "./CareSpecimenActions";
-export { CareSpecimenCard } from "./CareSpecimenCard";
-export { CareView } from "./CareView";
+export { DueNextView } from "./DueNextView";
+export { SpecimenCareTile } from "./SpecimenCareTile";
