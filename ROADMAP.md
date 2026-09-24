@@ -26,7 +26,7 @@ Get a coherent, polished MVP into the hands of real plant collectors and find ou
 | Item | Spec | Status |
 |---|---|---|
 | Design system adoption, phase 1 (tokens) and phase 3 (UI primitives) | `specs/003-design-system-adoption.md` | Draft spec |
-| Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | In progress |
+| Add specimen tile, filters and navigation to the design system | `specs/003-design-system-adoption.md` | Done (design system version 17) |
 | Care on specimen tiles, with a note popover, the Due today filter and the Due next view | `specs/001-care-on-tiles.md` | Agreed |
 | **Bug:** share links returned 404 in production (no SPA rewrite) | — | Fix ready (`vercel.json`) |
 | **Bug:** export and import are not reachable in the app (`ExportCollectionForm` and `ImportCollectionForm` are never rendered) | — | To do |

@@ -18,7 +18,7 @@ Bring the app in line with the design system so every new feature (starting with
 
 Only the newest design system artifact counts. The older "redesign concept" and "Redesign Notes for Web Designer" artifacts (2026-09-19) are superseded.
 
-The specimen tile, filters and navigation are being added to the design system (2026-09-24), so phase 4 builds from those designs.
+The design system now includes **SpecimenTile**, **CollectionFilters** and **AppNav** (added 2026-09-24, version 17). Phase 4 builds the collection grid, toolbar and header from them. The tile opens only from its name, so the tile-wide overlay button in `CompactSpecimenCard` goes away and in-tile care actions work.
 
 ## Non-goals (this spec)
 - Forms and dialogs beyond the UI primitives (to be added to the design system later)

@@ -5,8 +5,8 @@
 **The Verdarium design system artifact:** https://claude.ai/artifact/LH7dSvQKKg6XxccrmMcwjN
 
 - Read its `project/README.md` (the brand book) and `project/tokens.json` before any UI work. Read them through the Artifact tool, not by web-fetching.
-- It defines tokens for all three themes, type, spacing, radius, shadows, and five UI components: Button, IconButton, Input, Badge, Surface.
-- It does **not** yet cover app-level components (specimen tile, forms, navigation). For those, follow its principles and flag gaps.
+- It defines tokens for all three themes, type, spacing, radius and shadows. It has five UI components (Button, IconButton, Input, Badge, Surface) and three app-level components (SpecimenTile, CollectionFilters, AppNav), added 2026-09-24.
+- It does **not** yet cover forms, dialogs, the specimen record view or the Due next view. For those, follow its principles and flag gaps.
 - The app is being brought in line with it by `specs/003-design-system-adoption.md`. Until that ships, `src/styles/tokens.css` still has the older values. When they conflict, the design system wins.
 - If you change a token or component in code, the design system should be updated to match (and vice versa). Mention it in the PR.
 
