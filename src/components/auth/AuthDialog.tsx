@@ -48,6 +48,15 @@ export function AuthDialog({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+
+  // Sign-up only: cleared as soon as either password field is edited,
+  // separate from errorMessage so it never waits on a server round trip.
+  const [
+    confirmPasswordError,
+    setConfirmPasswordError,
+  ] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
@@ -100,6 +109,8 @@ export function AuthDialog({
     setMode("signIn");
     setEmail("");
     setPassword("");
+    setConfirmPassword("");
+    setConfirmPasswordError(null);
     setIsSubmitting(false);
     setErrorMessage(null);
     setConfirmationEmail(null);
@@ -187,6 +198,8 @@ export function AuthDialog({
 
     setMode(nextMode);
     setPassword("");
+    setConfirmPassword("");
+    setConfirmPasswordError(null);
     setErrorMessage(null);
     setConfirmationEmail(null);
   };
@@ -197,6 +210,16 @@ export function AuthDialog({
     event.preventDefault();
 
     if (isSubmitting) {
+      return;
+    }
+
+    if (
+      mode === "signUp" &&
+      password !== confirmPassword
+    ) {
+      setConfirmPasswordError(
+        "Passwords do not match.",
+      );
       return;
     }
 
@@ -234,6 +257,7 @@ export function AuthDialog({
       "confirmationRequired"
     ) {
       setPassword("");
+      setConfirmPassword("");
       setIsSubmitting(false);
       setConfirmationEmail(result.data.email);
       return;
@@ -459,16 +483,85 @@ export function AuthDialog({
                             : "new-password"
                         }
                         required
+                        minLength={
+                          mode === "signUp"
+                            ? 6
+                            : undefined
+                        }
                         value={password}
                         disabled={isSubmitting}
                         className="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus)]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setPassword(
                             event.target.value,
-                          )
-                        }
+                          );
+
+                          if (
+                            confirmPasswordError
+                          ) {
+                            setConfirmPasswordError(
+                              null,
+                            );
+                          }
+                        }}
                       />
                     </div>
+
+                    {mode === "signUp" ? (
+                      <div>
+                        <label
+                          htmlFor="auth-confirm-password"
+                          className="metadata-label"
+                        >
+                          Confirm password
+                        </label>
+
+                        <input
+                          id="auth-confirm-password"
+                          name="confirmPassword"
+                          type="password"
+                          autoComplete="new-password"
+                          required
+                          minLength={6}
+                          value={confirmPassword}
+                          disabled={isSubmitting}
+                          aria-invalid={
+                            confirmPasswordError
+                              ? true
+                              : undefined
+                          }
+                          aria-describedby={
+                            confirmPasswordError
+                              ? "auth-confirm-password-error"
+                              : undefined
+                          }
+                          className="mt-2 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus)]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                          onChange={(event) => {
+                            setConfirmPassword(
+                              event.target.value,
+                            );
+
+                            if (
+                              confirmPasswordError
+                            ) {
+                              setConfirmPasswordError(
+                                null,
+                              );
+                            }
+                          }}
+                        />
+
+                        {confirmPasswordError ? (
+                          <p
+                            id="auth-confirm-password-error"
+                            role="alert"
+                            className="mt-2 text-sm leading-6 text-[var(--color-reminder-overdue-ink)]"
+                          >
+                            {confirmPasswordError}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
 
                     {errorMessage ? (
                       <p
